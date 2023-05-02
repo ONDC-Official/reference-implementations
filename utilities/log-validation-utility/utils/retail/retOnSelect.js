@@ -181,6 +181,25 @@ const checkOnSelect = (dirPath, msgIdSet) => {
     }
 
     try {
+      console.log(`Checking TAT and TTS in /${constants.RET_ONSELECT}`);
+      const tts = dao.getValue("timeToShip");
+      on_select.fulfillments.forEach((ff, indx) => {
+        console.log("asfdadsfadsfsafdsfasdfadsf", ff);
+        const tat = utils.isoDurToSec(ff["@ondc/org/TAT"]);
+
+        if (tat < tts) {
+          onSlctObj.ttstat = `@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be smaller than @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH} in /fulfillments[${indx}]/`;
+        }
+
+        console.log(tat, "asdfasdf", tts);
+      });
+    } catch (error) {
+      console.log(
+        `!!Error while checking TAT and TTS in /${constants.RET_ONSELECT}`
+      );
+    }
+
+    try {
       console.log(`Checking fulfillments' state in ${constants.RET_ONSELECT}`);
       let nonServiceableFlag = 0;
       const ffState = on_select.fulfillments.every((ff) => {

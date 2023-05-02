@@ -316,9 +316,19 @@ const checkOnSearch = (dirPath, msgIdSet) => {
                 if (categoryList.includes(item.category_id)) {
                   if (!prvdr["@ondc/org/fssai_license_no"]) {
                     onSrchObj.fssaiLiceNo = `@ondc/org/fssai_license_no is mandatory for category_id ${item.category_id}`;
+                  } else if (
+                    prvdr.hasOwnProperty("@ondc/org/fssai_license_no")
+                  ) {
+                    if (prvdr["@ondc/org/fssai_license_no"].length != 14) {
+                    }
+                    onSrchObj.fssaiLiceNo = `@ondc/org/fssai_license_no must contain a valid 14 digit FSSAI No.`;
                   }
                 }
-              } catch (error) {}
+              } catch (error) {
+                console.log(
+                  `!!Error occurred while checking fssai license no for provider ${prvdr.id}`
+                );
+              }
             }
 
             console.log(`Checking fulfillment_id for item id: ${item.id}`);
@@ -345,12 +355,19 @@ const checkOnSearch = (dirPath, msgIdSet) => {
             if ("@ondc/org/contact_details_consumer_care" in item) {
               let consCare = item["@ondc/org/contact_details_consumer_care"];
               consCare = consCare.split(",");
-              checkEmail = utils.emailRegex(consCare[1].trim());
-              if (isNaN(consCare[2].trim()) || !checkEmail) {
+              if (consCare.length < 3) {
                 const key = `prvdr${i}consCare`;
                 onSrchObj[
                   key
                 ] = `@ondc/org/contact_details_consumer_care should be in the format "name,email,contactno" in /bpp/providers[${i}]/items`;
+              } else {
+                checkEmail = utils.emailRegex(consCare[1].trim());
+                if (isNaN(consCare[2].trim()) || !checkEmail) {
+                  const key = `prvdr${i}consCare`;
+                  onSrchObj[
+                    key
+                  ] = `@ondc/org/contact_details_consumer_care should be in the format "name,email,contactno" in /bpp/providers[${i}]/items`;
+                }
               }
             }
             j++;

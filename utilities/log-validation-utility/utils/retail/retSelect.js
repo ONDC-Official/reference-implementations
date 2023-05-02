@@ -12,7 +12,7 @@ const checkSelect = (dirPath, msgIdSet) => {
   let selectedPrice = 0;
   let itemsIdList = {};
   let itemsCtgrs = {};
-  let itemsTat = {};
+  let itemsTat = [];
   let slctObj = {};
 
   try {
@@ -107,77 +107,102 @@ const checkSelect = (dirPath, msgIdSet) => {
 
     select = select.message.order;
 
-    let onSearch = dao.getValue("onSearch");
+    try {
+      let onSearch = dao.getValue("onSearch");
 
-    let provider = onSearch["bpp/providers"].filter(
-      (provider) => provider.id === select.provider.id
-    );
-
-    if (provider[0]) {
-      provider = provider[0];
-      dao.setValue("providerId", provider.id);
-      dao.setValue("providerLoc", provider.locations[0].id);
-
-      try {
-        console.log(
-          `Comparing provider location in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
-        );
-        if (provider.locations[0].id != select.provider.locations[0].id) {
-          slctObj.prvdLoc = `provider.locations[0].id ${provider.locations[0].id} mismatches in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`;
-        }
-      } catch (error) {
-        console.log(
-          `!!Error while comparing provider.location id in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`,
-          error
-        );
-      }
-
-      console.log(
-        `Mapping Item Ids with their counts, categories and prices /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
+      let provider = onSearch["bpp/providers"].filter(
+        (provider) => provider.id === select.provider.id
       );
-      try {
-        select.items.forEach((item) => {
-          let itemOnSearch = provider.items.find((it) => it.id === item.id);
 
-          if (!itemOnSearch) {
-            key = `id${item.id}`;
-            slctObj[
-              key
-            ] = `Item Id ${item.id} does not exist in /${constants.RET_ONSEARCH}`;
-          } else {
-            console.log(
-              `ITEM ID: ${item.id}, Price: ${itemOnSearch.price.value}, Count: ${item.quantity.count}`
-            );
-            if (
-              item.location_id &&
-              itemOnSearch.location_id != item.location_id
-            ) {
-              slctObj.itemLocErr = `Location id for Item ${item.id} mismatches in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`;
-            }
-            itemsIdList[item.id] = item.quantity.count;
-            itemsCtgrs[item.id] = itemOnSearch.category_id;
-            itemsTat[item.id] = itemOnSearch["@ondc/org/time_to_ship"];
-            selectedPrice += itemOnSearch.price.value * item.quantity.count;
+      if (provider[0]) {
+        provider = provider[0];
+        dao.setValue("providerId", provider.id);
+        dao.setValue("providerLoc", provider.locations[0].id);
+
+        try {
+          console.log(
+            `Comparing provider location in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
+          );
+          if (provider.locations[0].id != select.provider.locations[0].id) {
+            slctObj.prvdLoc = `provider.locations[0].id ${provider.locations[0].id} mismatches in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`;
           }
-        });
-        dao.setValue("itemsIdList", itemsIdList);
-        dao.setValue("itemsCtgrs", itemsCtgrs);
-        dao.setValue("selectedPrice", selectedPrice);
-        dao.setValue("itemsTat", itemsTat);
+        } catch (error) {
+          console.log(
+            `!!Error while comparing provider's location id in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`,
+            error
+          );
+        }
+
         console.log(
-          `Provider Id in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} matched`
+          `Mapping Item Ids with their counts, categories and prices /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
         );
-      } catch (error) {
+        try {
+          select.items.forEach((item) => {
+            let itemOnSearch = provider.items.find((it) => it.id === item.id);
+
+            if (!itemOnSearch) {
+              key = `id${item.id}`;
+              slctObj[
+                key
+              ] = `Item Id ${item.id} does not exist in /${constants.RET_ONSEARCH}`;
+            } else {
+              console.log(
+                `ITEM ID: ${item.id}, Price: ${itemOnSearch.price.value}, Count: ${item.quantity.count}`
+              );
+              if (
+                item.location_id &&
+                itemOnSearch.location_id != item.location_id
+              ) {
+                slctObj.itemLocErr = `Location id for Item ${item.id} mismatches in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`;
+              }
+              itemsIdList[item.id] = item.quantity.count;
+              itemsCtgrs[item.id] = itemOnSearch.category_id;
+              itemsTat.push(itemOnSearch["@ondc/org/time_to_ship"]);
+              selectedPrice += itemOnSearch.price.value * item.quantity.count;
+            }
+          });
+
+          try {
+            console.log(`Saving time_to_ship in /${constants.RET_ONSEARCH}`);
+            let timeToShip = 0;
+            console.log("ITEMSDKJDKLSJF", itemsTat);
+            itemsTat.forEach((tts) => {
+              const ttship = utils.isoDurToSec(tts);
+              console.log(ttship);
+              timeToShip = Math.max(timeToShip, ttship);
+            });
+            console.log("timeTOSHIP", timeToShip);
+            dao.setValue("timeToShip", timeToShip);
+          } catch (error) {
+            console.log(
+              `Error while saving time_to_ship in ${constants.RET_ONSEARCH}`,
+              error
+            );
+          }
+
+          dao.setValue("itemsIdList", itemsIdList);
+          dao.setValue("itemsCtgrs", itemsCtgrs);
+          dao.setValue("selectedPrice", selectedPrice);
+
+          console.log(
+            `Provider Id in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} matched`
+          );
+        } catch (error) {
+          console.log(
+            `!!Error while Comparing and Mapping Items in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`,
+            error
+          );
+        }
+      } else {
         console.log(
-          `!!Error while Comparing and Mapping Items in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`,
-          error
+          `Provider Ids in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} mismatch`
         );
+        slctObj.prvdrIdMatch = `Provider Id ${select.provider.id} in /${constants.RET_SELECT} does not exist in /${constants.RET_ONSEARCH}`;
       }
-    } else {
+    } catch (error) {
       console.log(
-        `Provider Ids in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} mismatch`
+        `!!Error occcurred while checking providers info in /${constants.RET_SELECT}`
       );
-      slctObj.prvdrIdMatch = `Provider Id ${select.provider.id} in /${constants.RET_SELECT} does not exist in /${constants.RET_ONSEARCH}`;
     }
 
     try {

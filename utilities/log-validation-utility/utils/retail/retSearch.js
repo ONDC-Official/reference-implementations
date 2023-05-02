@@ -46,9 +46,9 @@ const checkSearch = (dirPath, msgIdSet) => {
     search = search.message.intent;
     try {
       console.log("Getting Buyer App finder fee amount");
-      if (search.payment["@ondc/org/buyer_app_finder_fee_type"] != "percent") {
-        srchObj.bffTyp = `Buyer app finder fee type should be "percent"`;
-      }
+      // if (search.payment["@ondc/org/buyer_app_finder_fee_type"] != "percent") {
+      //   srchObj.bffTyp = `Buyer app finder fee type should be "percent"`;
+      // }
       var buyerFF = parseFloat(
         search.payment["@ondc/org/buyer_app_finder_fee_amount"]
       );
