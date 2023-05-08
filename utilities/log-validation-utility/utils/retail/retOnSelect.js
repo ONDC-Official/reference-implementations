@@ -190,6 +190,9 @@ const checkOnSelect = (dirPath, msgIdSet) => {
         if (tat < tts) {
           onSlctObj.ttstat = `@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be smaller than @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH} in /fulfillments[${indx}]/`;
         }
+        if ((tat = tts)) {
+          onSlctObj.ttstat = `@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be equal to @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH} in /fulfillments[${indx}]/`;
+        }
 
         console.log(tat, "asdfasdf", tts);
       });
