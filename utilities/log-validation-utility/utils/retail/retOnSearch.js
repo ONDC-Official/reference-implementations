@@ -609,7 +609,7 @@ const checkOnSearch = (dirPath, msgIdSet) => {
     }
 
     dao.setValue("onSearch", onSearch);
-    console.log(onSrchObj);
+
     dao.setValue("onSrchObj", onSrchObj);
   } catch (err) {
     if (err.code === "ENOENT") {
