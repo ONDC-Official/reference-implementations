@@ -13,3 +13,4 @@ test.js
 !LICENSE.md
 *.md
 .DS_Store
+validations.log

@@ -20,4 +20,5 @@ module.exports = Object.freeze({
   RET_ONSTATUS: "on_status",
   RET_SUPPORT: "support",
   RET_ONSUPPORT: "on_support",
+  LOG_FILE_PATH: "./logs",
 });

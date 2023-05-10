@@ -184,7 +184,6 @@ const checkOnSelect = (dirPath, msgIdSet) => {
       console.log(`Checking TAT and TTS in /${constants.RET_ONSELECT}`);
       const tts = dao.getValue("timeToShip");
       on_select.fulfillments.forEach((ff, indx) => {
-        console.log("asfdadsfadsfsafdsfasdfadsf", ff);
         const tat = utils.isoDurToSec(ff["@ondc/org/TAT"]);
 
         if (tat < tts) {
