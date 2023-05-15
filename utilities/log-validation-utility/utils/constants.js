@@ -20,4 +20,6 @@ module.exports = Object.freeze({
   RET_ONSTATUS: "on_status",
   RET_SUPPORT: "support",
   RET_ONSUPPORT: "on_support",
+  RET_ISSUE: "issue",
+  RET_ONISSUE: "on_issue",
 });
