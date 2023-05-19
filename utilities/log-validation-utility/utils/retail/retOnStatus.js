@@ -8,6 +8,7 @@ const constants = require("../constants");
 
 const checkOnStatus = (dirPath, msgIdSet) => {
   let onStatObj = {};
+  let cntxtTmpstmp = "";
   try {
     let on_status = fs.readFileSync(
       dirPath + `/${constants.RET_ONSTATUS}.json`
@@ -63,6 +64,7 @@ const checkOnStatus = (dirPath, msgIdSet) => {
       if (_.gte(dao.getValue("tmpstmp"), on_status.context.timestamp)) {
         onStatObj.tmpstmp = `Timestamp for /${constants.RET_ONCONFIRM} api cannot be greater than or equal to /${constants.RET_ONSTATUS} api`;
       }
+      cntxtTmpstmp = on_status.context.timestamp;
     } catch (error) {
       console.log(
         `Error while comparing timestamp for /${constants.RET_ONCONFIRM} and /${constants.RET_ONSTATUS} api`,
@@ -168,13 +170,32 @@ const checkOnStatus = (dirPath, msgIdSet) => {
     }
 
     try {
-      console.log("Checking Fulfillments state");
-      on_status.fulfillments.forEach((element) => {
+      console.log(`Checking Fulfillments state in /${constants.RET_ONSTATUS}`);
+      on_status.fulfillments.forEach((element, indx) => {
         console.log(`Checking fulfillment state for Id ${element.id}`);
         if (
           !utils.retailFulfillmentState.includes(element.state.descriptor.code)
         ) {
           onStatObj.ffStatusState = `Fulfillment State Code in /${constants.RET_ONSTATUS} is not as per the API Contract`;
+        } else {
+          const ffState = element.state.descriptor.code;
+          if (ffState === "Order-picked-up") {
+            const pickupTime = element.start.time.timestamp;
+            if (pickupTime != cntxtTmpstmp) {
+              onStatObj.ffTmpstmps = `pickup time /fulfillments[${indx}]/start/time/timestamp must match context/timestamp when fulfillment state is ${ffState} `;
+            }
+            if (pickupTime != on_status.updated_at) {
+              onStatObj.updtdTmpstmps = `order/updated_at timestamp must match context/timestamp when fulfillment state is ${ffState} `;
+            }
+          } else if (ffState === "Order-delivered") {
+            const deliveryTime = element.end.time.timestamp;
+            if (deliveryTime != cntxtTmpstmp) {
+              onStatObj.ffTmpstmps = `delivery time /fulfillments[${indx}]/end/time/timestamp must match context/timestamp when fulfillment state is ${ffState} `;
+            }
+            if (deliveryTime != on_status.updated_at) {
+              onStatObj.updtdTmpstmps = `order/updated_at timestamp must match context/timestamp when fulfillment state is ${ffState} `;
+            }
+          }
         }
       });
     } catch (error) {

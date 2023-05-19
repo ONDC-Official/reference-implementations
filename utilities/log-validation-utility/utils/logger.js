@@ -9,7 +9,7 @@ const loggerFormat = printf(({ level, message, timestamp }) => {
   return `${timestamp} [${level}]: ${message}`;
 });
 
-loggerOpts = {
+const loggerOpts = {
   console: {
     format: combine(colorize(), timestamp(), loggerFormat),
   },
@@ -30,5 +30,7 @@ const logger = createLogger({
     new transports.File(loggerOpts.file),
   ],
 });
+
+logger.error("hello");
 
 exports.logger = logger;

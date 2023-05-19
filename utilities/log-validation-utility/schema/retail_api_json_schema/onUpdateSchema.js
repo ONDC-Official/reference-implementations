@@ -1,4 +1,4 @@
-const postConfirmRules = require("./postConfirmValidations");
+// const postConfirmRules = require("./postConfirmValidations");
 
 module.exports = {
   type: "object",
@@ -355,14 +355,12 @@ module.exports = {
                 type: "string",
                 enum: ["upi", "neft", "rtgs"],
               },
-              upi_address: { type: "string", pattern: "^(?!s*$).+" },
+              upi_address: { type: "string" },
               settlement_bank_account_no: {
                 type: "string",
-                pattern: "^(?!s*$).+",
               },
               settlement_ifsc_code: {
                 type: "string",
-                pattern: "^(?!s*$).+",
               },
               bank_name: { type: "string" },
               beneficiary_name: {
@@ -370,11 +368,6 @@ module.exports = {
               },
               branch_name: { type: "string" },
             },
-            required: [
-              "settlement_counterparty",
-              "settlement_phase",
-              "settlement_type",
-            ],
             allOf: [
               {
                 if: {
@@ -385,6 +378,11 @@ module.exports = {
                   },
                 },
                 then: {
+                  properties: {
+                    upi_address: {
+                      type: "string",
+                    },
+                  },
                   required: ["upi_address"],
                 },
               },
@@ -392,28 +390,21 @@ module.exports = {
                 if: {
                   properties: {
                     settlement_type: {
-                      const: "rtgs",
+                      enum: ["rtgs", "neft"],
                     },
                   },
                 },
                 then: {
-                  required: [
-                    "settlement_ifsc_code",
-                    "settlement_bank_account_no",
-                    "bank_name",
-                    "branch_name",
-                  ],
-                },
-              },
-              {
-                if: {
                   properties: {
-                    settlement_type: {
-                      const: "neft",
+                    settlement_bank_account_no: {
+                      type: "string",
                     },
+                    settlement_ifsc_code: {
+                      type: "string",
+                    },
+                    bank_name: { type: "string" },
+                    branch_name: { type: "string" },
                   },
-                },
-                then: {
                   required: [
                     "settlement_ifsc_code",
                     "settlement_bank_account_no",
@@ -422,6 +413,28 @@ module.exports = {
                   ],
                 },
               },
+              // {
+              //   if: {
+              //     properties: {
+              //       settlement_type: {
+              //         const: "neft",
+              //       },
+              //     },
+              //   },
+              //   then: {
+              //     required: [
+              //       "settlement_ifsc_code",
+              //       "settlement_bank_account_no",
+              //       "bank_name",
+              //       "branch_name",
+              //     ],
+              //   },
+              // },
+            ],
+            required: [
+              "settlement_counterparty",
+              "settlement_phase",
+              "settlement_type",
             ],
           },
         },

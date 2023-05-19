@@ -187,10 +187,10 @@ const checkOnSelect = (dirPath, msgIdSet) => {
         const tat = utils.isoDurToSec(ff["@ondc/org/TAT"]);
 
         if (tat < tts) {
-          onSlctObj.ttstat = `@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be smaller than @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH} in /fulfillments[${indx}]/`;
+          onSlctObj.ttstat = `/fulfillments[${indx}]/@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be smaller than @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH}`;
         }
         if (tat === tts) {
-          onSlctObj.ttstat = `@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be equal to @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH} in /fulfillments[${indx}]/`;
+          onSlctObj.ttstat = `/fulfillments[${indx}]/@ondc/org/TAT (O2D) in /${constants.RET_ONSELECT} can't be equal to @ondc/org/time_ship (O2S) in /${constants.RET_ONSEARCH}`;
         }
 
         console.log(tat, "asdfasdf", tts);

@@ -189,7 +189,6 @@ const getObjValues = (obj) => {
 
 const isArrayEqual = (x, y) => {
   flag = _(x).xorWith(y, _.isEqual).isEmpty();
-  console.log("FLAG*********", _(x).xorWith(y, _.isEqual).isEmpty());
   return flag;
 };
 
@@ -200,6 +199,48 @@ const countDecimalDigits = (num) => {
 const emailRegex = (email) => {
   const emailRE = /^\S+@\S+\.\S+$/;
   return emailRE.test(email);
+};
+
+const compareObjects = (obj1, obj2) => {
+  let differences = {};
+
+  for (let key in obj1) {
+    if (obj1.hasOwnProperty(key)) {
+      if (typeof obj1[key] === "object" && typeof obj2[key] === "object") {
+        if (Array.isArray(obj1[key]) && Array.isArray(obj2[key])) {
+          if (!compareArraysOfObjects(obj1[key], obj2[key])) {
+            differences[key] = { changed: true };
+          }
+        } else {
+          const nestedDifferences = compareObjects(obj1[key], obj2[key]);
+          if (Object.keys(nestedDifferences).length > 0) {
+            differences[key] = nestedDifferences;
+          }
+        }
+      } else if (obj1[key] !== obj2[key]) {
+        differences[key] = { changed: true };
+      }
+    }
+  }
+
+  return differences;
+};
+
+const compareArraysOfObjects = (arr1, arr2) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  const sortedArr1 = arr1.map((obj) => JSON.stringify(obj)).sort();
+  const sortedArr2 = arr2.map((obj) => JSON.stringify(obj)).sort();
+
+  for (let i = 0; i < sortedArr1.length; i++) {
+    if (sortedArr1[i] !== sortedArr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 const timeDiff = (time1, time2) => {
@@ -260,4 +301,5 @@ module.exports = {
   emailRegex,
   isoDurToSec,
   timeDiff,
+  compareObjects,
 };

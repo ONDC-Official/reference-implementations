@@ -3,6 +3,7 @@ const _ = require("lodash");
 const dao = require("../../dao/dao");
 const { checkContext } = require("../../services/service");
 const constants = require("../constants");
+const validateSchema = require("../schemaValidation");
 
 const checkSupport = (dirPath, msgIdSet) => {
   let sprtObj = {};
