@@ -1,37 +1,32 @@
 const { generateKeyPair, generateSharedKey } = require("./keyUtil");
 const { encryptData, decryptData } = require("./encryptionUtil");
 
-const aliceKeys = generateKeyPair();
-const bobKeys = generateKeyPair();
+// Generate Key Pair for User 1.
+const keyPair1 = generateKeyPair();
+console.log("Key Pair 1 ==> ", keyPair1);
 
-console.log("Alice's keys: ");
-console.log(aliceKeys);
+// Generate Key Pair for User 2.
+const keyPair2 = generateKeyPair();
+console.log("Key Pair 2 ==> ", keyPair2);
 
-console.log("Bob's keys: ");
-console.log(bobKeys);
+// Generate Shared Key with User 1's Private Key and User 2's Public Key.
+const sharedKey1 = generateSharedKey(keyPair1.privateKey, keyPair2.publicKey);
+console.log("SharedKey1 ==> " + sharedKey1);
 
-console.log("Making shared keys with the correct combination...");
+// Generate Shared Key with User 2's Private Key and User 1's Public Key.
+const sharedKey2 = generateSharedKey(keyPair2.privateKey, keyPair1.publicKey);
+console.log("SharedKey2 ==> " + sharedKey2);
 
-const aliceSharedKey = generateSharedKey(
-  aliceKeys.privateKey,
-  bobKeys.publicKey
-);
-const bobSharedKey = generateSharedKey(bobKeys.privateKey, aliceKeys.publicKey);
+// Comparing the two Shared keys generated above.
+console.log("sharedKey1 == sharedKey2 ==> ", sharedKey1 === sharedKey2);
 
-console.log(
-  "Do Alice and bob have the same shared key? ",
-  aliceSharedKey === bobSharedKey,
-  aliceSharedKey
-);
+// Initializing the raw text to be encrypted.
+const MESSAGE_DATA = "Hello This is ONDC Test Data";
 
-const MESSAGE_DATA = "Peter Parker is spider man!!!!!";
+// Encrypting the raw data.
+const encryptedData = encryptData(sharedKey1, MESSAGE_DATA);
+console.log("Encrypted Data ===> " + encryptedData);
 
-console.log("Using Alice shared key to enrypt data");
-const encryptedData = encryptData(aliceSharedKey, MESSAGE_DATA);
-
-console.log("Encrypted data = ", encryptedData);
-
-console.log("Using Bob shared key to decrypt data");
-const decryptedData = decryptData(bobSharedKey, encryptedData);
-
-console.log("Decrypted data = ", decryptedData);
+// Decrypting the Encrypted data.
+const decryptedData = decryptData(sharedKey2, encryptedData);
+console.log("Decrypted Data ===> " + decryptedData);

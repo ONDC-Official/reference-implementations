@@ -4,30 +4,35 @@ const {
   createPrivateKey,
   createPublicKey,
 } = require("crypto");
-const { KEY_LENGTH_IN_BITS } = require("./config");
+const {
+  KEY_PAIR_GENERATION_ALGORITHM,
+  KEY_STRING_FORMAT,
+} = require("./constants");
 
 function generateKeyPair() {
-  const { publicKey, privateKey } = generateKeyPairSync("x25519", {
-    modulusLength: KEY_LENGTH_IN_BITS,
-    privateKeyEncoding: {
-      format: "der",
-      type: "pkcs8",
-    },
-    publicKeyEncoding: {
-      format: "der",
-      type: "spki",
-    },
-  });
+  const { publicKey, privateKey } = generateKeyPairSync(
+    KEY_PAIR_GENERATION_ALGORITHM,
+    {
+      privateKeyEncoding: {
+        format: "der",
+        type: "pkcs8",
+      },
+      publicKeyEncoding: {
+        format: "der",
+        type: "spki",
+      },
+    }
+  );
 
-  const publicKeyString = publicKey.toString("base64");
-  const privateKeyString = privateKey.toString("base64");
+  const publicKeyString = publicKey.toString(KEY_STRING_FORMAT);
+  const privateKeyString = privateKey.toString(KEY_STRING_FORMAT);
 
   return { publicKey: publicKeyString, privateKey: privateKeyString };
 }
 
 function generateSharedKey(privateKeyString, publicKeyString) {
-  const privateBuffer = Buffer.from(privateKeyString, "base64");
-  const publicBuffer = Buffer.from(publicKeyString, "base64");
+  const privateBuffer = Buffer.from(privateKeyString, KEY_STRING_FORMAT);
+  const publicBuffer = Buffer.from(publicKeyString, KEY_STRING_FORMAT);
 
   const privateObj = createPrivateKey({
     key: privateBuffer,
@@ -45,7 +50,7 @@ function generateSharedKey(privateKeyString, publicKeyString) {
     publicKey: publicObj,
   });
 
-  const sharedKey = sharedSecret.toString("base64");
+  const sharedKey = sharedSecret.toString(KEY_STRING_FORMAT);
 
   return sharedKey;
 }
