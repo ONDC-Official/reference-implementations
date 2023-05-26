@@ -78,14 +78,14 @@ function decryptData(sharedKey, eData) {
 /**
  *  This is a helper function. Takes the parameters, constructes a JSON, stringify the JSON, encode it.
  * @param {String} encryptedMessage - Encrypted message
- * @param {String} authTagBase64 - auth tag (or hmac) in spcified formated
+ * @param {String} hmac - hmac (or authTag) in spcified formated
  * @param {String} iv - initial vector (or nonce)
  * @returns {String} string encoded in specified formated
  */
-function convertPayloadToBase64(encryptedMessage, authTagBase64, iv) {
+function convertPayloadToBase64(encryptedMessage, hmac, iv) {
   const returnPayloadJSON = {
     encrypted_data: encryptedMessage,
-    hmac: authTagBase64,
+    hmac: hmac,
     nonce: iv,
   };
 
