@@ -1,0 +1,15 @@
+{
+  "name": "aes-gcm-nodejs",
+  "version": "1.0.0",
+  "description": "Make sure you are in the root of folder of the repo and have node installed (v16^). Run this command to run the script",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}

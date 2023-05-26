@@ -34,29 +34,33 @@ function encryptData(sharedKey, data) {
 }
 
 function decryptData(sharedKey, eData) {
-  const decodedData = Buffer.from(eData, KEY_STRING_FORMAT).toString("utf8");
-  const dataJSON = JSON.parse(decodedData);
-  const { encrypted_data, hmac, nonce } = dataJSON;
+  try {
+    const decodedData = Buffer.from(eData, KEY_STRING_FORMAT).toString("utf8");
+    const dataJSON = JSON.parse(decodedData);
+    const { encrypted_data, hmac, nonce } = dataJSON;
 
-  const authTag = Buffer.from(hmac, KEY_STRING_FORMAT);
-  const sharedKeyBytes = Buffer.from(sharedKey, KEY_STRING_FORMAT);
-  const nonceBytes = Buffer.from(nonce, KEY_STRING_FORMAT);
+    const authTag = Buffer.from(hmac, KEY_STRING_FORMAT);
+    const sharedKeyBytes = Buffer.from(sharedKey, KEY_STRING_FORMAT);
+    const nonceBytes = Buffer.from(nonce, KEY_STRING_FORMAT);
 
-  const decipher = createDecipheriv(
-    ENCRYPT_DECRYPT_ALGORITHM,
-    sharedKeyBytes,
-    nonceBytes,
-    {
-      authTagLength: AUTH_TAG_LENGTH_IN_BYTES,
-    }
-  );
-  decipher.setAuthTag(authTag);
+    const decipher = createDecipheriv(
+      ENCRYPT_DECRYPT_ALGORITHM,
+      sharedKeyBytes,
+      nonceBytes,
+      {
+        authTagLength: AUTH_TAG_LENGTH_IN_BYTES,
+      }
+    );
+    decipher.setAuthTag(authTag);
 
-  const decryptedMessage =
-    decipher.update(encrypted_data, KEY_STRING_FORMAT, "utf8") +
-    decipher.final("utf8");
+    const decryptedMessage =
+      decipher.update(encrypted_data, KEY_STRING_FORMAT, "utf8") +
+      decipher.final("utf8");
 
-  return decryptedMessage;
+    return decryptedMessage;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function convertPayloadToBase64(encryptedMessage, authTagBase64, iv) {
