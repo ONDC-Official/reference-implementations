@@ -9,6 +9,13 @@ const {
   KEY_STRING_FORMAT,
 } = require("./constants");
 
+/**
+ * Generates a public, private key pair in 'der' format
+ * @typedef {Object} KeyPair
+ * @property {String} publicKey
+ * @property {String} privateKey
+ * @returns {KeyPair}
+ */
 function generateKeyPair() {
   const { publicKey, privateKey } = generateKeyPairSync(
     KEY_PAIR_GENERATION_ALGORITHM,
@@ -29,7 +36,12 @@ function generateKeyPair() {
 
   return { publicKey: publicKeyString, privateKey: privateKeyString };
 }
-
+/**
+ * Generates a shared key, when a private key and public key are passed
+ * @param {String} privateKeyString
+ * @param {String} publicKeyString
+ * @returns {String} sharedKey
+ */
 function generateSharedKey(privateKeyString, publicKeyString) {
   const privateBuffer = Buffer.from(privateKeyString, KEY_STRING_FORMAT);
   const publicBuffer = Buffer.from(publicKeyString, KEY_STRING_FORMAT);

@@ -9,6 +9,12 @@ const {
 const AUTH_TAG_LENGTH_IN_BYTES = Math.ceil(AUTH_TAG_LENGTH_IN_BITS / 8);
 const IV_LENGTH_IN_BYTES = Math.ceil(IV_LENGTH_IN_BITS / 8);
 
+/**
+ * Encrypt string by passing a key
+ * @param {String} sharedKey - in specified format (in constants folder)
+ * @param {String} data - in utf8
+ * @returns {String} encrypted data - string in specified format that contains hmac, nonce and encrypted message
+ */
 function encryptData(sharedKey, data) {
   const iv = randomBytes(IV_LENGTH_IN_BYTES);
   const sharedKeyBytes = Buffer.from(sharedKey, KEY_STRING_FORMAT);
@@ -33,6 +39,12 @@ function encryptData(sharedKey, data) {
   return digetBase64;
 }
 
+/**
+ * Decrypt the data
+ * @param {String} sharedKey
+ * @param {String} eData - encrypted data string
+ * @returns {String | undefined} decoded message is returned if shared key and encrypted data are valid, else returns void
+ */
 function decryptData(sharedKey, eData) {
   try {
     const decodedData = Buffer.from(eData, KEY_STRING_FORMAT).toString("utf8");
@@ -63,6 +75,13 @@ function decryptData(sharedKey, eData) {
   }
 }
 
+/**
+ *  This is a helper function. Takes the parameters, constructes a JSON, stringify the JSON, encode it.
+ * @param {String} encryptedMessage - Encrypted message
+ * @param {String} authTagBase64 - auth tag (or hmac) in spcified formated
+ * @param {String} iv - initial vector (or nonce)
+ * @returns {String} string encoded in specified formated
+ */
 function convertPayloadToBase64(encryptedMessage, authTagBase64, iv) {
   const returnPayloadJSON = {
     encrypted_data: encryptedMessage,
