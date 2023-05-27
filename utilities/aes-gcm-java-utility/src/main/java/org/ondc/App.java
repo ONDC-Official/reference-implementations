@@ -5,7 +5,15 @@ import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.ondc.KeyUtil.DHKeyPair;
 
+/**
+ * Class depicting the usage of the utility.
+ */
 public class App {
+
+    /**
+     * Main Function.
+     * @param args Main Function Args.
+     */
     public static void main(String[] args) {
     	
     	// Adding the BouncyCastleProvider to java.security.Security.

@@ -14,6 +14,10 @@ import javax.crypto.spec.SecretKeySpec;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+
+/**
+ * Utility class for encrypting and decrypting payload.
+ */
 public class EncryptionUtil {
 	private static Logger log = Logger.getLogger("ErrorLogger");
 
@@ -165,7 +169,7 @@ public class EncryptionUtil {
     /**
      * Decrypts the Encrypted Data using Shared Key.
      * @param key The Shared Key.
-     * @param encryptedData The Encrypted Data.
+     * @param eData The Encrypted Data.
      * @return The Raw Decrypted data.
      */
     public static String decryptData(String key, String eData) {
