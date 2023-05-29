@@ -14,6 +14,10 @@ import javax.crypto.spec.SecretKeySpec;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+
+/**
+ * Utility class for encrypting and decrypting payload.
+ */
 public class EncryptionUtil {
 	private static Logger log = Logger.getLogger("ErrorLogger");
 
@@ -66,7 +70,7 @@ public class EncryptionUtil {
          * Sets the Encrypted Data.
          * @param encrypedData The Encrypted Data.
          */
-        public void setEncrypedData(String encrypedData) {
+        private void setEncrypedData(String encrypedData) {
             this.encrypedData = encrypedData;
         }
 
@@ -82,7 +86,7 @@ public class EncryptionUtil {
          * Sets the Nonce.
          * @param nonce The Nonce.
          */
-        public void setNonce(String nonce) {
+        private void setNonce(String nonce) {
             this.nonce = nonce;
         }
 
@@ -98,7 +102,7 @@ public class EncryptionUtil {
          * Sets the HMAC.
          * @param hmac The HMAC.
          */
-        public void setHmac(String hmac) {
+        private void setHmac(String hmac) {
             this.hmac = hmac;
         }
 
@@ -165,7 +169,7 @@ public class EncryptionUtil {
     /**
      * Decrypts the Encrypted Data using Shared Key.
      * @param key The Shared Key.
-     * @param encryptedData The Encrypted Data.
+     * @param eData The Encrypted Data.
      * @return The Raw Decrypted data.
      */
     public static String decryptData(String key, String eData) {

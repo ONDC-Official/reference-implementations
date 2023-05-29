@@ -4,8 +4,10 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -18,11 +20,20 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * 
- * Key Utility Class to Generate Keypairs and Shared Key.
+ * Utility Class to Generate Keypairs and Shared Key.
  *
  */
 public class KeyUtil {
 	private static Logger log = Logger.getLogger("ErrorLogger");
+
+    private KeyUtil() {
+
+    }
+
+    /**
+     * The Algorithm used to generate Key pairs. ("X25519").
+     */
+    public static final String KEYPAIR_GENERATION_ALGORITHM = "X25519";
 	
 	/**
 	 * 
@@ -43,7 +54,7 @@ public class KeyUtil {
 
         /**
          * Constructor
-         * @param KeyPair Instance of java.security.KeyPair Class.
+         * @param keyPair Instance of java.security.KeyPair Class.
          */
         public DHKeyPair(KeyPair keyPair) {
             this.publicKey = keyToString(keyPair.getPublic());
@@ -60,7 +71,7 @@ public class KeyUtil {
 
         /**
          * Gets the Private Key.
-         * @return the Private Key.
+         * @return Private Key.
          */
         public String getPrivateKey() {
             return privateKey;
@@ -79,24 +90,24 @@ public class KeyUtil {
 
     /**
      * Generate a Keypair.
-     * @return
+     * @return Generated Keypair.
      */
     public static DHKeyPair generateKeyPair() {
-        DHKeyPair generatKeyPair = null;
+        DHKeyPair generatedKeyPair = null;
         try {
-            KeyPair keyPair = KeyPairGenerator.getInstance("X25519").generateKeyPair();
-            generatKeyPair = new DHKeyPair(keyPair);
+            KeyPair keyPair = KeyPairGenerator.getInstance(KEYPAIR_GENERATION_ALGORITHM).generateKeyPair();
+            generatedKeyPair = new DHKeyPair(keyPair);
         } catch (Exception e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
-        return generatKeyPair;
+        return generatedKeyPair;
     }
 
     /**
      * Generates a SharedKey.
      * @param privateKeyStr Private Key of one party.
      * @param publicKeyStr Public Key of the other party.
-     * @return
+     * @return Shared key as base64 string.
      */
     public static String generateSharedKey(String privateKeyStr, String publicKeyStr){
     	
@@ -111,7 +122,7 @@ public class KeyUtil {
             Key publicKey = publicKeyFromString(publicKeyStr);
             
             // Intializing a key agreement instance.
-            ka = KeyAgreement.getInstance("X25519", "BC");
+            ka = KeyAgreement.getInstance(KEYPAIR_GENERATION_ALGORITHM, "BC");
             ka.init(privateKey);
             
             // Generate the Shared Key.
@@ -132,7 +143,7 @@ public class KeyUtil {
      * @param key The key to encode.
      * @return The Encoded Key.
      */
-    public static String keyToString(Key key) {
+    private static String keyToString(Key key) {
         byte[] encodedKey = key.getEncoded();
         return Base64.getEncoder().encodeToString(encodedKey);
     }
@@ -141,11 +152,12 @@ public class KeyUtil {
      * Get the Public Key from base64 encoded string.
      * @param publicKeyStr The base64 encoded Public Key string.
      * @return The Decoded Public Key.
-     * @throws Exception
+     * @throws NoSuchAlgorithmException Thrown when invalid keypair generation algorithm is configured.
+     * @throws InvalidKeySpecException Thrown if the public key is invalid.
      */
-    public static PublicKey publicKeyFromString(String publicKeyStr) throws Exception {
+    private static PublicKey publicKeyFromString(String publicKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException  {
         byte[] encodedKey = Base64.getDecoder().decode(publicKeyStr);
-        KeyFactory keyFactory = KeyFactory.getInstance("X25519");
+        KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_GENERATION_ALGORITHM);
         return keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
     }
 
@@ -153,11 +165,12 @@ public class KeyUtil {
      * Get the Private Key from base64 encoded string.
      * @param privateKeyStr The base64 encoded Private Key string.
      * @return The Decoded Private Key.
-     * @throws Exception
+     * @throws NoSuchAlgorithmException Thrown when invalid keypair generation algorithm is configured.
+     * @throws InvalidKeySpecException Thrown if the private key is invalid.
      */
-    public static PrivateKey privateKeyFromString(String privateKeyStr) throws Exception {
+    private static PrivateKey privateKeyFromString(String privateKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException  {
         byte[] encodedKey = Base64.getDecoder().decode(privateKeyStr);
-        KeyFactory keyFactory = KeyFactory.getInstance("X25519");
+        KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_GENERATION_ALGORITHM);
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encodedKey));
     }
 
@@ -165,10 +178,9 @@ public class KeyUtil {
      * Get the Shared Key from base64 encoded string.
      * @param sharedKeyString The base64 encoded Shared Key String.
      * @return The Decoded Shared Key.
-     * @throws Exception
      */
-    public static SecretKey sharedKeyFromString(String sharedKeyString) throws Exception {
+    protected static SecretKey sharedKeyFromString(String sharedKeyString) {
         byte[] decodedKey = Base64.getDecoder().decode(sharedKeyString);
-        return new SecretKeySpec(decodedKey, "X25519");
+        return new SecretKeySpec(decodedKey, KEYPAIR_GENERATION_ALGORITHM);
     }
 }
