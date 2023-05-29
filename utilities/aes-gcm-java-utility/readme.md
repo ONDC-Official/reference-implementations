@@ -26,6 +26,7 @@ EncryptionUtil.java
 Make sure to rename the package name of these files acording to your project's package name.
 
 ## Add BouncyCastleProvider to java.security.Security
+Add the BouncyCastleProvider to the java Security class. Below is the implementation of the same.
 ```java
 import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;

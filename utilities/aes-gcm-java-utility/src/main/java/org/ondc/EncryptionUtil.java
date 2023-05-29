@@ -70,7 +70,7 @@ public class EncryptionUtil {
          * Sets the Encrypted Data.
          * @param encrypedData The Encrypted Data.
          */
-        public void setEncrypedData(String encrypedData) {
+        private void setEncrypedData(String encrypedData) {
             this.encrypedData = encrypedData;
         }
 
@@ -86,7 +86,7 @@ public class EncryptionUtil {
          * Sets the Nonce.
          * @param nonce The Nonce.
          */
-        public void setNonce(String nonce) {
+        private void setNonce(String nonce) {
             this.nonce = nonce;
         }
 
@@ -102,7 +102,7 @@ public class EncryptionUtil {
          * Sets the HMAC.
          * @param hmac The HMAC.
          */
-        public void setHmac(String hmac) {
+        private void setHmac(String hmac) {
             this.hmac = hmac;
         }
 

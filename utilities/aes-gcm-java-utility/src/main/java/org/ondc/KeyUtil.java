@@ -31,7 +31,7 @@ public class KeyUtil {
     }
 
     /**
-     * The Algorithm used to generate Key pairs.
+     * The Algorithm used to generate Key pairs. ("X25519").
      */
     public static final String KEYPAIR_GENERATION_ALGORITHM = "X25519";
 	
@@ -143,7 +143,7 @@ public class KeyUtil {
      * @param key The key to encode.
      * @return The Encoded Key.
      */
-    public static String keyToString(Key key) {
+    private static String keyToString(Key key) {
         byte[] encodedKey = key.getEncoded();
         return Base64.getEncoder().encodeToString(encodedKey);
     }
@@ -155,7 +155,7 @@ public class KeyUtil {
      * @throws NoSuchAlgorithmException Thrown when invalid keypair generation algorithm is configured.
      * @throws InvalidKeySpecException Thrown if the public key is invalid.
      */
-    public static PublicKey publicKeyFromString(String publicKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException  {
+    private static PublicKey publicKeyFromString(String publicKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException  {
         byte[] encodedKey = Base64.getDecoder().decode(publicKeyStr);
         KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_GENERATION_ALGORITHM);
         return keyFactory.generatePublic(new X509EncodedKeySpec(encodedKey));
@@ -166,9 +166,9 @@ public class KeyUtil {
      * @param privateKeyStr The base64 encoded Private Key string.
      * @return The Decoded Private Key.
      * @throws NoSuchAlgorithmException Thrown when invalid keypair generation algorithm is configured.
-     * @throws InvalidKeySpecException Thrown if the public key is invalid.
+     * @throws InvalidKeySpecException Thrown if the private key is invalid.
      */
-    public static PrivateKey privateKeyFromString(String privateKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException  {
+    private static PrivateKey privateKeyFromString(String privateKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException  {
         byte[] encodedKey = Base64.getDecoder().decode(privateKeyStr);
         KeyFactory keyFactory = KeyFactory.getInstance(KEYPAIR_GENERATION_ALGORITHM);
         return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encodedKey));
@@ -179,7 +179,7 @@ public class KeyUtil {
      * @param sharedKeyString The base64 encoded Shared Key String.
      * @return The Decoded Shared Key.
      */
-    public static SecretKey sharedKeyFromString(String sharedKeyString) {
+    protected static SecretKey sharedKeyFromString(String sharedKeyString) {
         byte[] decodedKey = Base64.getDecoder().decode(sharedKeyString);
         return new SecretKeySpec(decodedKey, KEYPAIR_GENERATION_ALGORITHM);
     }
