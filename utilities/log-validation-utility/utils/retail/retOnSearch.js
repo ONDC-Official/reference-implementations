@@ -320,8 +320,8 @@ const checkOnSearch = (dirPath, msgIdSet) => {
                     prvdr.hasOwnProperty("@ondc/org/fssai_license_no")
                   ) {
                     if (prvdr["@ondc/org/fssai_license_no"].length != 14) {
+                      onSrchObj.fssaiLiceNo = `@ondc/org/fssai_license_no must contain a valid 14 digit FSSAI No.`;
                     }
-                    onSrchObj.fssaiLiceNo = `@ondc/org/fssai_license_no must contain a valid 14 digit FSSAI No.`;
                   }
                 }
               } catch (error) {

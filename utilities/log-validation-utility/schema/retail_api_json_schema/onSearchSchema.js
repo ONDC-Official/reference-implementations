@@ -461,6 +461,7 @@ module.exports = {
                             images: {
                               type: "array",
                               minItems: 1,
+                              maxItems: 3,
                               items: {
                                 type: "string",
                               },
@@ -509,6 +510,7 @@ module.exports = {
 
                   tags: {
                     type: "array",
+                    minItems: 1,
                     items: {
                       type: "object",
                       properties: {

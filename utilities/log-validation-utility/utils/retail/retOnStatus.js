@@ -15,7 +15,6 @@ const checkOnStatus = (dirPath, msgIdSet) => {
     );
 
     on_status = JSON.parse(on_status);
-
     try {
       console.log(`Validating Schema for /${constants.RET_ONSTATUS} API`);
       const vs = validateSchema("retail", constants.RET_ONSTATUS, on_status);
