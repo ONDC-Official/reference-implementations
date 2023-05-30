@@ -6,7 +6,7 @@ import logging
 
 def encrypt_data(key, data):
     '''
-    Encrypts the specified plain text using AES/GCM/NoPadding.
+    Encrypt the specified plain text using AES/GCM/NoPadding.
     
     Parameters:
 

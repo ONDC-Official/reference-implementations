@@ -1,5 +1,4 @@
 import base64
-import fire as fire
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 from cryptography.hazmat.primitives import serialization
 import logging
@@ -9,9 +8,9 @@ class DHKeyPair:
     DHKeyPair class stores a pair of public_key and private_key.
 
     Attributes:
-        ``private_key`` (string): The Public Key.
+        ``private_key`` (string): The Private Key.
 
-        ``public_key`` (string): The Private Key.
+        ``public_key`` (string): The Public Key.
     '''
 
     def __init__(self, private_key, public_key):
@@ -52,7 +51,7 @@ def generate_key_pair():
 
 def generate_shared_key(private_key_str, public_key_str):
     '''
-        Generates a SharedKey.
+        Generate a SharedKey.
 
         Parameters:
 
