@@ -141,7 +141,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                   email: { type: "string" },
                 },
                 required: ["phone"],
@@ -214,7 +214,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                 },
                 required: ["phone"],
               },

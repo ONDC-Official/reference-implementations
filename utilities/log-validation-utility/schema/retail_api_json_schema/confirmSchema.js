@@ -149,7 +149,7 @@ module.exports = {
                   ],
                 },
                 email: { type: "string", format: "email" },
-                phone: { type: "string" },
+                phone: { type: "string", minLength: 10, maxLength: 11 },
                 created_at: {
                   type: "string",
                   format: "date-time",
@@ -205,6 +205,8 @@ module.exports = {
                           },
                           phone: {
                             type: "string",
+                            minLength: 10,
+                            maxLength: 11,
                           },
                         },
                         required: ["phone"],
@@ -442,23 +444,6 @@ module.exports = {
                           ],
                         },
                       },
-                      // {
-                      //   if: {
-                      //     properties: {
-                      //       settlement_type: {
-                      //         const: "neft",
-                      //       },
-                      //     },
-                      //   },
-                      //   then: {
-                      //     required: [
-                      //       "settlement_ifsc_code",
-                      //       "settlement_bank_account_no",
-                      //       "bank_name",
-                      //       "branch_name",
-                      //     ],
-                      //   },
-                      // },
                     ],
                     required: [
                       "settlement_counterparty",

@@ -14,3 +14,4 @@ test.js
 *.md
 .DS_Store
 validations.log
+playground.js

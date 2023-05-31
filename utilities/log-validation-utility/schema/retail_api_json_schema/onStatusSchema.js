@@ -1,4 +1,4 @@
-// const postConfirmRules = require("./postConfirmValidations");
+const onStatusRules = require("./onStatusValidations");
 
 module.exports = {
   type: "object",
@@ -22,7 +22,6 @@ module.exports = {
             required: ["id"],
           },
         },
-        rateable: { type: "boolean" },
       },
       required: ["id", "locations"],
     },
@@ -90,16 +89,14 @@ module.exports = {
           ],
         },
         email: { type: "string", format: "email" },
-        phone: { type: "string" },
+        phone: { type: "string", minLength: 10, maxLength: 11 },
         created_at: {
           type: "string",
           format: "date-time",
-          // pattern: "^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$",
         },
         updated_at: {
           type: "string",
           format: "date-time",
-          // pattern: "^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$",
         },
       },
       required: ["name", "address", "phone", "created_at", "updated_at"],
@@ -149,7 +146,6 @@ module.exports = {
               location: {
                 type: "object",
                 properties: {
-                  id: { type: "string" },
                   descriptor: {
                     type: "object",
                     properties: {
@@ -165,7 +161,7 @@ module.exports = {
                   },
                   gps: { type: "string" },
                 },
-                required: ["id", "descriptor", "gps"],
+                required: ["descriptor", "gps"],
               },
               time: {
                 type: "object",
@@ -201,7 +197,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                   email: { type: "string" },
                 },
                 required: ["phone"],
@@ -274,7 +270,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                 },
                 required: ["phone"],
               },
@@ -291,6 +287,7 @@ module.exports = {
           "start",
           "end",
         ],
+        allOf: onStatusRules.timeRules,
       },
     },
 
@@ -522,16 +519,7 @@ module.exports = {
       //   },
       // ],
     },
-    documents: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          url: { type: "string" },
-          label: { type: "string", const: "Invoice" },
-        },
-      },
-    },
+
     tags: {
       type: "object",
       properties: {
@@ -545,7 +533,7 @@ module.exports = {
     created_at: { type: "string", format: "date-time" },
     updated_at: { type: "string", format: "date-time" },
   },
-  // allOf: postConfirmRules,
+  allOf: onStatusRules.invoiceRules,
   required: [
     "payment",
     "fulfillments",

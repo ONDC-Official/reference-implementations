@@ -59,7 +59,7 @@ module.exports = {
           ],
         },
         email: { type: "string", format: "email" },
-        phone: { type: "string" },
+        phone: { type: "string", minLength: 10, maxLength: 11 },
         created_at: { type: "string", format: "date-time" },
         updated_at: { type: "string", format: "date-time" },
       },
@@ -108,7 +108,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                   email: { type: "string", format: "email" },
                 },
                 required: ["phone"],
