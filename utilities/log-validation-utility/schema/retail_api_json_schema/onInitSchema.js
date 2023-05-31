@@ -227,6 +227,7 @@ module.exports = {
               },
               settlement_phase: {
                 type: "string",
+                const: "sale-amount",
               },
               settlement_type: {
                 type: "string",

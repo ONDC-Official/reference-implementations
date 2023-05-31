@@ -184,7 +184,7 @@ const checkOnInit = (dirPath, msgIdSet) => {
       );
       const billing = dao.getValue("billing");
       if (!_.isEqual(billing, on_init.billing)) {
-        onInitObj.bill = `Billing object mismatches in /${constants.RET_INIT} and /${constants.RET_ONINIT}`;
+        onInitObj.bill = `billing object mismatches in /${constants.RET_INIT} and /${constants.RET_ONINIT}`;
       }
     } catch (error) {
       console.log(

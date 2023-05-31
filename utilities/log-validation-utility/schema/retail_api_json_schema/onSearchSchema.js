@@ -6,11 +6,11 @@ module.exports = {
     context: {
       type: "object",
       properties: {
-        domain: { type: "string" },
+        domain: { type: "string", const: "nic2004:52110" },
         country: { type: "string" },
         city: { type: "string" },
-        action: { type: "string" },
-        core_version: { type: "string" },
+        action: { type: "string", const: "on_search" },
+        core_version: { type: "string", const: "1.1.0" },
         bap_id: { type: "string" },
         bap_uri: { type: "string" },
         transaction_id: { type: "string" },

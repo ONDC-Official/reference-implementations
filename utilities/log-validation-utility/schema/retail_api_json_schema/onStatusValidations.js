@@ -134,13 +134,15 @@ timeRules = [
           properties: {
             time: {
               type: "object",
-              properties: {
-                timestamp: {
-                  type: "string",
-                  format: "date-time",
+              not: {
+                properties: {
+                  timestamp: {
+                    type: "string",
+                    format: "date-time",
+                  },
                 },
+                required: ["timestamp"],
               },
-              not: { required: ["timestamp"] },
               errorMessage: `pickup time should not be present until order is picked`,
             },
           },
@@ -194,13 +196,15 @@ timeRules = [
           properties: {
             time: {
               type: "object",
-              properties: {
-                timestamp: {
-                  type: "string",
-                  format: "date-time",
+              not: {
+                properties: {
+                  timestamp: {
+                    type: "string",
+                    format: "date-time",
+                  },
                 },
+                required: ["timestamp"],
               },
-              not: { required: ["timestamp"] },
               errorMessage: `delivery time should not be present until order is delivered`,
             },
           },

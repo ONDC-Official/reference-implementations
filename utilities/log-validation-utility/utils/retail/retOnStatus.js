@@ -152,6 +152,21 @@ const checkOnStatus = (dirPath, msgIdSet) => {
 
     try {
       console.log(
+        `Comparing billing object in ${constants.RET_CONFIRM} and /${constants.RET_ONSTATUS}`
+      );
+      const billing = dao.getValue("billing");
+      if (!_.isEqual(billing, on_status.billing)) {
+        onStatObj.bill = `Billing object mismatches in /${constants.RET_CONFIRM} and /${constants.RET_ONSTATUS}`;
+      }
+      // dao.setValue("billing", on_confirm.billing);
+    } catch (error) {
+      console.log(
+        `!Error while comparing billing object in /${constants.RET_CONFIRM} and /${constants.RET_ONSTATUS}`
+      );
+    }
+
+    try {
+      console.log(
         `Checking provider id and location in /${constants.RET_ONSTATUS}`
       );
       if (on_status.provider.id != dao.getValue("providerId")) {

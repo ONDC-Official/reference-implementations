@@ -1,5 +1,6 @@
 const { validateLog } = require("./services/cbCheck.service");
 const fs = require("fs");
+require("dotenv").config();
 
 try {
   if (process.argv.length < 3) {

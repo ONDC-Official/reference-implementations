@@ -4,13 +4,17 @@ const dao = require("../../dao/dao");
 const { checkContext } = require("../../services/service");
 const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
+const utils = require("../utils");
 
 const checkOnCancel = (dirPath, msgIdSet) => {
   let onCnclObj = {};
 
   try {
-    var on_cancel = fs.readFileSync(
+    let on_cancel = fs.readFileSync(
       dirPath + `/${constants.RET_ONCANCEL}.json`
+    );
+    const isSolicited = fs.existsSync(
+      dirPath + `/${constants.RET_CANCEL}.json`
     );
 
     on_cancel = JSON.parse(on_cancel);
@@ -89,7 +93,7 @@ const checkOnCancel = (dirPath, msgIdSet) => {
         `Comparing transaction Ids of /${constants.RET_SELECT} and /${constants.RET_ONCANCEL}`
       );
       if (!_.isEqual(dao.getValue("txnId"), on_cancel.context.transaction_id)) {
-        onCnclObj.txnId = `Transaction Id for /${constants.RET_SELECT} and /${constants.RET_ONCANCEL} api should be same`;
+        onCnclObj.txnId = `Transaction Id should be same from /${constants.RET_SELECT} onwards`;
       }
     } catch (error) {
       console.log(
@@ -98,15 +102,17 @@ const checkOnCancel = (dirPath, msgIdSet) => {
       );
     }
     try {
-      console.log(`Checking Message Id of /${constants.RET_ONCANCEL}`);
-      if (!_.isEqual(dao.getValue("msgId"), on_cancel.context.message_id)) {
-        onCnclObj.msgId = `Message Id for /${constants.RET_CANCEL} and /${constants.RET_ONCANCEL} api should be same`;
+      if (isSolicited) {
+        console.log(`Checking Message Id of /${constants.RET_ONCANCEL}`);
+        if (!_.isEqual(dao.getValue("msgId"), on_cancel.context.message_id)) {
+          onCnclObj.msgId = `Message Id for /${constants.RET_CANCEL} and /${constants.RET_ONCANCEL} api should be same`;
+        }
+        // if (msgIdSet.has(status.context.message_id)) {
+        //   statObj.msgId2 = "Message Id cannot be same for different sets of APIs";
+        // }
+        // msgId = status.context.message_id;
+        msgIdSet.add(on_cancel.context.message_id);
       }
-      // if (msgIdSet.has(status.context.message_id)) {
-      //   statObj.msgId2 = "Message Id cannot be same for different sets of APIs";
-      // }
-      // msgId = status.context.message_id;
-      msgIdSet.add(on_cancel.context.message_id);
     } catch (error) {
       console.log(
         `!!Error while checking message id for /${constants.RET_ONCANCEL}`,
@@ -135,15 +141,29 @@ const checkOnCancel = (dirPath, msgIdSet) => {
     }
 
     try {
-      console.log(
-        `Comparing cancellation reason id in /${constants.RET_ONCANCEL} and /${constants.RET_CANCEL}`
-      );
-      if (dao.getValue("cnclRid") != on_cancel.tags.cancellation_reason_id) {
-        onCnclObj.onCancelRID = `Cancellation Reason Id in /${constants.RET_CANCEL} and /${constants.RET_ONCANCEL} should be same`;
+      if (isSolicited) {
+        console.log(
+          `Comparing cancellation reason id in /${constants.RET_ONCANCEL} and /${constants.RET_CANCEL}`
+        );
+        if (dao.getValue("cnclRid") != on_cancel.tags.cancellation_reason_id) {
+          onCnclObj.onCancelRID = `Cancellation Reason Id in /${constants.RET_CANCEL} and /${constants.RET_ONCANCEL} should be same`;
+        }
+      } else {
+        if (
+          !utils.sellerCancellationRid.has(
+            on_cancel.tags.cancellation_reason_id
+          )
+        ) {
+          console.log(
+            `Cancellation Reason Id in /${constants.RET_ONCANCEL} is not a valid reason id`
+          );
+
+          onCnclObj.cancelRid = `cancellation_reason_id should be a valid cancellation id (unsolicited seller app initiated)`;
+        }
       }
     } catch (error) {
       console.log(
-        `!!Error while comparing cancellation reason id in /${constants.RET_CANCEL} and /${constants.RET_ONCANCEL}`,
+        `!!Error while checking cancellation reason id in  /${constants.RET_ONCANCEL}`,
         error
       );
       // onCnclObj.onCancelRID =
