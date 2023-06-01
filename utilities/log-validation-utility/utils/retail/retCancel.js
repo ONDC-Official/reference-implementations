@@ -73,7 +73,7 @@ const checkCancel = (dirPath, msgIdSet) => {
         `Comparing transaction Ids of /${constants.RET_SELECT} and /${constants.RET_CANCEL}`
       );
       if (!_.isEqual(dao.getValue("txnId"), cancel.context.transaction_id)) {
-        cnclObj.txnId = `Transaction Id for /${constants.RET_SELECT} and /${constants.RET_CANCEL} api should be same`;
+        cnclObj.txnId = `Transaction Id for should be same from /${constants.RET_SELECT} onwards`;
       }
     } catch (error) {
       console.log(
@@ -124,12 +124,12 @@ const checkCancel = (dirPath, msgIdSet) => {
 
     try {
       console.log("Checking the validity of cancellation reason id");
-      if (!(cancel.cancellation_reason_id in utils.cancellation_rid)) {
+      if (!utils.buyerCancellationRid.has(cancel.cancellation_reason_id)) {
         console.log(
-          `Cancellation Reason Id in /${constants.RET_CANCEL} is not a valid reason id`
+          `cancellation_reason_id should be a valid cancellation id (buyer app initiated)`
         );
 
-        cnclObj.cancelRid = `Cancellation reason id in /${constants.RET_CANCEL} is not a valid reason id`;
+        cnclObj.cancelRid = `Cancellation reason id is not a valid reason id (buyer app initiated)`;
       } else dao.setValue("cnclRid", cancel.cancellation_reason_id);
     } catch (error) {
       // cnclObj.cancelRid =

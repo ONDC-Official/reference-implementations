@@ -232,16 +232,16 @@ const checkOnConfirm = (dirPath, msgIdSet) => {
 
     try {
       console.log(
-        `Comparing billing object in ${constants.RET_INIT} and /${constants.RET_ONCONFIRM}`
+        `Comparing billing object in ${constants.RET_CONFIRM} and /${constants.RET_ONCONFIRM}`
       );
       const billing = dao.getValue("billing");
       if (!_.isEqual(billing, on_confirm.billing)) {
-        onCnfrmObj.bill = `Billing object mismatches in /${constants.RET_INIT} and /${constants.RET_ONCONFIRM}`;
+        onCnfrmObj.bill = `Billing object mismatches in /${constants.RET_CONFIRM} and /${constants.RET_ONCONFIRM}`;
       }
       // dao.setValue("billing", on_confirm.billing);
     } catch (error) {
       console.log(
-        `!Error while comparing billing object in /${constants.RET_INIT} and /${constants.RET_ONCONFIRM}`
+        `!Error while comparing billing object in /${constants.RET_CONFIRM} and /${constants.RET_ONCONFIRM}`
       );
     }
 

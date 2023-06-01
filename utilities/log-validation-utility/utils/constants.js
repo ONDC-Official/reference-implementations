@@ -21,4 +21,5 @@ module.exports = Object.freeze({
   RET_SUPPORT: "support",
   RET_ONSUPPORT: "on_support",
   LOG_FILE_PATH: "./logs",
+  API_KEY: process.env.API_KEY,
 });

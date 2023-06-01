@@ -1,4 +1,4 @@
-// const postConfirmRules = require("./postConfirmValidations");
+const onStatusRules = require("./onStatusValidations");
 
 module.exports = {
   type: "object",
@@ -22,7 +22,6 @@ module.exports = {
             required: ["id"],
           },
         },
-        rateable: { type: "boolean" },
       },
       required: ["id", "locations"],
     },
@@ -90,16 +89,14 @@ module.exports = {
           ],
         },
         email: { type: "string", format: "email" },
-        phone: { type: "string" },
+        phone: { type: "string", minLength: 10, maxLength: 11 },
         created_at: {
           type: "string",
           format: "date-time",
-          // pattern: "^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$",
         },
         updated_at: {
           type: "string",
           format: "date-time",
-          // pattern: "^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$",
         },
       },
       required: ["name", "address", "phone", "created_at", "updated_at"],
@@ -149,7 +146,6 @@ module.exports = {
               location: {
                 type: "object",
                 properties: {
-                  id: { type: "string" },
                   descriptor: {
                     type: "object",
                     properties: {
@@ -165,7 +161,7 @@ module.exports = {
                   },
                   gps: { type: "string" },
                 },
-                required: ["id", "descriptor", "gps"],
+                required: ["descriptor", "gps"],
               },
               time: {
                 type: "object",
@@ -201,7 +197,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                   email: { type: "string" },
                 },
                 required: ["phone"],
@@ -274,7 +270,7 @@ module.exports = {
               contact: {
                 type: "object",
                 properties: {
-                  phone: { type: "string" },
+                  phone: { type: "string", minLength: 10, maxLength: 11 },
                 },
                 required: ["phone"],
               },
@@ -291,6 +287,17 @@ module.exports = {
           "start",
           "end",
         ],
+        if: {
+          properties: {
+            type: {
+              type: "string",
+              const: "Delivery",
+            },
+          },
+        },
+        then: {
+          allOf: onStatusRules.timeRules,
+        },
       },
     },
 
@@ -403,98 +410,126 @@ module.exports = {
         "@ondc/org/settlement_details": {
           type: "array",
           items: {
-            type: "object",
-            properties: {
-              settlement_counterparty: {
-                type: "string",
-              },
-              settlement_phase: {
-                type: "string",
-              },
-              settlement_type: {
-                type: "string",
-                enum: ["upi", "neft", "rtgs"],
-              },
-              upi_address: { type: "string" },
-              settlement_bank_account_no: {
-                type: "string",
-              },
-              settlement_ifsc_code: {
-                type: "string",
-              },
-              bank_name: { type: "string" },
-              beneficiary_name: {
-                type: "string",
-              },
-              branch_name: { type: "string" },
-            },
-            allOf: [
+            anyOf: [
               {
-                if: {
-                  properties: {
-                    settlement_type: {
-                      const: "upi",
+                type: "object",
+                properties: {
+                  settlement_counterparty: {
+                    type: "string",
+                  },
+                  settlement_phase: {
+                    type: "string",
+                  },
+                  settlement_type: {
+                    type: "string",
+                    enum: ["upi", "neft", "rtgs"],
+                  },
+                  upi_address: { type: "string" },
+                  settlement_bank_account_no: {
+                    type: "string",
+                  },
+                  settlement_ifsc_code: {
+                    type: "string",
+                  },
+                  bank_name: { type: "string" },
+                  beneficiary_name: {
+                    type: "string",
+                  },
+                  branch_name: { type: "string" },
+                },
+                allOf: [
+                  {
+                    if: {
+                      properties: {
+                        settlement_type: {
+                          const: "upi",
+                        },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        upi_address: {
+                          type: "string",
+                        },
+                      },
+                      required: ["upi_address"],
                     },
                   },
-                },
-                then: {
-                  properties: {
-                    upi_address: {
-                      type: "string",
+                  {
+                    if: {
+                      properties: {
+                        settlement_type: {
+                          enum: ["rtgs", "neft"],
+                        },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        settlement_bank_account_no: {
+                          type: "string",
+                        },
+                        settlement_ifsc_code: {
+                          type: "string",
+                        },
+                        bank_name: { type: "string" },
+                        branch_name: { type: "string" },
+                      },
+                      required: [
+                        "settlement_ifsc_code",
+                        "settlement_bank_account_no",
+                        "bank_name",
+                        "branch_name",
+                      ],
                     },
                   },
-                  required: ["upi_address"],
-                },
+                  // {
+                  //   if: {
+                  //     properties: {
+                  //       settlement_type: {
+                  //         const: "neft",
+                  //       },
+                  //     },
+                  //   },
+                  //   then: {
+                  //     required: [
+                  //       "settlement_ifsc_code",
+                  //       "settlement_bank_account_no",
+                  //       "bank_name",
+                  //       "branch_name",
+                  //     ],
+                  //   },
+                  // },
+                ],
+                required: [
+                  "settlement_counterparty",
+                  "settlement_phase",
+                  "settlement_type",
+                ],
               },
               {
-                if: {
-                  properties: {
-                    settlement_type: {
-                      enum: ["rtgs", "neft"],
-                    },
+                type: "object",
+                properties: {
+                  settlement_counterparty: {
+                    type: "string",
+                    const: "buyer",
                   },
-                },
-                then: {
-                  properties: {
-                    settlement_bank_account_no: {
-                      type: "string",
-                    },
-                    settlement_ifsc_code: {
-                      type: "string",
-                    },
-                    bank_name: { type: "string" },
-                    branch_name: { type: "string" },
+                  settlement_phase: {
+                    type: "string",
+                    const: "refund",
                   },
-                  required: [
-                    "settlement_ifsc_code",
-                    "settlement_bank_account_no",
-                    "bank_name",
-                    "branch_name",
-                  ],
+                  settlement_type: {
+                    type: "string",
+                    enum: ["upi", "neft", "rtgs"],
+                  },
+                  settlement_amount: {
+                    type: "string",
+                  },
+                  settlement_timestamp: {
+                    type: "string",
+                    format: "date-time",
+                  },
                 },
               },
-              // {
-              //   if: {
-              //     properties: {
-              //       settlement_type: {
-              //         const: "neft",
-              //       },
-              //     },
-              //   },
-              //   then: {
-              //     required: [
-              //       "settlement_ifsc_code",
-              //       "settlement_bank_account_no",
-              //       "bank_name",
-              //       "branch_name",
-              //     ],
-              //   },
-              // },
-            ],
-            required: [
-              "settlement_counterparty",
-              "settlement_phase",
-              "settlement_type",
             ],
           },
         },
@@ -522,16 +557,7 @@ module.exports = {
       //   },
       // ],
     },
-    documents: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          url: { type: "string" },
-          label: { type: "string", const: "Invoice" },
-        },
-      },
-    },
+
     tags: {
       type: "object",
       properties: {
@@ -545,7 +571,7 @@ module.exports = {
     created_at: { type: "string", format: "date-time" },
     updated_at: { type: "string", format: "date-time" },
   },
-  // allOf: postConfirmRules,
+  allOf: onStatusRules.invoiceRules,
   required: [
     "payment",
     "fulfillments",

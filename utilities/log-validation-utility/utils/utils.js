@@ -93,9 +93,7 @@ const logOrderState = [
   "Cancelled",
 ];
 
-const bpp_fulfillments = ["Delivery", "Pickup", "Delivery and Pickup"]; //id =1,2,3
-
-const grocery_categories_id = [
+const groceryCategoriesId = [
   "Fruits and Vegetables",
   "Masala & Seasoning",
   "Oil & Ghee",
@@ -115,7 +113,7 @@ const grocery_categories_id = [
   "Packaged Foods",
 ];
 
-const fnb_categories_id = [
+const fnbCategoriesId = [
   "Continental",
   "Middle Eastern",
   "North Indian",
@@ -132,30 +130,18 @@ const fnb_categories_id = [
   "F&B",
 ];
 
-const fssai_nos = [
-  "brand_owner_FSSAI_license_no",
-  "other_FSSAI_license_no",
-  "importer_FSSAI_license_no",
-];
-
-const cancellation_rid = {
-  "001": 0,
-  "002": 0,
-  "003": 0,
-  "004": 0,
-  "005": 0,
-  "006": 0,
-  "009": 1,
-  "010": 1,
-  "011": 1,
-  "012": 1,
-  "013": 1,
-  "014": 1,
-  "015": 1,
-  "016": 0,
-  "017": 0,
-  "018": 0,
-};
+const buyerCancellationRid = new Set(["001", "003", "006", "009", "010"]);
+const sellerCancellationRid = new Set([
+  "002",
+  "005",
+  "011",
+  "012",
+  "013",
+  "014",
+  "015",
+  "018",
+  "019",
+]);
 
 // const uuidCheck = (data) => {
 //   console.log("***UUID Validation Utils***");
@@ -288,16 +274,14 @@ module.exports = {
   retailOrderState,
   logFulfillmentState,
   logOrderState,
-  bpp_fulfillments,
-  cancellation_rid,
+  buyerCancellationRid,
+  sellerCancellationRid,
   getObjValues,
   retailPaymentType,
   retailPymntTtl,
   taxNotInlcusive,
   isArrayEqual,
   countDecimalDigits,
-  grocery_categories_id,
-  fnb_categories_id,
   emailRegex,
   isoDurToSec,
   timeDiff,

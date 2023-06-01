@@ -1,5 +1,7 @@
 const { validateLog } = require("./services/cbCheck.service");
 const fs = require("fs");
+require("dotenv").config();
+const rG = require("./utils/reverseGeocodeUtil");
 
 try {
   if (process.argv.length < 3) {
@@ -25,6 +27,8 @@ try {
       console.log(`Error while reading logs folder`, error);
     }
   });
+
+  // rG.getReverseGeocode("28.457523", "77.026344");
 } catch (error) {
   console.log("!!Some Unexpected Error Occurred", error);
 }

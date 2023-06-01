@@ -181,6 +181,7 @@ const checkConfirm = (dirPath, msgIdSet) => {
       if (!_.isEqual(billing, confirm.billing)) {
         cnfrmObj.bill = `Billing object mismatches in /${constants.RET_INIT} and /${constants.RET_CONFIRM}`;
       }
+      dao.setValue("billing", confirm.billing);
     } catch (error) {
       console.log(
         `!!Error while comparing billing object in /${constants.RET_INIT} and /${constants.RET_CONFIRM}`

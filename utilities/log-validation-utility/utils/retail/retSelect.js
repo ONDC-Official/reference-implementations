@@ -223,8 +223,6 @@ const checkSelect = (dirPath, msgIdSet) => {
           if (!ff.end.location.address.hasOwnProperty("area_code")) {
             slctObj.areaCode = `address.area_code is required property in /${constants.RET_SELECT}`;
           }
-        } else {
-          srchObj.endflfllmntObj = `fulfillments[${indx}].end object missing in /${constants.RET_SELECT} API`;
         }
       });
     } catch (error) {
