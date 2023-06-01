@@ -6,15 +6,10 @@ const utils = require("../utils");
 const validateSchema = require("../schemaValidation");
 const constants = require("../constants");
 
-const checkOnStatus = (dirPath, msgIdSet) => {
+const checkOnStatus = (dirPath, msgIdSet,on_status) => {
   let onStatObj = {};
   let cntxtTmpstmp = "";
-  try {
-    let on_status = fs.readFileSync(
-      dirPath + `/${constants.RET_ONSTATUS}.json`
-    );
 
-    on_status = JSON.parse(on_status);
     try {
       console.log(`Validating Schema for /${constants.RET_ONSTATUS} API`);
       const vs = validateSchema("retail", constants.RET_ONSTATUS, on_status);
@@ -204,17 +199,9 @@ const checkOnStatus = (dirPath, msgIdSet) => {
       );
     }
 
-    dao.setValue("onStatObj", onStatObj);
-  } catch (err) {
-    if (err.code === "ENOENT") {
-      console.log(`!!File not found for /${constants.RET_ONSTATUS} API!`);
-    } else {
-      console.log(
-        `!!Some error occurred while checking /${constants.RET_ONSTATUS} API`,
-        err
-      );
-    }
-  }
-};
+    return onStatObj;
+    // dao.setValue("onStatObj", onStatObj);
+  } 
+
 
 module.exports = checkOnStatus;

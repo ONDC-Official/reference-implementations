@@ -12,7 +12,7 @@ const checkOnInit = require("./retail/retOnInit");
 const checkConfirm = require("./retail/retConfirm");
 const checkOnConfirm = require("./retail/retOnConfirm");
 const checkStatus = require("./retail/retStatus");
-const checkOnStatus = require("./retail/retOnStatus");
+// const checkOnStatus = require("./retail/retOnStatus");
 const checkTrack = require("./retail/retTrack");
 const checkOnTrack = require("./retail/retOnTrack");
 const checkCancel = require("./retail/retCancel");
@@ -21,6 +21,8 @@ const checkSupport = require("./retail/retSupport");
 const checkOnSupport = require("./retail/retOnSupport");
 const checkUpdate = require("./retail/retUpdate");
 const checkOnUpdate = require("./retail/retOnUpdate");
+const checkUnsolicitedStatus = require("./retail/retUnsolicitedOnStatus");
+
 
 //TAT in on_select = sumof(time to ship in /on_search and TAT by LSP in logistics /on_search)
 // If non-serviceable in /on_select, there should be domain-error
@@ -67,7 +69,8 @@ const validateLogs = (dirPath) => {
 
   // //ON_STATUS API
 
-  let onStatResp = checkOnStatus(dirPath, msgIdSet);
+  // let onStatResp = checkOnStatus(dirPath, msgIdSet);
+  let onStatResp = checkUnsolicitedStatus(dirPath, msgIdSet);
 
   // //UPDATE API
 
