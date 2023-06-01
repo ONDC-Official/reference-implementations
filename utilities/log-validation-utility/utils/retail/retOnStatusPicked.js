@@ -6,34 +6,33 @@ const _ = require("lodash");
 const dao = require("../../dao/dao");
 const constants = require("../constants");
 
-const checkOnStatusPickedUp =(dirPath, msgIdSet)=>{
+const checkOnStatusPicked = (dirPath, msgIdSet, state) => {
+  try {
+    let on_status = fs.readFileSync(
+      dirPath + `/${constants.RET_ONSTATUS}_${state}.json`
+    );
+    on_status = JSON.parse(on_status);
+    dao.setValue("pickedOnStatus", true);
+    let pickedupObj = {};
+    pickedupObj = checkOnStatus(msgIdSet, on_status, state);
 
-    try {
-        let on_status = fs.readFileSync(
-          dirPath + `/${constants.RET_ONSTATUS}_${state}.json`
-        );
-        on_status = JSON.parse(on_status);
-        dao.setValue("pickedOnStatus",true)
-        let pickedupObj={};
-        pickedupObj = checkOnStatus(dirPath, msgIdSet, on_status);
+    //timestamp validations
 
-        //timestamp validations
-        
-      if(dao.getValue("pendingOnStatus")){
-        
-      }
+    // if (dao.getValue("pendingOnStatus")) {
+    // }
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      console.log(
+        `!!File not found for /${constants.RET_ONSTATUS}_${state} API!`
+      );
+      dao.setValue("pickedOnStatus", false);
+    } else {
+      console.log(
+        `!!Some error occurred while checking /${constants.RET_ONSTATUS}_${state} API`,
+        err
+      );
+    }
+  }
+};
 
-      } catch (error) {
-        if (err.code === "ENOENT") {
-            console.log(`!!File not found for /${constants.RET_ONSTATUS}_${state} API!`);
-            dao.setValue("pickedOnStatus",false)
-          } else {
-            console.log(
-              `!!Some error occurred while checking /${constants.RET_ONSTATUS}_${state} API`,
-              err
-            );
-          }
-      }
-}
-
-module.exports= checkOnStatusPickedUp
+module.exports = checkOnStatusPicked;

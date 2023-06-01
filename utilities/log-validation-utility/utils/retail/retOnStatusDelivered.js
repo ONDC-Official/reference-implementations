@@ -11,21 +11,21 @@ const checkOnStatusDelivered = (dirPath, msgIdSet, state) => {
     );
     on_status = JSON.parse(on_status);
     let deliveredObj = {};
-    deliveredObj = checkOnStatus(dirPath, msgIdSet, on_status);
+    deliveredObj = checkOnStatus(msgIdSet, on_status, state);
 
     //timestamp validations
-
-
-  } catch (error) {
+  } catch (err) {
     if (err.code === "ENOENT") {
-        console.log(`!!File not found for /${constants.RET_ONSTATUS}_${state} API!`);
-      } else {
-        console.log(
-          `!!Some error occurred while checking /${constants.RET_ONSTATUS}_${state} API`,
-          err
-        );
-      }
+      console.log(
+        `!!File not found for /${constants.RET_ONSTATUS}_${state} API!`
+      );
+    } else {
+      console.log(
+        `!!Some error occurred while checking /${constants.RET_ONSTATUS}_${state} API`,
+        err
+      );
+    }
   }
 };
 
-module.exports =  checkOnStatusDelivered ;
+module.exports = checkOnStatusDelivered;
