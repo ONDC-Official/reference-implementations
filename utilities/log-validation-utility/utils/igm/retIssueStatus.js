@@ -26,6 +26,22 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
       );
     }
 
+        try {
+          console.log(
+            `Storing igmIssueStatMesgId in /${constants.RET_ONISSUE_STATUS}`
+          ); 
+          dao.setValue("igmIssueStatMsgId", issueStatus.context.message_id);
+          if (!res.valid) {
+            Object.assign(issueStatusObj, res.ERRORS);
+          }
+        } catch (error) {
+          console.log(
+            `!!Some error occurred while checking /${constants.RET_ISSUE_STATUS} context`,
+            error
+          );
+        }
+
+
     try {
       console.log(
         `Checking context for /${constants.RET_ISSUE_STATUS}rack API`
@@ -39,6 +55,27 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
         `!!Some error occurred while checking /${constants.RET_ISSUE_STATUS} context`
       );
     }
+
+
+        try {
+          console.log(
+            `Comparing transaction ID of /${constants.RET_ISSUE} and /${constants.RET_ISSUE_STATUS}`
+          );
+          if (
+            !_.isEqual(
+              dao.getValue("igmTxnId"),
+              issueStatus.context.transaction_id
+            )
+          ) {
+            issueStatusObj.igmTxnId = `transaction ID mismatch in /${constants.RET_ISSUE} and /${constants.RET_ISSUE_STATUS}`;
+          }
+        } catch (error) {
+          console.log(
+            `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ISSUE_STATUS}`,
+            error
+          );
+        }
+
 
     dao.setValue("issueStatusObj", issueStatusObj);
   } catch (err) {

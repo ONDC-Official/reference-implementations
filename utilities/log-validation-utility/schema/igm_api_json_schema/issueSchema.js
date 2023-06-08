@@ -20,7 +20,7 @@ module.exports = {
         },
         core_version: {
           type: "string",
-          const: "1.1.0",
+          const: "1.0.0",
         },
         bap_id: {
           type: "string",
@@ -52,9 +52,7 @@ module.exports = {
           format: "duration",
         },
       },
-      required: [
-        "ttl"
-      ],
+      required: ["ttl"],
     },
     message: {
       type: "object",
@@ -151,7 +149,7 @@ module.exports = {
                   },
                 },
               },
-              required:["id"]
+              required: ["id"],
             },
             description: {
               type: "object",
@@ -1154,7 +1152,15 @@ module.exports = {
               type: "string",
             },
           },
-          required: ["id", "created_at", "updated_at","issue_type","expected_response_time","expected_resolution_time","status"],
+          required: [
+            "id",
+            "created_at",
+            "updated_at",
+            "issue_type",
+            "expected_response_time",
+            "expected_resolution_time",
+            "status",
+          ],
         },
       },
       required: ["issue"],

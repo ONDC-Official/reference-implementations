@@ -39,12 +39,13 @@ const checkIssue = (dirPath) => {
 
     try {
       console.log(
-        `Storing igmTxnID igmTmpstmp igmType igmCoreVersion igmDomain in /${constants.RET_ISSUE}`
+        `Storing igmTxnID igmTmpstmp igmType igmCoreVersion igmDomain igmIssueMesgId in /${constants.RET_ISSUE}`
       ); //storing IgmTxnId IgmTmpstmp igmType igmCoreVersion igmDomain
       dao.setValue("igmTxnId", issue.context.transaction_id);
       dao.setValue("igmTmpstmp", issue.context.timestamp);
       dao.setValue("igmCoreVersion", issue.context.core_version);
-      dao.setValue("igmDomain", issue.context.domain);
+      dao.setValue( "igmDomain", issue.context.domain );
+      dao.setValue( "igmIssueMsgId", issue.context.message_id );
       if (issue.message) {
         dao.setValue("igmIssueType", issue.message.issue.issue_type);
       }

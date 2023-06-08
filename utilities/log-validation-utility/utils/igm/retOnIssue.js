@@ -56,6 +56,26 @@ const checkOnIssue = (dirPath) => {
       );
     }
 
+        try {
+          console.log(
+            `Comparing MESSAGE ID of /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}`
+          );
+          if (
+            !_.isEqual(
+              dao.getValue("igmIssueMsgId"),
+              on_issue.context.message_id
+            )
+          ) {
+            onissueObj.igmIssueMsgId = `Message  ID mismatch in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}`;
+          }
+        } catch (error) {
+          console.log(
+            `Error while comparing Message ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}`,
+            error
+          );
+        }
+
+
     try {
       console.log(
         `Comparing Domain of /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}`
@@ -63,7 +83,6 @@ const checkOnIssue = (dirPath) => {
       if (!_.isEqual(dao.getValue("igmDomain"), on_issue.context.domain)) {
         onissueObj.igmDomain = `Domain for /${constants.RET_ISSUE} api should be equal to /${constants.RET_ONISSUE} api`;
       }
-      dao.setValue("igmDomain", on_issue.context.domain);
     } catch (error) {
       console.log(
         `Error while comparing Domain for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE} api`,
@@ -86,11 +105,6 @@ const checkOnIssue = (dirPath) => {
     try {
       console.log(`Phone Number Check for /${constants.RET_ONISSUE}`);
 
-      console.log(
-        "on_issue?.message?.issue?.issue_actions?.respondent_actions?.[0]",
-        on_issue?.message?.issue?.issue_actions?.respondent_actions?.[0]
-          ?.updated_by?.contact?.phone?.phone
-      );
       if (
         !_.inRange(
           on_issue?.message?.issue?.issue_actions?.respondent_actions?.[0]
