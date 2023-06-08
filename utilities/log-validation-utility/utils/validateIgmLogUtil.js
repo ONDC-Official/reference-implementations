@@ -26,8 +26,8 @@ const validateIgmLogs = (dirPath) => {
 
   let issueObj = dao.getValue("issueObj");
   let onissueObj = dao.getValue("onissueObj");
-  let issueStatObj = dao.getValue("issueStatusObj");
-  let onIssueStatObj = dao.getValue("onIssueStatusObj");
+  let issueStatusObj = dao.getValue("issueStatusObj");
+  let onIssueStatusObj = dao.getValue("onIssueStatusObj");
   try {
     console.log("Flushing DB Data");
     dao.dropDB();
@@ -43,12 +43,12 @@ const validateIgmLogs = (dirPath) => {
     logReport += `**/on_issue** \n${getObjValues(onissueObj)}\n`;
   }
 
-  if (!_.isEmpty(issueStatObj)) {
-    logReport += `**/issue_status** \n${getObjValues(issueStatObj)}\n`;
+  if (!_.isEmpty(issueStatusObj)) {
+    logReport += `**/issue_status** \n${getObjValues(issueStatusObj)}\n`;
   }
 
-  if (!_.isEmpty(onIssueStatObj)) {
-    logReport += `**/on_issue_status** \n${getObjValues(onIssueStatObj)}\n`;
+  if (!_.isEmpty(onIssueStatusObj)) {
+    logReport += `**/on_issue_status** \n${getObjValues(onIssueStatusObj)}\n`;
   }
 
   fs.writeFileSync("IGM_log_report.md", logReport);

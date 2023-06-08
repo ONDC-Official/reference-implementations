@@ -15,9 +15,6 @@ const validateLog = async (domain, dirPath) => {
       case "igm":
         igm.validateIgmLogs(logsPath);
         break;
-      case "igm":
-        igm.validateIgmLogs(logsPath);
-        break;
     default:
       console.log("Invalid Domain!!");
   }
