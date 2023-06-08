@@ -14,10 +14,6 @@ const confirmSchema = require("./confirmSchema");
 const statusSchema = require("./statusSchema");
 const updateSchema = require("./updateSchema");
 const cancelSchema = require("./cancelSchema");
-const issueSchema = require("../igm_api_json_schema/issueSchema");
-const onIssueSchema = require("../igm_api_json_schema/onIssueSchema");
-const issueStatusSchema = require("../igm_api_json_schema/issueStatusSchema");
-const onIssueStatusSchema = require("../igm_api_json_schema/onIssueStatusSchema");
 
 const Ajv = require("ajv");
 const ajv = new Ajv({
@@ -25,7 +21,6 @@ const ajv = new Ajv({
   strict: "log",
 });
 const addFormats = require("ajv-formats");
-const { error } = require("ajv/dist/vocabularies/applicator/dependencies");
 addFormats(ajv);
 require("ajv-errors")(ajv);
 
@@ -159,27 +154,6 @@ const validate_schema_on_support_retail_for_json = (data) => {
   error_list = validate_schema(item_data, (schema = onSupportSchema));
   return formatted_error(error_list);
 };
-const validate_schema_issue_status_retail_for_json = (data) => {
-  error_list = validate_schema(data, (schema = issueStatusSchema));
-  return formatted_error(error_list);
-};
-
-const validate_schema_on_issue_status_retail_for_json = (data) => {
-  // item_data = data["message"];
-  error_list = validate_schema(data, (schema = onIssueStatusSchema));
-  return formatted_error(error_list);
-};
-
-const validate_schema_issue_retail_for_json = (data) => {
-  error_list = validate_schema(data, (schema = issueSchema));
-  return formatted_error(error_list);
-};
-
-const validate_schema_on_issue_retail_for_json = (data) => {
-  error_list = validate_schema(data, (schema = onIssueSchema));
-  return formatted_error(error_list);
-};
-
 
 module.exports = {
   validate_schema_search_retail_for_json,
@@ -191,8 +165,6 @@ module.exports = {
   validate_schema_track_retail_for_json,
   validate_schema_cancel_retail_for_json,
   validate_schema_support_retail_for_json,
-  validate_schema_issue_retail_for_json,
-  validate_schema_issue_status_retail_for_json,
   validate_schema_on_cancel_retail_for_json,
   validate_schema_on_confirm_retail_for_json,
   validate_schema_on_init_retail_for_json,
@@ -202,6 +174,4 @@ module.exports = {
   validate_schema_on_support_retail_for_json,
   validate_schema_on_track_retail_for_json,
   validate_schema_on_update_retail_for_json,
-  validate_schema_on_issue_retail_for_json,
-  validate_schema_on_issue_status_retail_for_json,
 };

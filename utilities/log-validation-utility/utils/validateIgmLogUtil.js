@@ -51,7 +51,7 @@ const validateIgmLogs = (dirPath) => {
     logReport += `**/on_issue_status** \n${getObjValues(onIssueStatusObj)}\n`;
   }
 
-  fs.writeFileSync("IGM_log_report.md", logReport);
+  fs.writeFileSync("log_report.md", logReport);
 
   console.log("Report Generated Successfully!!");
 };
