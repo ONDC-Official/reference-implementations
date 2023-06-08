@@ -14,7 +14,6 @@ const checkInit = (dirPath, msgIdSet) => {
     try {
       console.log(`Validating Schema for ${constants.RET_INIT} API`);
       const vs = validateSchema("retail", constants.RET_INIT, init);
-      console.log("DEBUGGG", vs);
       if (vs != "error") {
         Object.assign(initObj, vs);
       }
