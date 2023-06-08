@@ -57,6 +57,8 @@ module.exports = {
           properties: {
             id: {
               type: "string",
+              description:
+                "* Network issue identifier is an unique number assigned to any complaint by the interfacing application at the source.\n\n* **During the life cycle of a complaint, this number will not change and will be communicated to counterparty application.**\n\n* Any subsequent issues created with the interfacing,counterpary or casacaded counter party apps are responsible for providing the correalted and relevant network-issue-id which helps all this inteacting systems to traverse back to the main issue.\n",
             },
             complainant_info: {
               type: "object",
@@ -1699,15 +1701,7 @@ module.exports = {
               format: "date-time",
             },
           },
-          required: [
-            "id",
-            "order_details",
-            "issue_type",
-            "expected_response_time",
-            "expected_resolution_time",
-            "created_at",
-            "updated_at",
-          ],
+          required: ["id", "created_at", "updated_at"],
         },
       },
       required: ["issue"],
