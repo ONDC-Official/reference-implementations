@@ -235,7 +235,6 @@ module.exports = {
           "@ondc/org/provider_name",
           "state",
           "type",
-          "tracking",
           "start",
           "end",
         ],

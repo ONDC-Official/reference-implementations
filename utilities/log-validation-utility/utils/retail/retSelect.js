@@ -5,6 +5,7 @@ const utils = require("../utils");
 const { checkContext } = require("../../services/service");
 const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
+const logger = require("../logger");
 
 const checkSelect = (dirPath, msgIdSet) => {
   //list to store selected items
@@ -19,48 +20,47 @@ const checkSelect = (dirPath, msgIdSet) => {
     let select = fs.readFileSync(dirPath + `/${constants.RET_SELECT}.json`); //testing
     select = JSON.parse(select);
     try {
-      console.log(`Validating Schema for ${constants.RET_SELECT} API`);
+      logger.info(`Validating Schema for ${constants.RET_SELECT} API`);
       const vs = validateSchema("retail", constants.RET_SELECT, select);
       if (vs != "error") {
-        // console.log(vs);
+        // logger.info(vs);
         Object.assign(slctObj, vs);
       }
     } catch (error) {
-      console.log(
-        `!!Error occurred while performing schema validation for /${constants.RET_SELECT}`,
-        error
+      logger.error(
+        `!!Error occurred while performing schema validation for /${constants.RET_SELECT}, ${error.stack}`
+          .stack
       );
     }
 
-    console.log(`Checking context for ${constants.RET_SELECT} API`); //checking context
+    logger.info(`Checking context for ${constants.RET_SELECT} API`); //checking context
     try {
       res = checkContext(select.context, constants.RET_SELECT);
       if (!res.valid) {
         Object.assign(slctObj, res.ERRORS);
       }
     } catch (error) {
-      console.log(
-        `Some error occurred while checking /${constants.RET_SELECT} context`,
-        error
+      logger.info(
+        `Some error occurred while checking /${constants.RET_SELECT} context, ${error.stack}`
+          .stack
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Comparing city of /${constants.RET_SEARCH} and /${constants.RET_SELECT}`
       );
       if (!_.isEqual(dao.getValue("city"), select.context.city)) {
         slctObj.city = `City code mismatch in /${constants.RET_SEARCH} and /${constants.RET_SELECT}`;
       }
     } catch (error) {
-      console.log(
-        `Error while comparing city in /${constants.RET_SEARCH} and /${constants.RET_SELECT}`,
-        error
+      logger.info(
+        `Error while comparing city in /${constants.RET_SEARCH} and /${constants.RET_SELECT}, ${error.stack}`
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Comparing timestamp of /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
       );
       if (_.gte(dao.getValue("tmpstmp"), select.context.timestamp)) {
@@ -68,14 +68,13 @@ const checkSelect = (dirPath, msgIdSet) => {
       }
       dao.setValue("tmpstmp", select.context.timestamp);
     } catch (error) {
-      console.log(
-        `Error while comparing timestamp for /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} api`,
-        error
+      logger.info(
+        `Error while comparing timestamp for /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} api, ${error.stack}`
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Comparing transaction Ids of /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
       );
       // if (_.isEqual(dao.getValue("txnId"), select.context.transaction_id)) {
@@ -83,14 +82,13 @@ const checkSelect = (dirPath, msgIdSet) => {
       // }
       dao.setValue("txnId", select.context.transaction_id);
     } catch (error) {
-      console.log(
-        `Error while comparing transaction ids for /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} api`,
-        error
+      logger.info(
+        `Error while comparing transaction ids for /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} api, ${error.stack}`
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Comparing Message Ids of /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
       );
       if (_.isEqual(dao.getValue("msgId"), select.context.message_id)) {
@@ -99,9 +97,8 @@ const checkSelect = (dirPath, msgIdSet) => {
       dao.setValue("msgId", select.context.message_id);
       // msgIdSet.add(select.context.message_id);
     } catch (error) {
-      console.log(
-        `Error while comparing message ids for /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} api`,
-        error
+      logger.info(
+        `Error while comparing message ids for /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} api, ${error.stack}`
       );
     }
 
@@ -118,22 +115,24 @@ const checkSelect = (dirPath, msgIdSet) => {
         provider = provider[0];
         dao.setValue("providerId", provider.id);
         dao.setValue("providerLoc", provider.locations[0].id);
+        dao.setValue("providerGps", provider.locations[0].gps);
+        dao.setValue("providerName", provider.descriptor.name);
 
         try {
-          console.log(
+          logger.info(
             `Comparing provider location in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
           );
           if (provider.locations[0].id != select.provider.locations[0].id) {
             slctObj.prvdLoc = `provider.locations[0].id ${provider.locations[0].id} mismatches in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`;
           }
         } catch (error) {
-          console.log(
+          logger.error(
             `!!Error while comparing provider's location id in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`,
             error
           );
         }
 
-        console.log(
+        logger.info(
           `Mapping Item Ids with their counts, categories and prices /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`
         );
         try {
@@ -146,7 +145,7 @@ const checkSelect = (dirPath, msgIdSet) => {
                 key
               ] = `Item Id ${item.id} does not exist in /${constants.RET_ONSEARCH}`;
             } else {
-              console.log(
+              logger.info(
                 `ITEM ID: ${item.id}, Price: ${itemOnSearch.price.value}, Count: ${item.quantity.count}`
               );
               if (
@@ -163,19 +162,19 @@ const checkSelect = (dirPath, msgIdSet) => {
           });
 
           try {
-            console.log(`Saving time_to_ship in /${constants.RET_ONSEARCH}`);
+            logger.info(`Saving time_to_ship in /${constants.RET_ONSEARCH}`);
             let timeToShip = 0;
-            console.log("ITEMSDKJDKLSJF", itemsTat);
+            logger.info("ITEMSDKJDKLSJF", itemsTat);
             itemsTat.forEach((tts) => {
               const ttship = utils.isoDurToSec(tts);
-              console.log(ttship);
+              logger.info(ttship);
               timeToShip = Math.max(timeToShip, ttship);
             });
-            console.log("timeTOSHIP", timeToShip);
+            logger.info("timeTOSHIP", timeToShip);
             dao.setValue("timeToShip", timeToShip);
           } catch (error) {
-            console.log(
-              `Error while saving time_to_ship in ${constants.RET_ONSEARCH}`,
+            logger.error(
+              `!!Error while saving time_to_ship in ${constants.RET_ONSEARCH}`,
               error
             );
           }
@@ -184,30 +183,30 @@ const checkSelect = (dirPath, msgIdSet) => {
           dao.setValue("itemsCtgrs", itemsCtgrs);
           dao.setValue("selectedPrice", selectedPrice);
 
-          console.log(
+          logger.info(
             `Provider Id in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} matched`
           );
         } catch (error) {
-          console.log(
+          logger.error(
             `!!Error while Comparing and Mapping Items in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT}`,
             error
           );
         }
       } else {
-        console.log(
+        logger.info(
           `Provider Ids in /${constants.RET_ONSEARCH} and /${constants.RET_SELECT} mismatch`
         );
         slctObj.prvdrIdMatch = `Provider Id ${select.provider.id} in /${constants.RET_SELECT} does not exist in /${constants.RET_ONSEARCH}`;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `!!Error occcurred while checking providers info in /${constants.RET_SELECT}`
       );
     }
 
     try {
       select.fulfillments.forEach((ff, indx) => {
-        console.log(`Checking GPS Precision in /${constants.RET_SELECT}`);
+        logger.info(`Checking GPS Precision in /${constants.RET_SELECT}`);
 
         if (ff.hasOwnProperty("end")) {
           dao.setValue("buyerGps", ff.end.location.gps);
@@ -215,7 +214,7 @@ const checkSelect = (dirPath, msgIdSet) => {
           const gps = ff.end.location.gps.split(",");
           const gpsLat = gps[0];
           const gpsLong = gps[1];
-          // console.log(gpsLat, " sfsfdsf ", gpsLong);
+          // logger.info(gpsLat, " sfsfdsf ", gpsLong);
           if (!gpsLat || !gpsLong) {
             slctObj.gpsErr = `fulfillments location.gps is not as per the API contract`;
           }
@@ -226,19 +225,20 @@ const checkSelect = (dirPath, msgIdSet) => {
         }
       });
     } catch (error) {
-      console.log(
-        `!!Error while checking GPS Precision in /${constants.RET_SELECT}`,
-        error
+      logger.error(
+        `!!Error while checking GPS Precision in /${constants.RET_SELECT}, ${error.stack}`
+          .stack
       );
     }
 
-    console.log("Total Price of Selected Items:", selectedPrice);
-    dao.setValue("slctObj", slctObj);
+    logger.info("Total Price of Selected Items:", selectedPrice);
+    // dao.setValue("slctObj", slctObj);
+    return slctObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      console.log(`!!File not found for /${constants.RET_SELECT} API!`);
+      logger.info(`!!File not found for /${constants.RET_SELECT} API!`);
     } else {
-      console.log(
+      logger.error(
         `!!Some error occurred while checking /${constants.RET_SELECT} API`,
         err
       );

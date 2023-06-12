@@ -36,6 +36,7 @@ module.exports = {
                   "Liquidated",
                   "Cancelled",
                 ],
+                errorMessage: `tags should only be used for part returned/cancelled items`,
               },
             },
             required: ["status"],
@@ -193,7 +194,6 @@ module.exports = {
                     format: "date-time",
                   },
                 },
-                required: ["range"],
               },
               contact: {
                 type: "object",
@@ -206,18 +206,55 @@ module.exports = {
             required: ["time"],
           },
         },
-        required: ["id", "state", "type", "start", "end"],
-        if: {
-          properties: {
-            type: {
-              type: "string",
-              const: "Reverse QC",
+        required: ["id", "state", "type", "start"],
+        anyOf: [
+          {
+            if: {
+              properties: {
+                type: {
+                  type: "string",
+                  const: "Delivery",
+                },
+              },
+            },
+            then: {
+              properties: {
+                end: {
+                  type: "object",
+                  properties: {
+                    time: {
+                      type: "object",
+                      properties: {
+                        range: {
+                          type: "object",
+                        },
+                        timestamp: {
+                          type: "string",
+                          format: "date-time",
+                        },
+                      },
+                      required: ["range", "timestamp"],
+                    },
+                  },
+                },
+              },
+              required: ["end"],
             },
           },
-        },
-        then: {
-          allOf: onStatusRules.timeRules,
-        },
+          {
+            if: {
+              properties: {
+                type: {
+                  type: "string",
+                  const: "Reverse QC",
+                },
+              },
+            },
+            then: {
+              allOf: onStatusRules.timeRules,
+            },
+          },
+        ],
       },
     },
 

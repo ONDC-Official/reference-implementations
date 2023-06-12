@@ -259,7 +259,7 @@ module.exports = {
                     required: ["person", "contact", "location"],
                   },
                 },
-                required: ["id", "type", "tracking", "end"],
+                required: ["id", "type", "end"],
               },
             },
             quote: {

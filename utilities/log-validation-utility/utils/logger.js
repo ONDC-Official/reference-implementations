@@ -6,7 +6,7 @@ const constants = require("./constants");
 const log_dir = constants.LOG_FILE_PATH;
 
 const loggerFormat = printf(({ level, message, timestamp }) => {
-  return `${timestamp} [${level}]: ${message}`;
+  return `[${level}]: ${message}`;
 });
 
 const loggerOpts = {
@@ -17,6 +17,7 @@ const loggerOpts = {
     filename: log_dir + "/validations.log",
     level: "error",
     format: combine(timestamp(), loggerFormat),
+    options: { flags: "w" },
   },
 };
 
@@ -31,6 +32,4 @@ const logger = createLogger({
   ],
 });
 
-logger.error("hello");
-
-exports.logger = logger;
+module.exports = logger;

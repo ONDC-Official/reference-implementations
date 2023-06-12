@@ -1,5 +1,6 @@
 const onSearchItemValidations = require("./onSearchItemValidations");
-
+const utils = require("../../utils/utils");
+const constants = require("../../utils/constants");
 module.exports = {
   type: "object",
   properties: {
@@ -230,43 +231,8 @@ module.exports = {
                         },
                         category_id: {
                           type: "string",
-                          enum: [
-                            "Fruits and Vegetables",
-                            "Masala & Seasoning",
-                            "Oil & Ghee",
-                            "Gourmet & World Foods",
-                            "Foodgrains",
-                            "Eggs, Meat & Fish",
-                            "Cleaning & Household",
-                            "Beverages",
-                            "Beauty & Hygiene",
-                            "Bakery, Cakes & Dairy",
-                            "Kitchen Accessories",
-                            "Baby Care",
-                            "Snacks & Branded Foods",
-                            "Pet Care",
-                            "Stationery",
-                            "Continental",
-                            "Middle Eastern",
-                            "North Indian",
-                            "Pan-Asian",
-                            "Regional Indian",
-                            "South Indian",
-                            "Tex-Mexican",
-                            "World Cuisines",
-                            "Healthy Food",
-                            "Fast Food",
-                            "Desserts",
-                            "Bakes & Cakes",
-                            "Beverages (MTO)",
-                            "Home Decor",
-                            "Home Furnishings",
-                            "Furniture",
-                            "Garden and Outdoor Products",
-                            "Home Improvement",
-                            "Cookware and Dining",
-                            "Storage and Organisation",
-                          ],
+                          enum: utils.allCategories,
+                          errorMessage: `category_id should be one of the valid categories as defined in [enhanced sub-category list](${constants.ENHANCED_SUBCATEGORY_LIST})`,
                         },
 
                         fulfillment_id: { type: "string" },
@@ -470,7 +436,6 @@ module.exports = {
                         },
                       },
 
-                      allOf: onSearchItemValidations.onSearchRules,
                       required: [
                         "id",
                         "category_id",
@@ -484,6 +449,7 @@ module.exports = {
                         "@ondc/org/available_on_cod",
                         "@ondc/org/time_to_ship",
                       ],
+                      allOf: onSearchItemValidations.onSearchRules,
                     },
                   },
                   fulfillments: {
@@ -517,6 +483,8 @@ module.exports = {
                         code: { type: "string", const: "serviceability" },
                         list: {
                           type: "array",
+                          minItems: 5,
+                          maxItems: 5,
                           items: {
                             type: "object",
                             properties: {
