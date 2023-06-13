@@ -87,7 +87,7 @@ _Notes:_
     "bap_uri": "https://buyer-app-preprod.ondc.org/protocol/v1",
     "transaction_id": "7fc3bf55-2efc-442d-fda3-465d27a35d26",
     "message_id": "89b0ffb1-5f49-4eb7-b319-ca02caecc059",
-    "timestamp": "1999-05-20T12:15:00.000Z",
+    "timestamp": "2023-05-20T12:15:00.000Z",
     "ttl": "PT30S"
   },
   "message": {
@@ -116,7 +116,9 @@ _Notes:_
 
 ### N.B.
 
-> Please utilize the Log Validation Utility to validate logs for Flow 1, as outlined in the test case scenario document (accessible at: [link](https://docs.google.com/document/d/1ttixilM-I6dutEdHL10uzqRFd8RcJlEO_9wBUijtdDc/edit)).
-> Please be aware that for Flow 2 and subsequent flows, the Log Validation Utility may produce unnecessary outcomes.
-> For debugging purpose, please review the "./logs/validations.log" file that is generated after running the utility. It will consist of the error logs of the utility
-> Community contributions are welcomed to enhance this utility for future releases.
+
+> - Please utilize the Log Validation Utility to validate logs for Flow 1, as outlined in the test case scenario document (accessible at: [link](https://docs.google.com/document/d/1ttixilM-I6dutEdHL10uzqRFd8RcJlEO_9wBUijtdDc/edit)).
+> - Please be aware that for Flow 2 and subsequent flows, the Log Validation Utility may produce unnecessary outcomes.
+> - For debugging purpose, please review the "./logs/validations.log" file that is generated after running the utility. It will consist of the error logs of the utility
+> - Community contributions are welcomed to enhance this utility for future releases.
+

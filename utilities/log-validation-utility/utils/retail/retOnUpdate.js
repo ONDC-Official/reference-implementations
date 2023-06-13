@@ -273,7 +273,7 @@ const checkOnUpdate = (msgIdSet, on_update, state) => {
       let key = `returnedItemCount${item}`;
       onUpdtObj[
         key
-      ] = `quantity of returned item: ${item} mismatches in /${constants.RET_UPDATE} and /${RET_ONUPDATE}`;
+      ] = `quantity of returned item: ${item} mismatches in /${constants.RET_UPDATE} and /${constants.RET_ONUPDATE}`;
       // }
     }
 
@@ -432,7 +432,7 @@ const checkOnUpdate = (msgIdSet, on_update, state) => {
     }
   } catch (error) {
     logger.error(
-      `!!Error while checking reverse QC fulfillment in /${RET_ONUPDATE}_${state}`
+      `!!Error while checking reverse QC fulfillment in /${constants.RET_ONUPDATE}_${state}`
     );
   }
 
@@ -468,7 +468,7 @@ const checkOnUpdate = (msgIdSet, on_update, state) => {
     }
   } catch (error) {
     logger.error(
-      `Error while checking pickup and delivery timestamp in ${RET_ONUPDATE}_${state}, ${error.stack}`
+      `Error while checking pickup and delivery timestamp in ${constants.RET_ONUPDATE}_${state}, ${error.stack}`
     );
   }
 
