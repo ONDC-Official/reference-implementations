@@ -1,24 +1,5 @@
 A signing and verification utility that is necessary for creation and verification of authentication signature between network participants of ONDC.
 
-## Generating Asymmetric Key-Pair
-
-For generating the asymmetric key pair for your buyer or seller application, you can use the `createKeyPair` method.
-
-```javascript
-import { createKeyPair } from 'ondc-crypto-sdk-nodejs';
-
-const keyPair = await createKeyPair();
-```
-
-The method returns a set of public and private keys that you can use to register on the ONDC network.
-
-```javascript
-{
-  publicKey: "...",
-  privateKey: "...",
-};
-```
-
 ## Signing Authorisation Header
 
 For signing the verification header, you can use the `createAuthorizationHeader` method.
@@ -44,7 +25,7 @@ For verifying the verification header, you can use the `isSignatureValid` method
 import { isSignatureValid } from "ondc-crypto-sdk-nodejs"
 
 const isValid = await isSignatureValid({
-      header: header, // The authorisation header sent by other network participants
+      header: header, // The Authorisation header sent by other network participants
       body: { context: {...}, message: {...} },
       publicKey: publicKey,
 });

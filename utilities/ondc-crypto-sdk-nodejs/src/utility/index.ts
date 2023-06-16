@@ -65,17 +65,6 @@ export const createAuthorizationHeader = async ({
   return header;
 };
 
-export const createKeyPair = async () => {
-  await _sodium.ready;
-  const sodium = _sodium;
-
-  const { publicKey, privateKey } = sodium.crypto_sign_keypair();
-  const publicKeyBase64 = sodium.to_base64(publicKey, _sodium.base64_variants.ORIGINAL);
-  const privateKeyBase64 = sodium.to_base64(privateKey, _sodium.base64_variants.ORIGINAL);
-
-  return { publicKey: publicKeyBase64, privateKey: privateKeyBase64 };
-};
-
 const removeQuotes = (a: string) => {
   return a.replace(/^["'](.+(?=["']$))["']$/, '$1');
 };

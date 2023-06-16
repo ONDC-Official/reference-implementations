@@ -1,4 +1,4 @@
-import { createAuthorizationHeader, createKeyPair, isSignatureValid } from './utility';
+import { createAuthorizationHeader, isSignatureValid } from './utility';
 import { ICreateAuthorizationHeader, IsSignatureValid } from './types';
 
-export { createAuthorizationHeader, createKeyPair, isSignatureValid, ICreateAuthorizationHeader, IsSignatureValid };
+export { createAuthorizationHeader, isSignatureValid, ICreateAuthorizationHeader, IsSignatureValid };
