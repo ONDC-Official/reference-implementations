@@ -6,7 +6,7 @@ module.exports = {
       properties: {
         domain: {
           type: "string",
-          const: "nic2004:52110",
+          enum: ["nic2004:52110", "nic2004:60232"],
         },
         action: {
           type: "string",

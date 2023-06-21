@@ -7,9 +7,9 @@ const validateSchema = (domain, api, data) => {
   console.log(`Inside Schema Validation for domain: ${domain}, api: ${api}`);
   let errObj = {};
   var schmaVldtr;
-  if (domain !== "igm") {
+  if (domain == "retail") {
     schmaVldtr = validate_schema_for_retail_json(domain, api, data);
-  } else {
+  } else if (domain == "igm") {
     schmaVldtr = validate_schema_for_igm_json(domain, api, data);
   }
   const datavld = schmaVldtr;
