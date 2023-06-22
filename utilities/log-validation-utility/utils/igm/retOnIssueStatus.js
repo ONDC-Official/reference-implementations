@@ -4,6 +4,7 @@ const dao = require("../../dao/dao");
 const { checkContext } = require("../../services/service");
 const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
+const logger = require("../logger");
 
 const checkOnIssueStatus = (dirPath, msgIdSet) => {
   let onIssueStatusObj = {};
@@ -16,7 +17,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
     issue = JSON.parse(issue);
 
     try {
-      console.log(`Validating Schema for ${constants.RET_ONISSUE_STATUS} API`);
+      logger.info(`Validating Schema for ${constants.RET_ONISSUE_STATUS} API`);
       const vs = validateSchema(
         "igm",
         constants.RET_ONISSUE_STATUS,
@@ -26,27 +27,27 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
         Object.assign(onIssueStatusObj, vs);
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `!!Error occurred while performing schema validation for /${constants.RET_ONISSUE_STATUS}`,
         error
       );
     }
 
     try {
-      console.log(`Checking context for /${constants.RET_ONISSUE_STATUS} API`); //checking context
+      logger.info(`Checking context for /${constants.RET_ONISSUE_STATUS} API`); //checking context
       res = checkContext(onIssueStatus.context, constants.RET_ONISSUE_STATUS);
       if (!res.valid) {
         Object.assign(onIssueStatusObj, res.ERRORS);
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `!!Some error occurred while checking /${constants.RET_ONISSUE_STATUS} context`,
         error
       );
     }
 
     try {
-      console.log(`Phone Number Check for /${constants.RET_ONISSUE_STATUS}`);
+      logger.info(`Phone Number Check for /${constants.RET_ONISSUE_STATUS}`);
 
       if (
         !_.inRange(
@@ -59,14 +60,14 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
         onIssueStatusObj.Phn = `Phone Number for /${constants.RET_ONISSUE_STATUS} api is not in the valid Range`;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while checking phone number for /${constants.RET_ONISSUE_STATUS} api`,
         error
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Comparing transaction ID of /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS}`
       );
       if (
@@ -78,34 +79,33 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
         onIssueStatusObj.igmTxnId = `transaction ID mismatch in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS}`;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS}`,
         error
       );
     }
 
-            try {
-              console.log(
-                `Comparing MESSAGE ID of /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`
-              );
-              if (
-                !_.isEqual(
-                  dao.getValue("igmIssueStatMsgId"),
-                  onIssueStatus.context.message_id
-                )
-              ) {
-                onIssueStatusObj.igmIssueMsgId = `Message  ID mismatch in /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`;
-              }
-            } catch (error) {
-              console.log(
-                `Error while comparing Message ID in /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`,
-                error
-              );
-            }
-
+    try {
+      logger.info(
+        `Comparing MESSAGE ID of /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`
+      );
+      if (
+        !_.isEqual(
+          dao.getValue("igmIssueStatMsgId"),
+          onIssueStatus.context.message_id
+        )
+      ) {
+        onIssueStatusObj.igmIssueMsgId = `Message  ID mismatch in /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`;
+      }
+    } catch (error) {
+      logger.error(
+        `Error while comparing Message ID in /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`,
+        error
+      );
+    }
 
     try {
-      console.log(
+      logger.info(
         `Checking refund amount for /${constants.RET_ONISSUE_STATUS}`
       );
       if (
@@ -115,28 +115,28 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
         onIssueStatusObj.refund_amt = `Refund Amount for /${constants.RET_ONISSUE_STATUS} should only be when action type is REFUND `;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while checking refund amount for /${constants.RET_ONISSUE_STATUS} api`,
         error
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Comparing Domain of /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS}`
       );
       if (!_.isEqual(dao.getValue("igmDomain"), onIssueStatus.context.domain)) {
         onIssueStatusObj.igmDomain = `Domain for /${constants.RET_ISSUE} api should be equal to /${constants.RET_ONISSUE_STATUS} api`;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while comparing Domain for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS} api`,
         error
       );
     }
 
     try {
-      console.log(`Phone Number Check for /${constants.RET_ONISSUE_STATUS}`);
+      logger.info(`Phone Number Check for /${constants.RET_ONISSUE_STATUS}`);
 
       if (
         !_.inRange(
@@ -149,14 +149,14 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
         onIssueStatusObj.Phn = `Phone Number for /${constants.RET_ONISSUE_STATUS} api is not in the valid Range`;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while checking phone number for /${constants.RET_ONISSUE_STATUS} api`,
         error
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Checking organization's name for /${constants.RET_ONISSUE_STATUS}`
       );
       let org_name =
@@ -170,14 +170,14 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
         onIssueStatusObj.org_domain = `Domain of organization for /${constants.RET_ONISSUE_STATUS} api mismatched with domain in context`;
       }
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while checking organization's name for /${constants.RET_ONISSUE_STATUS} api`,
         error
       );
     }
 
     try {
-      console.log(
+      logger.info(
         `Checking time of creation and updation for /${constants.RET_ONISSUE_STATUS}`
       );
       if (
@@ -187,7 +187,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
       dao.setValue("igmCreatedAt", onIssueStatus.message.issue.created_at);
     } catch (error) {
-      console.log(
+      logger.error(
         `Error while checking time of creation and updation for /${constants.RET_ONISSUE_STATUS} api`,
         error
       );
@@ -196,9 +196,11 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
     dao.setValue("onIssueStatusObj", onIssueStatusObj);
   } catch (err) {
     if (err.code === "ENOENT") {
-      console.log(`!!File not found for /${constants.RET_ONISSUE_STATUS} API!`);
+      logger.error(
+        `!!File not found for /${constants.RET_ONISSUE_STATUS} API!`
+      );
     } else {
-      console.log(
+      logger.error(
         `!!Some error occurred while checking /${constants.RET_ONISSUE_STATUS} API`,
         err
       );

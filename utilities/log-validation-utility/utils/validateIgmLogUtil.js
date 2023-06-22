@@ -5,6 +5,7 @@ const checkIssue = require("./igm/retIssue");
 const checkOnIssue = require("./igm/retOnIssue");
 const checkIssueStatus = require("./igm/retIssueStatus");
 const checkOnIssueStatus = require("./igm/retOnIssueStatus");
+const logger = require("../utils/logger");
 // const path = require("path");
 const { getObjValues } = require("./utils");
 
@@ -29,10 +30,10 @@ const validateIgmLogs = (dirPath) => {
   let issueStatusObj = dao.getValue("issueStatusObj");
   let onIssueStatusObj = dao.getValue("onIssueStatusObj");
   try {
-    console.log("Flushing DB Data");
+    logger.info("Flushing DB Data");
     dao.dropDB();
   } catch (error) {
-    console.log("Error while removing LMDB");
+    logger.error("Error while removing LMDB");
   }
 
   if (!_.isEmpty(issueObj)) {
@@ -53,6 +54,6 @@ const validateIgmLogs = (dirPath) => {
 
   fs.writeFileSync("log_report.md", logReport);
 
-  console.log("Report Generated Successfully!!");
+  logger.info("Report Generated Successfully!!");
 };
 module.exports = { validateIgmLogs };
