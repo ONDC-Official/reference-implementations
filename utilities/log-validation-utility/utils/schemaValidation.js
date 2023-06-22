@@ -1,5 +1,8 @@
-const schemaValidator = require("../schema/main");
-const { validate_schema_for_igm_json } = require("../schema/main");
+// const schemaValidator = require("../schema/main");
+const {
+  validate_schema_for_retail_json,
+  validate_schema_for_igm_json,
+} = require("../schema/main");
 const path = require("path");
 const fs = require("fs");
 const logger = require("./logger");

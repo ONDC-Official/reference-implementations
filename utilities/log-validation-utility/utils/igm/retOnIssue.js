@@ -23,8 +23,7 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `!!Error occurred while performing schema validation for /${constants.RET_ONISSUE}`,
-        error
+        `!!Error occurred while performing schema validation for /${constants.RET_ONISSUE}, ${error.stack}`
       );
     }
 
@@ -36,8 +35,7 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Some error occurred while checking /${constants.RET_ONISSUE} context`,
-        error
+        `Some error occurred while checking /${constants.RET_ONISSUE} context, ${error.stack}`
       );
     }
 
@@ -52,8 +50,7 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}`,
-        error
+        `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}, ${error.stack}`
       );
     }
 
@@ -68,8 +65,7 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing Message ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}`,
-        error
+        `Error while comparing Message ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE}, ${error.stack}`
       );
     }
 
@@ -82,8 +78,7 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing Domain for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE} api`,
-        error
+        `Error while comparing Domain for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE} api, ${error.stack}`
       );
     }
 
@@ -94,8 +89,7 @@ const checkOnIssue = (dirPath) => {
       dao.setValue("core_version", on_issue.context.core_version);
     } catch (error) {
       logger.error(
-        `Error while comparing core version for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE} api`,
-        error
+        `Error while comparing core version for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE} api, ${error.stack}`
       );
     }
 
@@ -114,8 +108,7 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking phone number for /${constants.RET_ONISSUE} api`,
-        error
+        `Error while checking phone number for /${constants.RET_ONISSUE} api, ${error.stack}`
       );
     }
 
@@ -129,8 +122,7 @@ const checkOnIssue = (dirPath) => {
       dao.setValue("igmCreatedAt", on_issue.message.issue.created_at);
     } catch (error) {
       logger.error(
-        `Error while checking time of creation and updation for /${constants.RET_ONISSUE} api`,
-        error
+        `Error while checking time of creation and updation for /${constants.RET_ONISSUE} api, ${error.stack}`
       );
     }
 
@@ -148,12 +140,12 @@ const checkOnIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking organization's name for /${constants.RET_ONISSUE} api`,
-        error
+        `Error while checking organization's name for /${constants.RET_ONISSUE} api, ${error.stack}`
       );
     }
 
-    dao.setValue("onissueObj", onissueObj);
+    // dao.setValue("onissueObj", onissueObj);
+    return onissueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
       logger.info(`!!File not found for /${constants.RET_ONISSUE} API!`);

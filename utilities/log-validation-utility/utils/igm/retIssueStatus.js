@@ -22,8 +22,7 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `!!Error occurred while performing schema validation for /${constants.RET_ISSUE_STATUS}`,
-        error
+        `!!Error occurred while performing schema validation for /${constants.RET_ISSUE_STATUS}, ${error.stack}`
       );
     }
 
@@ -37,8 +36,7 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `!!Some error occurred while checking /${constants.RET_ISSUE_STATUS} context`,
-        error
+        `!!Some error occurred while checking /${constants.RET_ISSUE_STATUS} context, ${error.stack}`
       );
     }
 
@@ -67,12 +65,12 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ISSUE_STATUS}`,
-        error
+        `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ISSUE_STATUS}, ${error.stack}`
       );
     }
 
-    dao.setValue("issueStatusObj", issueStatusObj);
+    // dao.setValue("issueStatusObj", issueStatusObj);
+    return issueStatusObj;
   } catch (err) {
     if (err.code === "ENOENT") {
       logger.error(`!!File not found for /${constants.RET_ISSUE_STATUS} API!`);

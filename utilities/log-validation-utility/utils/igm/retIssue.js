@@ -5,6 +5,7 @@ const { checkContext } = require("../../services/service");
 const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
+const utils = require("../utils");
 const checkIssue = (dirPath) => {
   let issueObj = {};
 
@@ -20,8 +21,7 @@ const checkIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `!!Error occurred while performing schema validation for /${constants.RET_ISSUE}`,
-        error
+        `!!Error occurred while performing schema validation for /${constants.RET_ISSUE}, ${error.stack}`
       );
     }
     try {
@@ -32,8 +32,7 @@ const checkIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Some error occurred while checking /${constants.RET_ISSUE} context`,
-        error
+        `Some error occurred while checking /${constants.RET_ISSUE} context, ${error.stack}`
       );
     }
 
@@ -55,8 +54,49 @@ const checkIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `!!Some error occurred while checking /${constants.RET_ISSUE} context`,
-        error
+        `!!Some error occurred while checking /${constants.RET_ISSUE} context, ${error.stack}`
+      );
+    }
+
+    try {
+      logger.info(
+        `Validating category and subcategory in /${constants.RET_ISSUE}`
+      );
+
+      if (
+        (issue.category === "ITEM" &&
+          !utils.issueItmSubCategories.includes(issue.sub_category)) ||
+        (issue.category === "FULFILLMENT" &&
+          !utils.issueFlmSubcategories.includes(issue.sub_category))
+      ) {
+        issueObj.ctgrySubCategory = `Invalid sub_category ${issue.sub_category} for issue category "${issue.category}"`;
+      }
+    } catch (error) {
+      logger.error(
+        `!!Error while validating category and subcategory in /${constants.RET_ISSUE}, ${error.stack}`
+      );
+    }
+
+    try {
+      logger.info(
+        `Checking conditional mandatory images for certain issue sub-categories`
+      );
+      if (
+        ["ITM02", "ITM03", "ITM04", "ITM05", "FLM04"].includes(
+          issue.sub_category
+        )
+      ) {
+        const has = Object.prototype.hasOwnProperty;
+        if (
+          !has.call(issue.description, "images") ||
+          !issue.description.images.length
+        ) {
+          issueObj.mndtryImages = `issue/description/images are mandatory for issue sub_category ${issue.sub_category}`;
+        }
+      }
+    } catch (error) {
+      logger.error(
+        `Error while checking conditional mandatory images for certain issue sub-categories, ${error.stack}`
       );
     }
 
@@ -78,8 +118,7 @@ const checkIssue = (dirPath) => {
       );
     } catch (error) {
       logger.error(
-        `Error while checking phone number for /${constants.RET_ISSUE} api`,
-        error
+        `Error while checking phone number for /${constants.RET_ISSUE} api, ${error.stack}`
       );
     }
 
@@ -94,15 +133,14 @@ const checkIssue = (dirPath) => {
         )
       ) {
         if (!_.lte(issue.context.timestamp, issue.message.issue.created_at)) {
-          issueObj.updatedTime = `Time of Creation for /${constants.RET_ISSUE} api should be less than current timestamp`;
+          issueObj.updatedTime = `Time of Creation for /${constants.RET_ISSUE} api should be less than context timestamp`;
         }
         issueObj.respTime = `Time of Creation and time of updation for /${constants.RET_ISSUE} api should be same`;
       }
       dao.setValue("igmCreatedAt", issue.message.issue.created_at);
     } catch (error) {
       logger.error(
-        `Error while checking time of creation and updation for /${constants.RET_issue} api`,
-        error
+        `Error while checking time of creation and updation for /${constants.RET_issue} api, ${error.stack}`
       );
     }
 
@@ -120,11 +158,11 @@ const checkIssue = (dirPath) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking organization's name for /${constants.RET_ISSUE} api`,
-        error
+        `Error while checking organization's name for /${constants.RET_ISSUE} api, ${error.stack}`
       );
     }
-    dao.setValue("issueObj", issueObj);
+    // dao.setValue("issueObj", issueObj);
+    return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
       logger.info(`!!File not found for /${constants.RET_ISSUE} API!`);

@@ -28,8 +28,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `!!Error occurred while performing schema validation for /${constants.RET_ONISSUE_STATUS}`,
-        error
+        `!!Error occurred while performing schema validation for /${constants.RET_ONISSUE_STATUS}, ${error.stack}`
       );
     }
 
@@ -41,8 +40,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `!!Some error occurred while checking /${constants.RET_ONISSUE_STATUS} context`,
-        error
+        `!!Some error occurred while checking /${constants.RET_ONISSUE_STATUS} context, ${error.stack}`
       );
     }
 
@@ -61,8 +59,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking phone number for /${constants.RET_ONISSUE_STATUS} api`,
-        error
+        `Error while checking phone number for /${constants.RET_ONISSUE_STATUS} api, ${error.stack}`
       );
     }
 
@@ -80,8 +77,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS}`,
-        error
+        `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS}, ${error.stack}`
       );
     }
 
@@ -99,8 +95,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing Message ID in /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}`,
-        error
+        `Error while comparing Message ID in /${constants.RET_ISSUE_STATUS} and /${constants.RET_ONISSUE_STATUS}, ${error.stack}`
       );
     }
 
@@ -116,8 +111,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking refund amount for /${constants.RET_ONISSUE_STATUS} api`,
-        error
+        `Error while checking refund amount for /${constants.RET_ONISSUE_STATUS} api, ${error.stack}`
       );
     }
 
@@ -130,8 +124,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while comparing Domain for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS} api`,
-        error
+        `Error while comparing Domain for /${constants.RET_ISSUE} and /${constants.RET_ONISSUE_STATUS} api, ${error.stack}`
       );
     }
 
@@ -150,8 +143,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking phone number for /${constants.RET_ONISSUE_STATUS} api`,
-        error
+        `Error while checking phone number for /${constants.RET_ONISSUE_STATUS} api, ${error.stack}`
       );
     }
 
@@ -171,8 +163,7 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       }
     } catch (error) {
       logger.error(
-        `Error while checking organization's name for /${constants.RET_ONISSUE_STATUS} api`,
-        error
+        `Error while checking organization's name for /${constants.RET_ONISSUE_STATUS} api, ${error.stack}`
       );
     }
 
@@ -188,12 +179,12 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       dao.setValue("igmCreatedAt", onIssueStatus.message.issue.created_at);
     } catch (error) {
       logger.error(
-        `Error while checking time of creation and updation for /${constants.RET_ONISSUE_STATUS} api`,
-        error
+        `Error while checking time of creation and updation for /${constants.RET_ONISSUE_STATUS} api, ${error.stack}`
       );
     }
 
-    dao.setValue("onIssueStatusObj", onIssueStatusObj);
+    // dao.setValue("onIssueStatusObj", onIssueStatusObj);
+    return onIssueStatusObj;
   } catch (err) {
     if (err.code === "ENOENT") {
       logger.error(
