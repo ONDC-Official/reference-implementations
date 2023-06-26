@@ -25,31 +25,31 @@ const validateIgmLogs = (dirPath) => {
 
   let logReport = "";
 
-  let issueObj = dao.getValue("issueObj");
-  let onissueObj = dao.getValue("onissueObj");
-  let issueStatusObj = dao.getValue("issueStatusObj");
-  let onIssueStatusObj = dao.getValue("onIssueStatusObj");
+  // let issueObj = dao.getValue("issueObj");
+  // let onissueObj = dao.getValue("onissueObj");
+  // let issueStatusObj = dao.getValue("issueStatusObj");
+  // let onIssueStatusObj = dao.getValue("onIssueStatusObj");
   try {
     logger.info("Flushing DB Data");
     dao.dropDB();
   } catch (error) {
-    logger.error("Error while removing LMDB");
+    logger.error(`Error while removing LMDB, ${error.stack}`);
   }
 
-  if (!_.isEmpty(issueObj)) {
-    logReport += `**/issue** \n${getObjValues(issueObj)}\n`;
+  if (!_.isEmpty(issueResp)) {
+    logReport += `**/issue** \n${getObjValues(issueResp)}\n`;
   }
 
-  if (!_.isEmpty(onissueObj)) {
-    logReport += `**/on_issue** \n${getObjValues(onissueObj)}\n`;
+  if (!_.isEmpty(onIssueResp)) {
+    logReport += `**/on_issue** \n${getObjValues(onIssueResp)}\n`;
   }
 
-  if (!_.isEmpty(issueStatusObj)) {
-    logReport += `**/issue_status** \n${getObjValues(issueStatusObj)}\n`;
+  if (!_.isEmpty(issueStatusResp)) {
+    logReport += `**/issue_status** \n${getObjValues(issueStatusResp)}\n`;
   }
 
-  if (!_.isEmpty(onIssueStatusObj)) {
-    logReport += `**/on_issue_status** \n${getObjValues(onIssueStatusObj)}\n`;
+  if (!_.isEmpty(onissueStatusResp)) {
+    logReport += `**/on_issue_status** \n${getObjValues(onissueStatusResp)}\n`;
   }
 
   fs.writeFileSync("log_report.md", logReport);

@@ -1,3 +1,4 @@
+const utils = require("../../utils/utils");
 module.exports = {
   type: "object",
   properties: {
@@ -44,15 +45,26 @@ module.exports = {
           type: "string",
           format: "date-time",
         },
-        key: {
-          type: "string",
-        },
         ttl: {
           type: "string",
           format: "duration",
         },
       },
-      required: ["ttl"],
+      required: [
+        "domain",
+        "action",
+        "country",
+        "city",
+        "core_version",
+        "bap_id",
+        "bap_uri",
+        "bpp_id",
+        "bpp_uri",
+        "transaction_id",
+        "message_id",
+        "timestamp",
+        "ttl",
+      ],
     },
     message: {
       type: "object",
@@ -91,12 +103,15 @@ module.exports = {
                       type: "string",
                     },
                   },
+                  required: ["name"],
                 },
                 contact: {
                   type: "object",
                   properties: {
                     phone: {
                       type: "string",
+                      minLength: 10,
+                      maxLength: 11,
                     },
                     email: {
                       type: "string",
@@ -108,7 +123,7 @@ module.exports = {
                   required: ["phone"],
                 },
               },
-              required: ["contact"],
+              required: ["person", "contact"],
             },
             order_details: {
               type: "object",
@@ -129,9 +144,10 @@ module.exports = {
                       },
                       quantity: {
                         type: "number",
-                        minLength: 1,
+                        minimum: 1,
                       },
                     },
+                    required: ["id", "quantity"],
                   },
                 },
                 fulfillments: {
@@ -146,10 +162,14 @@ module.exports = {
                         type: "string",
                       },
                     },
+                    required: ["id"],
                   },
                 },
+                provider_id: {
+                  type: "string",
+                },
               },
-              required: ["id"],
+              required: ["id", "provider_id"],
             },
             description: {
               type: "object",
@@ -198,51 +218,18 @@ module.exports = {
                 images: {
                   type: "array",
                   items: {
-                    type: "object",
-                    properties: {
-                      images: {
-                        type: "string",
-                      },
-                    },
+                    type: "string",
                   },
                 },
               },
             },
             category: {
               type: "string",
-              enum: [
-                "ORDER",
-                "ITEM",
-                "FULFILLMENT",
-                "AGENT",
-                "PAYMENT",
-                "TRANSACTION",
-              ],
+              enum: utils.issueCategories,
             },
             sub_category: {
               type: "string",
-              enum: [
-                "ORD01",
-                "ORD02",
-                "ORD03",
-                "ITM01",
-                "ITM02",
-                "ITM03",
-                "ITM04",
-                "FLM01",
-                "FLM02",
-                "FLM03",
-                "FLM04",
-                "FLM05",
-                "FLM06",
-                "FLM07",
-                "AGT01",
-                "AGT02",
-                "PMT01",
-                "PMT02",
-                "PMT03",
-                "PMT04",
-              ],
+              enum: utils.issueSubCategories,
             },
             issue_type: {
               type: "string",
@@ -271,6 +258,7 @@ module.exports = {
                 },
                 duration: {
                   type: "string",
+                  format: "duration",
                 },
                 range: {
                   type: "object",
@@ -290,6 +278,7 @@ module.exports = {
                   type: "object",
                 },
               },
+              required: ["duration"],
             },
             expected_resolution_time: {
               type: "object",
@@ -302,6 +291,7 @@ module.exports = {
                 },
                 duration: {
                   type: "string",
+                  format: "duration",
                 },
                 range: {
                   type: "object",
@@ -321,6 +311,7 @@ module.exports = {
                   type: "object",
                 },
               },
+              required: ["duration"],
             },
             status: {
               type: "string",
@@ -354,6 +345,7 @@ module.exports = {
                                 type: "string",
                               },
                             },
+                            required: ["name"],
                           },
                           contact: {
                             type: "object",
@@ -368,6 +360,7 @@ module.exports = {
                                 type: "string",
                               },
                             },
+                            required: ["phone", "email"],
                           },
                           person: {
                             type: "object",
@@ -394,13 +387,21 @@ module.exports = {
                                 type: "string",
                               },
                             },
+                            required: ["name"],
                           },
                         },
+                        required: ["org", "contact", "person"],
                       },
                       short_desc: {
                         type: "string",
                       },
                     },
+                    required: [
+                      "complainant_action",
+                      "short_desc",
+                      "updated_at",
+                      "updated_by",
+                    ],
                   },
                 },
                 respondent_actions: {
@@ -1053,12 +1054,7 @@ module.exports = {
                         images: {
                           type: "array",
                           items: {
-                            type: "object",
-                            properties: {
-                              images: {
-                                type: "string",
-                              },
-                            },
+                            type: "string",
                           },
                         },
                       },
@@ -1154,11 +1150,18 @@ module.exports = {
           },
           required: [
             "id",
+            "category",
+            "sub_category",
+            "complainant_info",
+            "order_details",
+            "description",
+            "source",
             "created_at",
             "updated_at",
             "issue_type",
             "expected_response_time",
             "expected_resolution_time",
+            "issue_actions",
             "status",
           ],
         },
@@ -1166,5 +1169,5 @@ module.exports = {
       required: ["issue"],
     },
   },
-  required: ["context"],
+  required: ["context", "message"],
 };
