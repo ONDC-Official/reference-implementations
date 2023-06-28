@@ -324,7 +324,7 @@ module.exports = {
                 network_participant_id: {
                   type: "string",
                 },
-                issue_source_type: {
+                type: {
                   type: "string",
                   enum: ["CONSUMER", "SELLER", "INTERFACING-NP"],
                 },
@@ -576,7 +576,7 @@ module.exports = {
                           },
                         },
                       },
-                      remarks: {
+                      short_desc: {
                         type: "string",
                       },
                     },
@@ -719,7 +719,7 @@ module.exports = {
                           },
                         },
                       },
-                      remarks: {
+                      short_desc: {
                         type: "string",
                       },
                       cascaded_level: {
@@ -862,7 +862,10 @@ module.exports = {
                         name: {
                           type: "string",
                         },
-                        about_info: {
+                        short_desc: {
+                          type: "string",
+                        },
+                        long_desc: {
                           type: "string",
                         },
                         url: {
@@ -1047,13 +1050,13 @@ module.exports = {
                         resolution_ratings: {
                           type: "object",
                           properties: {
-                            rating_value: {
+                            value: {
                               type: "string",
                             },
                           },
                         },
                       },
-                      required: ["name", "about_info", "url"],
+                      required: ["name", "long_desc", "url"],
                     },
                   },
                 },
@@ -1247,7 +1250,7 @@ module.exports = {
                 resolution_ratings: {
                   type: "object",
                   properties: {
-                    rating_value: {
+                    value: {
                       type: "string",
                     },
                   },
@@ -1430,7 +1433,7 @@ module.exports = {
                             },
                           },
                         },
-                        respondentFaqs: {
+                        faqs: {
                           type: "object",
                           properties: {
                             additionalProp1: {
@@ -1469,39 +1472,15 @@ module.exports = {
                           },
                         },
                         additional_sources: {
-                          type: "object",
-                          properties: {
-                            additionalProp1: {
-                              type: "object",
-                              properties: {
-                                type: {
-                                  type: "string",
-                                },
-                                link: {
-                                  type: "string",
-                                },
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              type: {
+                                type: "string",
                               },
-                            },
-                            additionalProp2: {
-                              type: "object",
-                              properties: {
-                                type: {
-                                  type: "string",
-                                },
-                                link: {
-                                  type: "string",
-                                },
-                              },
-                            },
-                            additionalProp3: {
-                              type: "object",
-                              properties: {
-                                type: {
-                                  type: "string",
-                                },
-                                link: {
-                                  type: "string",
-                                },
+                              link: {
+                                type: "string",
                               },
                             },
                           },
@@ -1649,19 +1628,19 @@ module.exports = {
             resolution: {
               type: "object",
               properties: {
-                resolution: {
+                short_desc: {
                   type: "string",
                 },
-                resolution_remarks: {
+                long_desc: {
                   type: "string",
                 },
                 gro_remarks: {
                   type: "string",
                 },
-                dispute_resolution_remarks: {
+                odr_remarks: {
                   type: "string",
                 },
-                resolution_action: {
+                action: {
                   type: "string",
                   enum: ["RESOLVE", " REJECT"],
                 },
@@ -1679,7 +1658,7 @@ module.exports = {
                   type: "string",
                 },
               },
-              required: ["resolution_remarks", "resolution_action"],
+              required: ["resolution_remarks", "action"],
             },
             additional_info_required: {
               type: "array",

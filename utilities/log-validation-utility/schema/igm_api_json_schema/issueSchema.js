@@ -928,13 +928,16 @@ module.exports = {
                           },
                         },
                         additional_sources: {
-                          type: "object",
-                          properties: {
-                            type: {
-                              type: "string",
-                            },
-                            link: {
-                              type: "string",
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              type: {
+                                type: "string",
+                              },
+                              link: {
+                                type: "string",
+                              },
                             },
                           },
                         },
