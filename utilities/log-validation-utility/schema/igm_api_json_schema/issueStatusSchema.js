@@ -61,6 +61,9 @@ module.exports = {
         "transaction_id",
         "message_id",
         "timestamp",
+        "bpp_id",
+        "bpp_uri",
+        "ttl",
       ],
     },
     message: {
