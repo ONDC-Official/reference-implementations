@@ -636,12 +636,7 @@ module.exports = {
                   type: "string",
                 },
               },
-              required: [
-                "long_desc",
-                "short_desc",
-                "action_triggered",
-                "refund_amount",
-              ],
+              required: ["long_desc", "short_desc", "action_triggered"],
             },
             created_at: {
               type: "string",
