@@ -64,7 +64,6 @@ module.exports = {
         "timestamp",
         "bpp_id",
         "bpp_uri",
-        "ttl",
       ],
     },
     message: {
@@ -224,13 +223,13 @@ module.exports = {
                         type: "number",
                       },
                     },
+                    required: [
+                      "respondent_action",
+                      "updated_at",
+                      "updated_by",
+                      "short_desc",
+                    ],
                   },
-                  required: [
-                    "respondent_action",
-                    "updated_at",
-                    "updated_by",
-                    "short_desc",
-                  ],
                 },
               },
               required: ["respondent_actions"],

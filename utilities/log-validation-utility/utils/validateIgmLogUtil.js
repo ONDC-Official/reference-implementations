@@ -5,12 +5,13 @@ const checkIssue = require("./igm/retIssue");
 const checkOnIssue = require("./igm/retOnIssue");
 const checkIssueStatus = require("./igm/retIssueStatus");
 const checkOnIssueStatus = require("./igm/retOnIssueStatus");
+const checkIssueClose = require("./igm/retIssueClose");
 const logger = require("../utils/logger");
-// const path = require("path");
 const { getObjValues } = require("./utils");
 
 const validateIgmLogs = (dirPath) => {
   let msgIdSet = new Set();
+
   //ISSUE API
   let issueResp = checkIssue(dirPath, msgIdSet);
 
@@ -22,6 +23,9 @@ const validateIgmLogs = (dirPath) => {
 
   //ON_ISSUE_STATUS API
   let onissueStatusResp = checkOnIssueStatus(dirPath, msgIdSet);
+
+  //ISSUE_CLOSE API
+  let issueCloseResp = checkIssueClose(dirPath, msgIdSet);
 
   let logReport = "";
 
@@ -50,6 +54,10 @@ const validateIgmLogs = (dirPath) => {
 
   if (!_.isEmpty(onissueStatusResp)) {
     logReport += `**/on_issue_status** \n${getObjValues(onissueStatusResp)}\n`;
+  }
+
+  if (!_.isEmpty(issueCloseResp)) {
+    logReport += `**/issue_close** \n${getObjValues(issueCloseResp)}\n`;
   }
 
   fs.writeFileSync("log_report.md", logReport);

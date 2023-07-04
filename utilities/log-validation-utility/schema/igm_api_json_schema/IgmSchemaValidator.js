@@ -2,6 +2,7 @@ const issueSchema = require("./issueSchema");
 const onIssueSchema = require("./onIssueSchema");
 const issueStatusSchema = require("./issueStatusSchema");
 const onIssueStatusSchema = require("./onIssueStatusSchema");
+const issueCloseSchema = require("./issueCloseSchema");
 
 const Ajv = require("ajv");
 const ajv = new Ajv({
@@ -65,9 +66,15 @@ const validate_schema_on_issue_igm_for_json = (data) => {
   return formatted_error(error_list);
 };
 
+const validate_schema_issue_close_igm_for_json = (data) => {
+  error_list = validate_schema(data, (schema = issueCloseSchema));
+  return formatted_error(error_list);
+};
+
 module.exports = {
   validate_schema_issue_igm_for_json,
   validate_schema_issue_status_igm_for_json,
   validate_schema_on_issue_igm_for_json,
   validate_schema_on_issue_status_igm_for_json,
+  validate_schema_issue_close_igm_for_json,
 };
