@@ -111,7 +111,7 @@ const validateLogs = (dirPath) => {
     logger.info("Flushing DB Data");
     dao.dropDB();
   } catch (error) {
-    logger.error("!!Error while removing LMDB", error);
+    logger.error(`!!Error while removing LMDB, ${error.stack}`);
   }
 
   if (!_.isEmpty(srchResp)) {

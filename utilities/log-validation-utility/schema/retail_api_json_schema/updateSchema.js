@@ -67,7 +67,7 @@ module.exports = {
     },
     message: {
       type: "object",
-      properties: {
+            properties: {
         update_target: {
           type: "string",
           enum: ["item", "billing"],

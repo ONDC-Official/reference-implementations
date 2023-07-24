@@ -34,6 +34,12 @@ npm i
 node index.js retail ./public/logs/
 ```
 
+In case of IGM, domain will be igm.
+
+```sh
+node index.js igm ./public/logs/
+```
+
 4. A text report (log_report.md) will be generated upon successful execution of the utility.
 <!-- 5. An error handling txt file (error_report.txt) will also be generated to catch all the errors occurred during the execution. -->
 
