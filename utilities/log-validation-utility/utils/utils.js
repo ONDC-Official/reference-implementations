@@ -259,6 +259,41 @@ const allCategories = [
 
 const taxNotInlcusive = [...fnbCategories];
 
+const issueCategories = [
+  "ORDER",
+  "ITEM",
+  "FULFILLMENT",
+  "AGENT",
+  "PAYMENT",
+  "TRANSACTION",
+];
+
+const issueItmSubCategories = ["ITM01", "ITM02", "ITM03", "ITM04", "ITM05"];
+const issueFlmSubcategories = [
+  "FLM01",
+  "FLM02",
+  "FLM03",
+  "FLM04",
+  "FLM05",
+  "FLM06",
+  "FLM07",
+  "FLM08",
+];
+
+const issueSubCategories = [
+  ...issueItmSubCategories,
+  ...issueFlmSubcategories,
+  "ORD01",
+  "ORD02",
+  "ORD03",
+  "AGT01",
+  "AGT02",
+  "PMT01",
+  "PMT02",
+  "PMT03",
+  "PMT04",
+];
+
 const buyerCancellationRid = new Set(["001", "003", "006", "009", "010"]);
 const sellerCancellationRid = new Set([
   "002",
@@ -315,7 +350,6 @@ const timeDiff = (time1, time2) => {
   else return dtime1 - dtime2;
 };
 
-
 const isObjectEqual = (obj1, obj2, parentKey = "") => {
   const typeOfObj1 = typeof obj1;
   const typeOfObj2 = typeof obj2;
@@ -337,7 +371,11 @@ const isObjectEqual = (obj1, obj2, parentKey = "") => {
     const sortedObj2 = [...obj2].sort();
 
     for (let i = 0; i < sortedObj1.length; i++) {
-      const nestedKeys = isObjectEqual(sortedObj1[i], sortedObj2[i], `${parentKey}[${i}]`);
+      const nestedKeys = isObjectEqual(
+        sortedObj1[i],
+        sortedObj2[i],
+        `${parentKey}[${i}]`
+      );
       if (nestedKeys.length > 0) {
         return nestedKeys;
       }
@@ -434,4 +472,8 @@ module.exports = {
   isObjectEqual,
   checkGpsPrecision,
   compareCoordinates,
+  issueCategories,
+  issueSubCategories,
+  issueItmSubCategories,
+  issueFlmSubcategories,
 };

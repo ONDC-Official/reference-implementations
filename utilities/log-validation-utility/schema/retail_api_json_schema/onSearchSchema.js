@@ -218,6 +218,7 @@ module.exports = {
                                   type: "string",
                                 },
                               },
+                              required: ["count"],
                             },
                             available: {
                               type: "object",
@@ -226,6 +227,7 @@ module.exports = {
                                   type: "string",
                                 },
                               },
+                              required: ["count"],
                             },
                           },
                           required: ["available", "maximum"],
