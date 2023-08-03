@@ -1,0 +1,20 @@
+{
+    "context": {
+        "domain": "nic2004:60232",
+        "country": "IND",
+        "city": "std:080",
+        "action": "issue_status",
+        "timestamp": "2023-06-26T05:22:49.530Z",
+        "ttl": "PT30S",
+        "core_version": "1.0.0",
+        "bap_id": "ondc-qa.gofrugalretail.com",
+        "bap_uri": "https://ondc-qa.gofrugalretail.com/ondc-service_1_0/ondc/logistics",
+        "bpp_id": "ondc-preprod.loadshare.net",
+        "bpp_uri": "https://ondc-preprod.loadshare.net/logistics/bpp",
+        "transaction_id": "08823c33-93eb-4497-9860-8174bb1c7c21",
+        "message_id": "0e9f8e2b-0ff4-4def-b263-0a8d8b5f26d3"
+    },
+    "message": {
+        "issue_id": "167f0f50-fa49-4581-8e52-13610292f0f8"
+    }
+}

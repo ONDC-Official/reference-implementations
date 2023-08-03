@@ -6,6 +6,7 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const utils = require("../utils");
+
 const checkIssue = (dirPath) => {
   let issueObj = {};
 
@@ -45,6 +46,9 @@ const checkIssue = (dirPath) => {
       dao.setValue("igmCoreVersion", issue.context.core_version);
       dao.setValue("igmDomain", issue.context.domain);
       dao.setValue("igmIssueMsgId", issue.context.message_id);
+      dao.setValue("seller_bpp_id", issue.context.bpp_id);
+      dao.setValue("seller_bpp_uri", issue.context.bpp_uri);
+
       if (issue.message) {
         dao.setValue("igmIssueType", issue.message.issue.issue_type);
       }
@@ -74,6 +78,31 @@ const checkIssue = (dirPath) => {
     } catch (error) {
       logger.error(
         `!!Error while validating category and subcategory in /${constants.RET_ISSUE}, ${error.stack}`
+      );
+    }
+
+    try {
+      logger.info(
+        `checking updated_at and last complainent_action's updated_at /${constants.RET_ONISSUE}`
+      );
+
+      const complainant_actions =
+        issue.message.issue.issue_actions.complainant_actions;
+
+      console.log(
+        "complainant_actions[complainant_actions.length - 1]",
+        complainant_actions[complainant_actions.length - 1]
+      );
+
+      if (
+        complainant_actions[complainant_actions.length - 1].updated_at ===
+        issue.message.issue.updated_at
+      ) {
+        issueObj.updated_at = message.updatedAtInRespondentAction;
+      }
+    } catch (error) {
+      logger.error(
+        `!!Some error occurred while checking /${constants.RET_ONISSUE} message, ${error.stack}`
       );
     }
 
@@ -130,9 +159,10 @@ const checkIssue = (dirPath) => {
         !_.isEqual(
           issue.message.issue.created_at,
           issue.message.issue.updated_at
-        )
+        ) &&
+        issue.message.issue.issue_actions.responsdent_actions.length === 0
       ) {
-        if (!_.lte(issue.context.timestamp, issue.message.issue.created_at)) {
+        if (!_.lte(issue.message.issue.created_at, issue.context.timestamp)) {
           issueObj.updatedTime = `Time of Creation for /${constants.RET_ISSUE} api should be less than context timestamp`;
         }
         issueObj.respTime = `Time of Creation and time of updation for /${constants.RET_ISSUE} api should be same`;

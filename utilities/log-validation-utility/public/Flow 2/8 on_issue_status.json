@@ -1,0 +1,81 @@
+{
+    "context": {
+        "domain": "nic2004:52110",
+        "country": "IND",
+        "city": "std:080",
+        "action": "on_issue_status",
+        "timestamp": "2023-06-26T05:22:50.607Z",
+        "core_version": "1.0.0",
+        "bap_id": "buyer-app-preprod.ondc.org",
+        "bap_uri": "https://buyer-app-preprod.ondc.org/protocol/v1",
+        "bpp_id": "ondc-qa.gofrugalretail.com",
+        "bpp_uri": "https://ondc-qa.gofrugalretail.com/ondc-service_1_0/ondc",
+        "transaction_id": "08823c33-93eb-4497-9860-8174bb1c7c21",
+        "message_id": "c5890993-b0af-4c1c-a11c-7721f523d472"
+    },
+    "message": {
+        "issue": {
+            "id": "167f0f50-fa49-4581-8e52-13610292f0f8",
+            "issue_actions": {
+                "respondent_actions": [
+                    {
+                        "respondent_action": "PROCESSING",
+                        "updated_at": "2023-06-26T05:22:40.671Z",
+                        "updated_by": {
+                            "org": {
+                                "name": "ondc-preprod.loadshare.net::nic2004:60232"
+                            },
+                            "contact": {
+                                "phone": "7760277716",
+                                "email": "satish.k@loadshare.net"
+                            },
+                            "person": {
+                                "name": "Satish K."
+                            }
+                        },
+                        "cascaded_level": 2,
+                        "short_desc": "Complaint is being processed"
+                    },
+                    {
+                        "respondent_action": "CASCADED",
+                        "updated_at": "2023-06-26T05:22:39.262Z",
+                        "updated_by": {
+                            "org": {
+                                "name": "ondc-qa.gofrugalretail.com::nic2004:52110"
+                            },
+                            "contact": {
+                                "phone": "8881177221",
+                                "email": "sherin.h@gofrugal.com"
+                            },
+                            "person": {
+                                "name": "sherin shafa"
+                            }
+                        },
+                        "cascaded_level": 2,
+                        "short_desc": "Cascaded to Logistics"
+                    },
+                    {
+                        "respondent_action": "PROCESSING",
+                        "updated_at": "2023-06-26T05:22:29.995Z",
+                        "updated_by": {
+                            "org": {
+                                "name": "ondc-qa.gofrugalretail.com::nic2004:52110"
+                            },
+                            "contact": {
+                                "phone": "8881177221",
+                                "email": "sherin.h@gofrugal.com"
+                            },
+                            "person": {
+                                "name": "sherin shafa"
+                            }
+                        },
+                        "cascaded_level": 1,
+                        "short_desc": "Processing"
+                    }
+                ]
+            },
+            "created_at": "2023-06-26T05:22:04.141Z",
+            "updated_at": "2023-06-26T05:22:40.671Z"
+        }
+    }
+}
