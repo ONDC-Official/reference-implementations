@@ -40,10 +40,10 @@ export const signMessage = async ({ signingString, privateKey }: ISignMessage) =
 };
 
 export const createAuthorizationHeader = async ({
-  message,
+  body,
   privateKey,
-  bapId,
-  bapUniqueKeyId,
+  subscriberId,
+  subscriberUniqueKeyId,
   expires,
   created,
 }: ICreateAuthorizationHeader) => {
@@ -52,16 +52,14 @@ export const createAuthorizationHeader = async ({
     expires: expiresT,
     created: createdT,
   } = await createSigningString({
-    message: JSON.stringify(message),
+    message: JSON.stringify(body),
     created,
     expires,
   });
 
   const signature = await signMessage({ signingString, privateKey });
 
-  const subscriberId = bapId;
-  const uniqueKeyId = bapUniqueKeyId;
-  const header = `Signature keyId="${subscriberId}|${uniqueKeyId}|ed25519",algorithm="ed25519",created="${createdT}",expires="${expiresT}",headers="(created) (expires) digest",signature="${signature}"`;
+  const header = `Signature keyId="${subscriberId}|${subscriberUniqueKeyId}|ed25519",algorithm="ed25519",created="${createdT}",expires="${expiresT}",headers="(created) (expires) digest",signature="${signature}"`;
   return header;
 };
 

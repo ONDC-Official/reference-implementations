@@ -8,10 +8,10 @@ For signing the verification header, you can use the `createAuthorizationHeader`
 import { createAuthorizationHeader } from "ondc-crypto-sdk-nodejs"
 
 const header = await createAuthorizationHeader({
-      message: { context: {...}, message: {...} },
+      body: { context: {...}, message: {...} },
       privateKey: privateKey,
-      bapId: "...", // Subscriber ID that you get after registering to ONDC Network
-      bapUniqueKeyId: "584", // Unique Key Id or uKid that you get after registering to ONDC Network
+      subscriberId: "...", // Subscriber ID that you get after registering to ONDC Network
+      subscriberUniqueKeyId: "584", // Unique Key Id or uKid that you get after registering to ONDC Network
     });
 ```
 
