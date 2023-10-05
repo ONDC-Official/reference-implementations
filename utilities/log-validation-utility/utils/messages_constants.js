@@ -1,6 +1,6 @@
 module.exports = getLspIssueMessage = (endpoint) => {
   return {
-    transaction_id_issue_message: `Transaction Id should be the id from the logistics transaction in /${endpoint} api. It should not be of the retail transactions that is being used for retail`,
+    transaction_id_issue_message: `Transaction Id should be the id from the logistics transaction id in /${endpoint} api. It should not be of the retail transactions that is being used for retail`,
     order_details_issue_message: `Items array should be included in order_details object when the issue_category is ITEM /${endpoint} api.`,
     quantity_issue_message: `Each Item must have quantity attribute when the issue_category is ITEM /${endpoint} api.`,
     respondent_action_required: `At least one respondent action is required to have actions as CASCADED /${endpoint} api.`,

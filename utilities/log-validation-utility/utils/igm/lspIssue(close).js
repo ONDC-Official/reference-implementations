@@ -9,13 +9,13 @@ const utils = require("../utils");
 const getLspIssueMessage = require("../messages_constants");
 const igmHelper = require("./igmHelpers");
 
-const checkLspIssue = (dirPath) => {
+const checkLspIssueClose = (dirPath) => {
   let issueObj = {};
 
   const message = getLspIssueMessage(constants.RET_ISSUE);
   try {
     let issue = fs.readFileSync(
-      dirPath + `/${constants.RET_ISSUE}_to_lsp.json`
+      dirPath + `/${constants.RET_ISSUE}_to_lsp_close.json`
     );
     issue = JSON.parse(issue);
 
@@ -226,4 +226,4 @@ const checkLspIssue = (dirPath) => {
   }
 };
 
-module.exports = checkLspIssue;
+module.exports = checkLspIssueClose;

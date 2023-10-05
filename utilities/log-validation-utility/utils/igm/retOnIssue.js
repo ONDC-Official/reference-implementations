@@ -5,6 +5,7 @@ const { checkContext } = require("../../services/service");
 const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
+const igmHelper = require("./igmHelpers");
 
 const checkOnIssue = (dirPath) => {
   let onissueObj = {};
@@ -112,39 +113,51 @@ const checkOnIssue = (dirPath) => {
       );
     }
 
-    try {
-      logger.info(
-        `Checking time of creation and updation for /${constants.RET_ONISSUE}`
-      );
-      if (!_.lte(on_issue.message.issue.created_at, issue.context.timestamp)) {
-        onissueObj.updatedTime = `Time of Creation for /${constants.RET_ONISSUE} api should be less than current timestamp`;
-      }
-      dao.setValue("igmCreatedAt", on_issue.message.issue.created_at);
-    } catch (error) {
-      logger.error(
-        `Error while checking time of creation and updation for /${constants.RET_ONISSUE} api, ${error.stack}`
-      );
-    }
+    // try {
+    //   logger.info(
+    //     `Checking time of creation and updation for /${constants.RET_ONISSUE}`
+    //   );
+    //   if (!_.lte(issue.context.timestamp, on_issue.message.issue.created_at)) {
+    //     onissueObj.updatedTime = `Time of Creation for /${constants.RET_ONISSUE} api should be less than context timestamp`;
+    //   }
+    // } catch (error) {
+    //   logger.error(
+    //     `Error while checking time of creation and updation for /${constants.RET_ONISSUE} api, ${error.stack}`
+    //   );
+    // }
+    dao.setValue("igmCreatedAt", on_issue.message.issue.created_at);
 
-    try {
-      logger.info(`Checking organization's name for /${constants.RET_ONISSUE}`);
-      let org_name =
-        on_issue.message.issue.issue_actions.respondent_actions?.[0].updated_by
-          .org.name;
-      let org_id = org_name.split("::");
-      if (!_.isEqual(on_issue.context.bpp_id, org_id?.[0])) {
-        onissueObj.org_name = `Organization's Name for /${constants.RET_ONISSUE} api mismatched with bpp_id`;
-      }
-      if (!_.lte(on_issue.context.domain, org_id[1])) {
-        onissueObj.org_domain = `Domain of organization for /${constants.RET_ONISSUE} api mismatched with domain in context`;
-      }
-    } catch (error) {
-      logger.error(
-        `Error while checking organization's name for /${constants.RET_ONISSUE} api, ${error.stack}`
-      );
-    }
+    const respondent_actions =
+      on_issue.message.issue.issue_actions.respondent_actions;
 
-    // dao.setValue("onissueObj", onissueObj);
+    igmHelper.checkOrganizationNameandDomain(
+      constants.RET_ONISSUE,
+      respondent_actions,
+      on_issue.context.bpp_id,
+      on_issue.context.domain,
+      onissueObj
+    );
+
+    igmHelper.compareUpdatedAtAndContextTimeStamp(
+      constants.RET_ONISSUE,
+      respondent_actions,
+      on_issue.message.issue.updated_at,
+      onissueObj
+    );
+
+    igmHelper.checkCreatedAtInAll(
+      constants.RET_ONISSUE,
+      on_issue.message.issue.created_at,
+      onissueObj
+    );
+    
+    igmHelper.checkDomainInAll(
+      constants.RET_ONISSUE,
+      on_issue.context.domain,
+      onissueObj
+    );
+
+    dao.setValue("onissueObj", onissueObj);
     return onissueObj;
   } catch (err) {
     if (err.code === "ENOENT") {

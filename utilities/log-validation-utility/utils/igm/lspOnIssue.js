@@ -7,6 +7,7 @@ const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const getLspIssueMessage = require("../messages_constants");
 
+
 const checkLspOnIssue = (dirPath) => {
   let issueObj = {};
 
@@ -76,25 +77,25 @@ const checkLspOnIssue = (dirPath) => {
       );
     }
 
-    try {
-      logger.info(
-        `checking updated_at and last respondent_action's updated_at /${constants.RET_ONISSUE}`
-      );
+    // try {
+    //   logger.info(
+    //     `checking updated_at and last respondent_action's updated_at /${constants.RET_ONISSUE}`
+    //   );
 
-      const respondent_action =
-        issue.message.issue.issue_actions.respondent_actions;
+    //   const respondent_action =
+    //     issue.message.issue.issue_actions.respondent_actions;
 
-      if (
-        respondent_action[respondent_action.length - 1].updated_at ===
-        issue.message.issue.updated_at
-      ) {
-        issueObj.updated_at = message.updatedAtInRespondentAction;
-      }
-    } catch (error) {
-      logger.error(
-        `!!Some error occurred while checking /${constants.RET_ONISSUE} message, ${error.stack}`
-      );
-    }
+    //   if (
+    //     respondent_action[respondent_action.length - 1].updated_at !==
+    //     issue.message.issue.updated_at
+    //   ) {
+    //     issueObj.updated_at = message.updatedAtInRespondentAction;
+    //   }
+    // } catch (error) {
+    //   logger.error(
+    //     `!!Some error occurred while checking /${constants.RET_ONISSUE} message, ${error.stack}`
+    //   );
+    // }
 
     try {
       logger.info(

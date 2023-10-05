@@ -6,6 +6,8 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const utils = require("../utils");
+const igmHelper = require("./igmHelpers");
+
 
 const checkIssue = (dirPath) => {
   let issueObj = {};
@@ -68,12 +70,23 @@ const checkIssue = (dirPath) => {
       );
 
       if (
-        (issue.category === "ITEM" &&
-          !utils.issueItmSubCategories.includes(issue.sub_category)) ||
-        (issue.category === "FULFILLMENT" &&
-          !utils.issueFlmSubcategories.includes(issue.sub_category))
+        (issue.message.category === "ITEM" &&
+          !utils.issueItmSubCategories.includes(issue.message.sub_category)) ||
+        (issue.message.category === "FULFILLMENT" &&
+          !utils.issueFlmSubcategories.includes(issue.message.sub_category))
       ) {
         issueObj.ctgrySubCategory = `Invalid sub_category ${issue.sub_category} for issue category "${issue.category}"`;
+      }
+
+      if (issue.message.issue.category === "ITEM") {
+        if (issue.message.issue.order_details.items.length === 0) {
+          issueObj.items = `Items in issue.message.issue.order_details.items should not be empty when message category is ITEM`;
+        }
+      }
+      if (issue.message.issue.category === "FULFILLMENT") {
+        if (issue.message.issue.order_details.fulfillments.length === 0) {
+          issueObj.items = `Fulfillments in issue.message.issue.order_details.fulfillments should not be empty when message category is FULFILLMENT`;
+        }
       }
     } catch (error) {
       logger.error(
@@ -81,30 +94,33 @@ const checkIssue = (dirPath) => {
       );
     }
 
-    try {
-      logger.info(
-        `checking updated_at and last complainent_action's updated_at /${constants.RET_ONISSUE}`
-      );
+    const complainant_actions =
+      issue.message.issue.issue_actions.complainant_actions;
 
-      const complainant_actions =
-        issue.message.issue.issue_actions.complainant_actions;
+    igmHelper.checkOrganizationNameandDomain(
+      constants.RET_ISSUE,
+      complainant_actions,
+      issue.context.bap_id,
+      issue.context.domain,
+      issueObj
+    );
 
-      console.log(
-        "complainant_actions[complainant_actions.length - 1]",
-        complainant_actions[complainant_actions.length - 1]
-      );
+    igmHelper.compareUpdatedAtAndContextTimeStamp(
+      constants.RET_ISSUE,
+      complainant_actions,
+      issue.message.issue.updated_at,
+      issueObj
+    );
 
-      if (
-        complainant_actions[complainant_actions.length - 1].updated_at ===
-        issue.message.issue.updated_at
-      ) {
-        issueObj.updated_at = message.updatedAtInRespondentAction;
-      }
-    } catch (error) {
-      logger.error(
-        `!!Some error occurred while checking /${constants.RET_ONISSUE} message, ${error.stack}`
-      );
-    }
+    igmHelper.compareCreationAndUpdationTime(
+      constants.RET_ISSUE,
+      issue.message.issue.created_at,
+      issue.context.timestamp,
+      issue.message.issue.updated_at,
+      issue.message.issue.issue_actions.respondent_actions,
+      issue.context.domain,
+      issueObj
+    );
 
     try {
       logger.info(
@@ -151,47 +167,7 @@ const checkIssue = (dirPath) => {
       );
     }
 
-    try {
-      logger.info(
-        `Checking time of creation and updation for /${constants.RET_ISSUE}`
-      );
-      if (
-        !_.isEqual(
-          issue.message.issue.created_at,
-          issue.message.issue.updated_at
-        ) &&
-        issue.message.issue.issue_actions.responsdent_actions.length === 0
-      ) {
-        if (!_.lte(issue.message.issue.created_at, issue.context.timestamp)) {
-          issueObj.updatedTime = `Time of Creation for /${constants.RET_ISSUE} api should be less than context timestamp`;
-        }
-        issueObj.respTime = `Time of Creation and time of updation for /${constants.RET_ISSUE} api should be same`;
-      }
-      dao.setValue("igmCreatedAt", issue.message.issue.created_at);
-    } catch (error) {
-      logger.error(
-        `Error while checking time of creation and updation for /${constants.RET_issue} api, ${error.stack}`
-      );
-    }
-
-    try {
-      logger.info(`Checking organization's name for /${constants.RET_ISSUE}`);
-      let org_name =
-        issue.message.issue.issue_actions.complainant_actions[0].updated_by.org
-          .name;
-      let org_id = org_name.split("::");
-      if (!_.isEqual(issue.context.bap_id, org_id[0])) {
-        issueObj.org_name = `Organization's Name for /${constants.RET_ISSUE} api mismatched with bap id`;
-      }
-      if (!_.lte(issue.context.domain, org_id[1])) {
-        issueObj.org_domain = `Domain of organization for /${constants.RET_ISSUE} api mismatched with domain in context`;
-      }
-    } catch (error) {
-      logger.error(
-        `Error while checking organization's name for /${constants.RET_ISSUE} api, ${error.stack}`
-      );
-    }
-    // dao.setValue("issueObj", issueObj);
+    dao.setValue("igmCreatedAt", issue.message.issue.created_at);
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {

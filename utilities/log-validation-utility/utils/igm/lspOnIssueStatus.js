@@ -78,6 +78,37 @@ const checkLspOnIssueStatus = (dirPath) => {
 
     try {
       logger.info(
+        `checking updated_at and last respondent_action's updated_at /${constants.RET_ONISSUE_STATUS}`
+      );
+
+      const respondent_action =
+        issue.message.issue.issue_actions.respondent_actions;
+
+      if (
+        respondent_action[respondent_action.length - 1].updated_at !==
+        issue.message.issue.updated_at
+      ) {
+        issueObj.updated_at = message.updatedAtInRespondentAction;
+      }
+    } catch (error) {
+      logger.error(
+        `!!Some error occurred while checking /${constants.RET_ONISSUE_STATUS} message, ${error.stack}`
+      );
+    }
+
+    const respondent_actions =
+      issue.message.issue.issue_actions.respondent_actions;
+
+    igmHelper.checkOrganizationNameandDomain(
+      constants.RET_ONISSUE,
+      respondent_actions,
+      issue.context.bap_id,
+      issue.context.domain,
+      issueObj
+    );
+
+    try {
+      logger.info(
         `checking respondent action, and is RESOLVED, Resolution object /${constants.RET_ONISSUE_STATUS}`
       );
 
@@ -101,7 +132,7 @@ const checkLspOnIssueStatus = (dirPath) => {
               issue.message.issue.resolution_provider.respondent_info;
 
             if (respondant_info.type !== "CASCADED-COUNTERPARTY-NP") {
-              issueObj.respondant_info = message.respondent_info
+              issueObj.respondant_info = message.respondent_info;
             }
           }
         }

@@ -5,6 +5,7 @@ const checkIssue = require("./igm/retIssue");
 const checkOnIssue = require("./igm/retOnIssue");
 const checkIssueStatus = require("./igm/retIssueStatus");
 const checkOnIssueStatus = require("./igm/retOnIssueStatus");
+const checkOnIssueStatUsunsolicited = require("./igm/retOnIssueStatus(unsolicited)");
 const checkIssueClose = require("./igm/retIssueClose");
 const checkLspIssue = require("./igm/lspIssue");
 const checkLspOnIssue = require("./igm/lspOnIssue");
@@ -27,6 +28,11 @@ const validateIgmLogs = (dirPath) => {
 
   //ON_ISSUE_STATUS API
   let onissueStatusResp = checkOnIssueStatus(dirPath, msgIdSet);
+
+  let onIssueStatusUnSolicitedResp = checkOnIssueStatUsunsolicited(
+    dirPath,
+    msgIdSet
+  );
 
   //ISSUE_CLOSE API
   let issueCloseResp = checkIssueClose(dirPath, msgIdSet);
@@ -67,7 +73,13 @@ const validateIgmLogs = (dirPath) => {
   if (!_.isEmpty(onissueStatusResp)) {
     logReport += `**/on_issue_status** \n${getObjValues(onissueStatusResp)}\n`;
   }
+  if (!_.isEmpty(onIssueStatusUnSolicitedResp)) {
+    logReport += `**/on_issue_status(unsolicited)** \n${getObjValues(
+      onIssueStatusUnSolicitedResp
+    )}\n`;
+  }
 
+  checkOnIssueStatUsunsolicited;
   if (!_.isEmpty(issueCloseResp)) {
     logReport += `**/issue_close** \n${getObjValues(issueCloseResp)}\n`;
   }
@@ -84,7 +96,9 @@ const validateIgmLogs = (dirPath) => {
   }
 
   if (!_.isEmpty(onIssueStatusLsp)) {
-    logReport += `**/lsp_on_issue_status** \n${getObjValues(onIssueStatusLsp)}\n`;
+    logReport += `**/lsp_on_issue_status** \n${getObjValues(
+      onIssueStatusLsp
+    )}\n`;
   }
 
   fs.writeFileSync("log_report.md", logReport);

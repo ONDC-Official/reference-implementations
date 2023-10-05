@@ -6,6 +6,7 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const utils = require("../utils");
+
 const checkIssueClose = (dirPath) => {
   let issueObj = {};
 
@@ -61,45 +62,73 @@ const checkIssueClose = (dirPath) => {
 
     try {
       logger.info(
-        `Checking time of creation and updation for /${constants.RET_ISSUE}_close`
+        `Checking time of creation and updation for /${constants.RET_ISSUE}`
       );
       if (
-        !_.isEqual(
+        _.isEqual(
           issue.message.issue.created_at,
           issue.message.issue.updated_at
-        )
+        ) &&
+        issue.message.issue.issue_actions.responsdent_actions.length === 0
       ) {
         if (!_.lte(issue.context.timestamp, issue.message.issue.created_at)) {
-          issueObj.updatedTime = `Time of Creation for /${constants.RET_ISSUE}_close api should be less than context timestamp`;
+          issueObj.updatedTime = `Time of Creation for /${constants.RET_ISSUE} api should not be less than context timestamp`;
         }
-        issueObj.respTime = `Time of Creation and time of updation for /${constants.RET_ISSUE}_close api should be same`;
+        issueObj.respTime = `Time of Creation and time of updation for /${constants.RET_ISSUE} api should be same`;
       }
       dao.setValue("igmCreatedAt", issue.message.issue.created_at);
     } catch (error) {
       logger.error(
-        `Error while checking time of creation and updation for /${constants.RET_issue}_close api, ${error.stack}`
+        `Error while checking time of creation and updation for /${constants.RET_issue} api, ${error.stack}`
       );
     }
 
-    try {
-      logger.info(
-        `Checking organization's name for /${constants.RET_ISSUE}_close`
-      );
-      let org_name =
-        issue.message.issue.issue_actions.complainant_actions[0].updated_by.org
-          .name;
-      let org_id = org_name.split("::");
-      if (!_.isEqual(issue.context.bap_id, org_id[0])) {
-        issueObj.org_name = `Organization's Name for /${constants.RET_ISSUE}_close api mismatched with bap id`;
-      }
-      if (!_.lte(issue.context.domain, org_id[1])) {
-        issueObj.org_domain = `Domain of organization for /${constants.RET_ISSUE}_close api mismatched with domain in context`;
-      }
-    } catch (error) {
-      logger.error(
-        `Error while checking organization's name for /${constants.RET_ISSUE}_close api, ${error.stack}`
-      );
-    }
+    const complainant_actions =
+      issue.message.issue.issue_actions.complainant_actions;
+
+    igmHelper.checkOrganizationNameandDomain(
+      constants.RET_ISSUE,
+      complainant_actions,
+      issue.context.bap_id,
+      issue.context.domain,
+      issueObj
+    );
+
+    igmHelper.compareUpdatedAtAndContextTimeStamp(
+      constants.RET_ISSUE,
+      complainant_actions,
+      issue.message.issue.updated_at,
+      issueObj
+    );
+
+    igmHelper.checkDomainInAll(
+      constants.RET_ISSUE,
+      issue.context.domain,
+      onIssueStatusObj
+    );
+
+    // try {
+    //   logger.info(
+    //     `Checking organization's name for /${constants.RET_ISSUE}_close`
+    //   );
+
+    //   for (const [index, complainant_action] of complainant_actions.entries()) {
+    //     let org_name = complainant_action.updated_by.org.name;
+
+    //     let org_id = org_name.split("::");
+
+    //     if (!_.isEqual(issue.context.bap_id, org_id[0])) {
+    //       issueObj.org_name = `Organization's Name for /${constants.RET_ISSUE} api message/issue/issue_actions/comlainant_actions/[${index}] mismatched with bap id`;
+    //     }
+    //     if (!_.lte(issue.context.domain, org_id[1])) {
+    //       issueObj.org_domain = `Domain of organization for /${constants.RET_ISSUE} api in message/issue/issue_actions/comlainant_actions/[${index}] mismatched with domain in context`;
+    //     }
+    //   }
+    // } catch (error) {
+    //   logger.error(
+    //     `Error while checking organization's name for /${constants.RET_ISSUE}_close api, ${error.stack}`
+    //   );
+    // }
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {

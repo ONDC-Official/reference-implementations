@@ -68,6 +68,7 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
         `Error while comparing transaction ID in /${constants.RET_ISSUE} and /${constants.RET_ISSUE_STATUS}, ${error.stack}`
       );
     }
+    
 
     // dao.setValue("issueStatusObj", issueStatusObj);
     return issueStatusObj;
