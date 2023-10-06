@@ -6,16 +6,17 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const igmHelper = require("./igmHelpers");
+const DomainType = require("../enums");
 
 const checkOnIssueStatUsunsolicited = (dirPath, msgIdSet) => {
   let onIssueStatusObj = {};
   try {
     let onIssueStatus = fs.readFileSync(
-      dirPath + `/${constants.RET_ONISSUE_STATUS}(unsolicited).json`
+      dirPath + `/${DomainType.retail}_${constants.RET_ONISSUE_STATUS}(unsolicited).json`
     );
     onIssueStatus = JSON.parse(onIssueStatus);
 
-    let issue = fs.readFileSync(dirPath + `/${constants.RET_ISSUE}.json`);
+    let issue = fs.readFileSync(dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`);
     issue = JSON.parse(issue);
 
     try {
@@ -184,7 +185,7 @@ const checkOnIssueStatUsunsolicited = (dirPath, msgIdSet) => {
   } catch (err) {
     if (err.code === "ENOENT") {
       logger.error(
-        `!!File not found for /${constants.RET_ONISSUE_STATUS}(unsolicited) API!`
+        `!!File not found for /${DomainType.retail}_${constants.RET_ONISSUE_STATUS}(unsolicited) API!`
       );
     } else {
       logger.error(

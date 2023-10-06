@@ -6,14 +6,19 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const igmHelper = require("./igmHelpers");
+const DomainType = require("../enums");
 
 const checkOnIssue = (dirPath) => {
   let onissueObj = {};
 
   try {
-    let on_issue = fs.readFileSync(dirPath + `/${constants.RET_ONISSUE}.json`);
+    let on_issue = fs.readFileSync(
+      dirPath + `/${DomainType.retail}_${constants.RET_ONISSUE}.json`
+    );
     on_issue = JSON.parse(on_issue);
-    let issue = fs.readFileSync(dirPath + `/${constants.RET_ISSUE}.json`);
+    let issue = fs.readFileSync(
+      dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`
+    );
     issue = JSON.parse(issue);
 
     try {
@@ -150,7 +155,7 @@ const checkOnIssue = (dirPath) => {
       on_issue.message.issue.created_at,
       onissueObj
     );
-    
+
     igmHelper.checkDomainInAll(
       constants.RET_ONISSUE,
       on_issue.context.domain,
@@ -161,7 +166,9 @@ const checkOnIssue = (dirPath) => {
     return onissueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.info(`!!File not found for /${constants.RET_ONISSUE} API!`);
+      logger.info(
+        `!!File not found for /${DomainType.retail}_${constants.RET_ONISSUE} API!`
+      );
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ONISSUE} API`,

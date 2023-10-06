@@ -7,15 +7,16 @@ const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const utils = require("../utils");
 const igmHelper = require("./igmHelpers");
-
+const DomainType = require("../enums");
 
 const checkIssue = (dirPath) => {
   let issueObj = {};
 
   try {
-    let issue = fs.readFileSync(dirPath + `/${constants.RET_ISSUE}.json`);
+    let issue = fs.readFileSync(
+      dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`
+    );
     issue = JSON.parse(issue);
-
     try {
       logger.info(`Validating Schema for ${constants.RET_ISSUE} API`);
       const vs = validateSchema("igm", constants.RET_ISSUE, issue);
@@ -171,7 +172,7 @@ const checkIssue = (dirPath) => {
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.info(`!!File not found for /${constants.RET_ISSUE} API!`);
+      logger.info(`!!File not found for /${DomainType.retail}_${constants.RET_ISSUE} API!`);
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ISSUE} API`,

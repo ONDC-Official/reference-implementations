@@ -5,12 +5,13 @@ const { checkContext } = require("../../services/service");
 const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
+const DomainType = require("../enums");
 
 const checkIssueStatus = (dirPath, msgIdSet) => {
   let issueStatusObj = {};
   try {
     let issueStatus = fs.readFileSync(
-      dirPath + `/${constants.RET_ISSUE_STATUS}.json`
+      dirPath + `/${DomainType.retail}_${constants.RET_ISSUE_STATUS}.json`
     );
     issueStatus = JSON.parse(issueStatus);
     try {
@@ -74,7 +75,7 @@ const checkIssueStatus = (dirPath, msgIdSet) => {
     return issueStatusObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.error(`!!File not found for /${constants.RET_ISSUE_STATUS} API!`);
+      logger.error(`!!File not found for /${DomainType.retail}_${constants.RET_ISSUE_STATUS} API!`);
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ISSUE_STATUS} API`,

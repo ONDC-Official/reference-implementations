@@ -6,13 +6,14 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const getLspIssueMessage = require("../messages_constants");
+const DomainType = require("../enums");
 
 const checkLspIssueStatus = (dirPath) => {
   let issueObj = {};
   const message = getLspIssueMessage(constants.RET_ISSUE_STATUS);
   try {
     let issue = fs.readFileSync(
-      dirPath + `/${constants.RET_ISSUE_STATUS}_to_lsp.json`
+      dirPath + `/${DomainType.lsp}_${constants.RET_ISSUE_STATUS}_to_lsp.json`
     );
     issue = JSON.parse(issue);
 
@@ -78,7 +79,7 @@ const checkLspIssueStatus = (dirPath) => {
   } catch (err) {
     if (err.code === "ENOENT") {
       logger.info(
-        `!!File not found for /${constants.RET_ISSUE_STATUS}_lsp API!`
+        `!!File not found for /${DomainType.lsp}_${constants.RET_ISSUE_STATUS}_lsp API!`
       );
     } else {
       logger.error(

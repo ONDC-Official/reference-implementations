@@ -6,7 +6,7 @@ const constants = require("../constants");
 const validateSchema = require("../schemaValidation");
 const logger = require("../logger");
 const getLspIssueMessage = require("../messages_constants");
-
+const DomainType = require("../enums");
 
 const checkLspOnIssue = (dirPath) => {
   let issueObj = {};
@@ -15,7 +15,7 @@ const checkLspOnIssue = (dirPath) => {
 
   try {
     let issue = fs.readFileSync(
-      dirPath + `/${constants.RET_ONISSUE}_to_lsp.json`
+      dirPath + `/${DomainType.lsp}_${constants.RET_ONISSUE}_to_lsp.json`
     );
     issue = JSON.parse(issue);
 
@@ -113,7 +113,7 @@ const checkLspOnIssue = (dirPath) => {
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.info(`!!File not found for /${constants.RET_ONISSUE}_lsp API!`);
+      logger.info(`!!File not found for /${DomainType.lsp}_${constants.RET_ONISSUE}_lsp API!`);
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ONISSUE} API`,
