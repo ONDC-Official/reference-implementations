@@ -89,7 +89,6 @@ const checkLspIssue = (dirPath) => {
         issue.message.issue.issue_actions.respondent_actions;
 
       const orgDomain = respondent_action[0].updated_by.org.name.split("::");
-
       if (!_.isEqual(issue.context.bap_id, orgDomain[0])) {
         issueObj.org_name = message.organization_name;
       }
