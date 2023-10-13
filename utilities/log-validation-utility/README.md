@@ -79,6 +79,27 @@ _Notes:_
 | support.json                                |
 | on_support.json                             |
 
+
+
+
+## IGM
+
+
+| Payloads (Correct Format)   | File Names
+| -------- | -------- |  
+| issue | retail_issue.json |  
+| issue (close) | retail_issue_close.json |  
+| on_issue | retail_on_issue.json|  
+| issue_status | retail_issue_status.json | 
+| on_issue_status | retail_on_issue_status.json|
+| on_issue_status | retail_on_issue_status.json| 
+| on_issue_status(unsolicited) | retail_on_issue_status(unsolicited).json | 
+| issue (lsp) | lsp_issue.json | 
+| issue (close)(lsp) | lsp_issue_close.json | 
+| on_issue (lsp)| lsp_on_issue.json|  
+| issue_status (lsp)| lsp_issue_status.json | 
+| on_issue_status (lsp)| lsp_on_issue_status.json| 
+
 > Sample payload for search.json is demonstrated below:
 
 ```json

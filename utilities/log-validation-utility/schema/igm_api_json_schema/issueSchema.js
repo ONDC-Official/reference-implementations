@@ -7,7 +7,7 @@ module.exports = {
       properties: {
         domain: {
           type: "string",
-          enum: [
+          enum: [     
             "nic2004:52110",
             "nic2004:60232",
             "ONDC:RET10",

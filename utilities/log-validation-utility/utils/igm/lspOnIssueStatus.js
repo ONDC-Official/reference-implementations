@@ -15,7 +15,7 @@ const checkLspOnIssueStatus = (dirPath) => {
 
   try {
     let issue = fs.readFileSync(
-      dirPath + `/${DomainType.lsp}_${constants.RET_ONISSUE_STATUS}_to_lsp.json`
+      dirPath + `/${DomainType.lsp}_${constants.RET_ONISSUE_STATUS}.json`
     );
     issue = JSON.parse(issue);
 

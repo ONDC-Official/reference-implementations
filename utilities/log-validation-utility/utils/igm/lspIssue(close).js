@@ -16,7 +16,7 @@ const checkLspIssueClose = (dirPath) => {
   const message = getLspIssueMessage(constants.RET_ISSUE);
   try {
     let issue = fs.readFileSync(
-      dirPath + `/${DomainType.lsp}_${constants.RET_ISSUE}_to_lsp_close.json`
+      dirPath + `/${DomainType.lsp}_${constants.RET_ISSUE}_close.json`
     );
     issue = JSON.parse(issue);
 

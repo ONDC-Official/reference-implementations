@@ -13,7 +13,7 @@ const checkLspIssueStatus = (dirPath) => {
   const message = getLspIssueMessage(constants.RET_ISSUE_STATUS);
   try {
     let issue = fs.readFileSync(
-      dirPath + `/${DomainType.lsp}_${constants.RET_ISSUE_STATUS}_to_lsp.json`
+      dirPath + `/${DomainType.lsp}_${constants.RET_ISSUE_STATUS}.json`
     );
     issue = JSON.parse(issue);
 
