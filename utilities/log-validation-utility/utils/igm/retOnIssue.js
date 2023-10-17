@@ -162,6 +162,13 @@ const checkOnIssue = (dirPath) => {
       onissueObj
     );
 
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ONISSUE,
+      on_issue.context.timestamp,
+      on_issue.message.issue.updated_at,
+      onissueObj
+    );
+
     dao.setValue("onissueObj", onissueObj);
     return onissueObj;
   } catch (err) {

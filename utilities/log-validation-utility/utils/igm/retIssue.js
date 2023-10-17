@@ -113,13 +113,20 @@ const checkIssue = (dirPath) => {
       issueObj
     );
 
-    igmHelper.compareCreationAndUpdationTime(
+    igmHelper.compareCreatedAtAndUpdationTime(
       constants.RET_ISSUE,
       issue.message.issue.created_at,
       issue.context.timestamp,
       issue.message.issue.updated_at,
       issue.message.issue.issue_actions.respondent_actions,
       issue.context.domain,
+      issueObj
+    );
+
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ISSUE,
+      issue.context.timestamp,
+      issue.message.issue.updated_at,
       issueObj
     );
 
@@ -172,7 +179,9 @@ const checkIssue = (dirPath) => {
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.info(`!!File not found for /${DomainType.retail}_${constants.RET_ISSUE} API!`);
+      logger.info(
+        `!!File not found for /${DomainType.retail}_${constants.RET_ISSUE} API!`
+      );
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ISSUE} API`,

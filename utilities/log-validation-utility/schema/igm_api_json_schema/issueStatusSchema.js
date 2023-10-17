@@ -97,7 +97,7 @@ module.exports = {
       properties: {
         issue_id: {
           type: "string",
-          format: "uuid",
+
         },
       },
       required: ["issue_id"],

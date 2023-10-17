@@ -108,6 +108,13 @@ const checkLspOnIssueStatus = (dirPath) => {
       issueObj
     );
 
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ONISSUE,
+      issue.context.timestamp,
+      issue.message.issue.updated_at,
+      issueObj
+    );
+
     try {
       logger.info(
         `checking respondent action, and is RESOLVED, Resolution object /${constants.RET_ONISSUE_STATUS}`

@@ -12,7 +12,9 @@ const checkIssueClose = (dirPath) => {
   let issueObj = {};
 
   try {
-    let issue = fs.readFileSync(dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}_close.json`);
+    let issue = fs.readFileSync(
+      dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}_close.json`
+    );
     issue = JSON.parse(issue);
 
     try {
@@ -105,9 +107,15 @@ const checkIssueClose = (dirPath) => {
     igmHelper.checkDomainInAll(
       constants.RET_ISSUE,
       issue.context.domain,
-      onIssueStatusObj
+      issueObj
     );
 
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ISSUE,
+      issue.context.timestamp,
+      issue.message.issue.updated_at,
+      issueObj
+    );
     // try {
     //   logger.info(
     //     `Checking organization's name for /${constants.RET_ISSUE}_close`
@@ -133,7 +141,9 @@ const checkIssueClose = (dirPath) => {
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.info(`!!File not found for /${DomainType.retail}_${constants.RET_ISSUE}_close API!`);
+      logger.info(
+        `!!File not found for /${DomainType.retail}_${constants.RET_ISSUE}_close API!`
+      );
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ISSUE} API`,

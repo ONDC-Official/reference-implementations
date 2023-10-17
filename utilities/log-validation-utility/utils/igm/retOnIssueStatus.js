@@ -15,7 +15,9 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
       dirPath + `/${DomainType.retail}_${constants.RET_ONISSUE_STATUS}.json`
     );
     onIssueStatus = JSON.parse(onIssueStatus);
-    let issue = fs.readFileSync(dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`);
+    let issue = fs.readFileSync(
+      dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`
+    );
     issue = JSON.parse(issue);
 
     try {
@@ -176,6 +178,13 @@ const checkOnIssueStatus = (dirPath, msgIdSet) => {
     igmHelper.checkDomainInAll(
       constants.RET_ONISSUE_STATUS,
       onIssueStatus.context.domain,
+      onIssueStatusObj
+    );
+
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ONISSUE_STATUS,
+      onIssueStatus.context.timestamp,
+      onIssueStatus.message.issue.updated_at,
       onIssueStatusObj
     );
 

@@ -12,11 +12,14 @@ const checkOnIssueStatUsunsolicited = (dirPath, msgIdSet) => {
   let onIssueStatusObj = {};
   try {
     let onIssueStatus = fs.readFileSync(
-      dirPath + `/${DomainType.retail}_${constants.RET_ONISSUE_STATUS}(unsolicited).json`
+      dirPath +
+        `/${DomainType.retail}_${constants.RET_ONISSUE_STATUS}(unsolicited).json`
     );
     onIssueStatus = JSON.parse(onIssueStatus);
 
-    let issue = fs.readFileSync(dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`);
+    let issue = fs.readFileSync(
+      dirPath + `/${DomainType.retail}_${constants.RET_ISSUE}.json`
+    );
     issue = JSON.parse(issue);
 
     try {
@@ -177,6 +180,13 @@ const checkOnIssueStatUsunsolicited = (dirPath, msgIdSet) => {
     igmHelper.checkDomainInAll(
       constants.RET_ONISSUE_STATUS,
       onIssueStatus.context.domain,
+      onIssueStatusObj
+    );
+
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ONISSUE_STATUS,
+      onIssueStatus.context.timestamp,
+      onIssueStatus.message.issue.updated_at,
       onIssueStatusObj
     );
 

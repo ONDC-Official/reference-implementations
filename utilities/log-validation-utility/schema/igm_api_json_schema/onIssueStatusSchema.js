@@ -99,8 +99,7 @@ module.exports = {
           type: "object",
           properties: {
             id: {
-              type: "string",
-              format: "uuid",
+              type: "string"
             },
             issue_actions: {
               type: "object",

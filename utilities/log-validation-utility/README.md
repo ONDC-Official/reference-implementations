@@ -92,7 +92,6 @@ _Notes:_
 | on_issue | retail_on_issue.json|  
 | issue_status | retail_issue_status.json | 
 | on_issue_status | retail_on_issue_status.json|
-| on_issue_status | retail_on_issue_status.json| 
 | on_issue_status(unsolicited) | retail_on_issue_status(unsolicited).json | 
 | issue (lsp) | lsp_issue.json | 
 | issue (close)(lsp) | lsp_issue_close.json | 

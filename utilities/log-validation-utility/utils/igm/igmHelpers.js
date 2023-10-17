@@ -46,7 +46,7 @@ function checkOrganizationNameandDomain(
 }
 
 /**
- * @description Compare the 'updated_at' property of actions with 'messageUpdatedAt' and report discrepancies.
+ * @description Compare the 'updated_at' property of lastactions with 'messageUpdatedAt' and report discrepancies.
  * @param {string} endpoint - The API endpoint being checked.
  * @param {Object[]} actionPayload - An array of action objects to compare.
  * @param {string} messageUpdatedAt - The timestamp from the message context.
@@ -73,7 +73,8 @@ function compareUpdatedAtAndContextTimeStamp(
       !_.isEqual(
         actionPayload[actionPayload.length - 1].updated_at,
         messageUpdatedAt
-      )
+      ) &&
+      !messageUpdatedAt > actionPayload[actionPayload.length - 1].updated_at
     ) {
       issuerReportObj.updated_at = `The 'updated_at' of message/issue/issue_action/${actionType}/index[${
         actionPayload.length - 1
@@ -97,7 +98,7 @@ function compareUpdatedAtAndContextTimeStamp(
  * @param {string} domain - The domain from context.
  * @param {Object} issuerReportObj - An object to collect and report discrepancies.
  */
-function compareCreationAndUpdationTime(
+function compareCreatedAtAndUpdationTime(
   endpoint,
   created_at,
   contextTimeStamp,
@@ -111,6 +112,7 @@ function compareCreationAndUpdationTime(
 
     if (
       _.isEqual(created_at, messageUpdatedAt) &&
+      responsdentActions &&
       responsdentActions.length === 0
     ) {
       issuerReportObj.respTime = `Time of creation and time of updation for /${endpoint} api should be the same`;
@@ -154,6 +156,34 @@ function checkCreatedAtInAll(endpoint, created_at, issuerReportObj) {
 }
 
 /**
+ * @description Check if 'created_at' matches issue's 'created_at'.
+ * @param {string} endpoint - The API endpoint being checked.
+ * @param {string} contextTimeStamp - The creation timestamp.
+ * @param {string} issue_updated_at - The issue updated time stamp
+ * @param {Object} issuerReportObj - An object to collect and report discrepancies.
+ */
+function compareContextTimeStampAndUpdatedAt(
+  endpoint,
+  contextTimeStamp,
+  issue_updated_at,
+  issuerReportObj
+) {
+  try {
+    logger.info(
+      `Checking 'comparing 'context_timstamp' and updated_at' for /${endpoint}`
+    );
+
+    if (!_.gte(contextTimeStamp, issue_updated_at)) {
+      issuerReportObj.created_at = `context timestamp should be greater than or equal to updated_at in ${endpoint}`;
+    }
+  } catch (error) {
+    logger.error(
+      `Error occurred while comparing 'context_timstamp' and updated_at for /${endpoint}_close api, ${error.stack}`
+    );
+  }
+}
+
+/**
  * @description Check if the provided domain code is the same across all APIs.
  * @param {string} endpoint - The API endpoint being checked.
  * @param {string} domain - The domain from the context to be checked.
@@ -176,7 +206,8 @@ function checkDomainInAll(endpoint, domain, issuerReportObj) {
 module.exports = {
   checkOrganizationNameandDomain,
   compareUpdatedAtAndContextTimeStamp,
-  compareCreationAndUpdationTime,
+  compareCreatedAtAndUpdationTime,
   checkCreatedAtInAll,
   checkDomainInAll,
+  compareContextTimeStampAndUpdatedAt,
 };

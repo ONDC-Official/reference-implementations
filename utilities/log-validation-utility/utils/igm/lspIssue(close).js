@@ -214,10 +214,19 @@ const checkLspIssueClose = (dirPath) => {
       issueObj
     );
 
+    igmHelper.compareContextTimeStampAndUpdatedAt(
+      constants.RET_ISSUE,
+      issue.context.timestamp,
+      issue.message.issue.updated_at,
+      issueObj
+    );
+
     return issueObj;
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.info(`!!File not found for /${DomainType.lsp}_${constants.RET_ISSUE}_lsp API!`);
+      logger.info(
+        `!!File not found for /${DomainType.lsp}_${constants.RET_ISSUE}_lsp API!`
+      );
     } else {
       logger.error(
         `!!Some error occurred while checking /${constants.RET_ISSUE} API`,
