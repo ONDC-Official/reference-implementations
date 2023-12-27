@@ -1,0 +1,9 @@
+{
+    "require": {
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.6",
+        "paragonie/sodium_compat": "^1.20",
+        "phpseclib/phpseclib": "3.0",
+        "sop/asn1": "^4.1"
+    }
+}
