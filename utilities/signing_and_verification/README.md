@@ -56,7 +56,7 @@ output will be true
 
 7. Encrypt Payload
 ```
-python cryptic_utils.py encrypt "PrivateKey" "PublicKey"
+python cryptic_utils.py encrypt "Crypto_Privatekey" "Crypto_Publickey"
 ```
 
 eg usage
@@ -68,7 +68,7 @@ Output will be base64 encoded string like "CrwN248HS4CIYsUvxtrK0pWCBaoyZh4LnWtGq
 
 8. Decrypt Payload
 ```
-python cryptic_utils.py decrypt "PrivateKey" "PublicKey" "Encrypted String"
+python cryptic_utils.py decrypt "Crypto_Privatekey" "Crypto_Publickey" "Encrypted String"
 ```
 eg usage
 ```
