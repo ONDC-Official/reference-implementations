@@ -35,6 +35,14 @@ export ENCRYPTION_PRIVATE_KEY=<Encryption_Privatekey>
 export ENCRYPTION_PUBLIC_KEY=<Encryption_Publickey>
 ```
 
+4a. In windows, here is the command:
+```
+set PRIVATE_KEY=<Signing_private_key>
+set PUBLIC_KEY=<Signing_public_key>
+set ENCRYPTION_PRIVATE_KEY=<Encryption_Privatekey>
+set ENCRYPTION_PUBLIC_KEY=<Encryption_Publickey>
+```
+
 5. Create authorisation header
 ```
 python cryptic_utils.py create_authorisation_header
