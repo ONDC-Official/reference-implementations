@@ -13,3 +13,6 @@
 [submodule "frontend-ui/frontend-react-js-based-buyer-app"]
 	path = frontend-ui/frontend-react-js-based-buyer-app
 	url = https://github.com/Open-network-for-digital-commerce/biap-app-ui-front.git
+[submodule "utilities/stream"]
+	path = utilities/stream
+	url = https://github.com/beckn-on-succinct/stream
