@@ -38,6 +38,7 @@ const checkOnInit = (data, msgIdSet) => {
           ] = `Price value for '${breakup["@ondc/org/title_type"]}' should not have more than 2 decimal places`;
         }
         totalBreakup += parseFloat(breakup?.price?.value);
+        totalBreakup = parseFloat(totalBreakup.toFixed(2));
         if (breakup["@ondc/org/title_type"] === "tax") tax_present = true;
         onSearchProvArr?.forEach((provider) => {
           if (provider.id === provId) {
