@@ -51,3 +51,17 @@ const isValid = await createVLookupSignature({
 ```
 
 The method returns a signature that can be used in the /vlookup call on the registry.
+
+
+## Release Notes
+
+### [v2.1.0] - 2024-14-05
+
+
+#### Changed
+- Removed the JSON.parser in code
+- Accepting JSON as string
+
+#### Fixed
+- Fixed a bug that caused the package to give NACK for valid signature
+
