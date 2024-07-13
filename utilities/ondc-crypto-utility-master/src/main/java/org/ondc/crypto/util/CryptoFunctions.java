@@ -60,7 +60,7 @@ public class CryptoFunctions {
 		 * 
 		 * byte[] signature= CryptoFunctions.sign(signingKeyPair.getPrivateKey(), message.getBytes());
 		 * 
-		 * boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublickKey());
+		 * boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublicKey());
 		 * </pre>
 
 		 * @author SujeetS
@@ -102,7 +102,7 @@ public class CryptoFunctions {
 		 * 
 		 * String message="message to be signed";
 		 * byte[] signature= CryptoFunctions.sign(signingKeyPair.getPrivateKey(), message.getBytes());
-		 * boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublickKey());
+		 * boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublicKey());
 		 * </pre>
 
 		 * @author SujeetS
@@ -132,7 +132,7 @@ public class CryptoFunctions {
 		 * 
 		 * String message="message to be signed";
 		 * byte[] signature= CryptoFunctions.sign(signingKeyPair.getPrivateKey(), message.getBytes());
-		 * boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublickKey());
+		 * boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublicKey());
 		 * </pre>
 		 * @author SujeetS
 		 * @param signature the signature that needs to be verified
@@ -192,22 +192,22 @@ public class CryptoFunctions {
 		 * 		} 
 		 * 		String message="message to be encrypted";
 		 * 		
-		 * 		byte[] encrypted= CryptoFunctions.encryptDecrypt(Cipher.ENCRYPT_MODE,message.getBytes(),senderEncDecKeyPair.getPrivateKey(),receiverEncDecKeyPair.getPublickKey());
+		 * 		byte[] encrypted= CryptoFunctions.encryptDecrypt(Cipher.ENCRYPT_MODE,message.getBytes(),senderEncDecKeyPair.getPrivateKey(),receiverEncDecKeyPair.getPublicKey());
 		 * 		
 		 * 		System.out.println("\n\n/* Sender Side /");
 		 * 		System.out.println("{");
 		 * 		System.out.println("\t\"plainChallengeString \":\""+message +"\",");
 		 * 		System.out.println("\t\"EncryptedChallengeString \":\""+Base64.getEncoder().encodeToString(encrypted)+"\",");
 		 * 		System.out.println("\t\"senderPrivateKey \":\""+Base64.getEncoder().encodeToString(senderEncDecKeyPair.getPrivateKey()) +"\",");
-		 * 		System.out.println("\t\"receiverPublicKey \":\""+Base64.getEncoder().encodeToString(receiverEncDecKeyPair.getPublickKey()) +"\"");
+		 * 		System.out.println("\t\"receiverPublicKey \":\""+Base64.getEncoder().encodeToString(receiverEncDecKeyPair.getPublicKey()) +"\"");
 		 * 		System.out.println("}\n\n");
-		 * 		byte[] decrypted= CryptoFunctions.encryptDecrypt(Cipher.DECRYPT_MODE,encrypted,receiverEncDecKeyPair.getPrivateKey(),senderEncDecKeyPair.getPublickKey());
+		 * 		byte[] decrypted= CryptoFunctions.encryptDecrypt(Cipher.DECRYPT_MODE,encrypted,receiverEncDecKeyPair.getPrivateKey(),senderEncDecKeyPair.getPublicKey());
 		 * 		String decryptedMessage=new String(decrypted);
 		 * 		System.out.println("\n\n/** Receiver Side ");
 		 * 		System.out.println("{");
 		 * 		System.out.println("\t\"DecryptedChallengeString \":\""+decryptedMessage+"\",");
 		 * 		System.out.println("\t\"receiverPrivateKey \":\""+Base64.getEncoder().encodeToString(receiverEncDecKeyPair.getPrivateKey()) +"\",");
-		 * 		System.out.println("\t\"senderPublicKey \":\""+Base64.getEncoder().encodeToString(senderEncDecKeyPair.getPublickKey()) +"\"");
+		 * 		System.out.println("\t\"senderPublicKey \":\""+Base64.getEncoder().encodeToString(senderEncDecKeyPair.getPublicKey()) +"\"");
 		 * 		System.out.println("}");
 		 * </pre>
 		 * @author SujeetS

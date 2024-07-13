@@ -58,13 +58,13 @@ public class CryptoTest {
 		System.out.println("}\n\n");
 		
 		
-		boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublickKey());
+		boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublicKey());
 		
 		System.out.println("\n\n/** Receiver Side **/");
 		System.out.println("{");
 		System.out.println("\t\"message \":\""+message +"\",");
 		System.out.println("\t\"signature \":\""+Base64.getEncoder().encodeToString(signature)+"\",");
-		System.out.println("\t\"publicKey \":\""+Base64.getEncoder().encodeToString(signingKeyPair.getPublickKey()) +"\",");
+		System.out.println("\t\"publicKey \":\""+Base64.getEncoder().encodeToString(signingKeyPair.getPublicKey()) +"\",");
 		System.out.println("\t\"verified \":\""+verificationResult +"\",");
 		System.out.println("}\n\n");
 		if(verificationResult) 
@@ -106,13 +106,13 @@ public class CryptoTest {
 		
 		message="tampered message to be verified";
 		
-		boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublickKey());
+		boolean verificationResult=CryptoFunctions.verify(signature, message.getBytes(), signingKeyPair.getPublicKey());
 		
 		System.out.println("\n\n/** Receiver Side **/");
 		System.out.println("{");
 		System.out.println("\t\"message \":\""+message +"\",");
 		System.out.println("\t\"signature \":\""+Base64.getEncoder().encodeToString(signature)+"\",");
-		System.out.println("\t\"publicKey \":\""+Base64.getEncoder().encodeToString(signingKeyPair.getPublickKey()) +"\",");
+		System.out.println("\t\"publicKey \":\""+Base64.getEncoder().encodeToString(signingKeyPair.getPublicKey()) +"\",");
 		System.out.println("\t\"verified \":\""+verificationResult +"\",");
 		System.out.println("}\n\n");
 		
@@ -156,7 +156,7 @@ public class CryptoTest {
 		} 
 		String message="message to be encrypted";
 		
-		byte[] encrypted= CryptoFunctions.encryptDecrypt(Cipher.ENCRYPT_MODE,message.getBytes(),senderEncDecKeyPair.getPrivateKey(),receiverEncDecKeyPair.getPublickKey());
+		byte[] encrypted= CryptoFunctions.encryptDecrypt(Cipher.ENCRYPT_MODE,message.getBytes(),senderEncDecKeyPair.getPrivateKey(),receiverEncDecKeyPair.getPublicKey());
 		
 		System.out.println("Encryption :: [OK]");
 		
@@ -165,10 +165,10 @@ public class CryptoTest {
 		System.out.println("\t\"plainChallengeString \":\""+message +"\",");
 		System.out.println("\t\"EncryptedChallengeString \":\""+Base64.getEncoder().encodeToString(encrypted)+"\",");
 		System.out.println("\t\"senderPrivateKey \":\""+Base64.getEncoder().encodeToString(senderEncDecKeyPair.getPrivateKey()) +"\",");
-		System.out.println("\t\"receiverPublicKey \":\""+Base64.getEncoder().encodeToString(receiverEncDecKeyPair.getPublickKey()) +"\"");
+		System.out.println("\t\"receiverPublicKey \":\""+Base64.getEncoder().encodeToString(receiverEncDecKeyPair.getPublicKey()) +"\"");
 		System.out.println("}\n\n");
 		
-		byte[] decrypted= CryptoFunctions.encryptDecrypt(Cipher.DECRYPT_MODE,encrypted,receiverEncDecKeyPair.getPrivateKey(),senderEncDecKeyPair.getPublickKey());
+		byte[] decrypted= CryptoFunctions.encryptDecrypt(Cipher.DECRYPT_MODE,encrypted,receiverEncDecKeyPair.getPrivateKey(),senderEncDecKeyPair.getPublicKey());
 		System.out.println("Decryption :: [OK]");
 		
 		String decryptedMessage=new String(decrypted);
@@ -178,7 +178,7 @@ public class CryptoTest {
 		System.out.println("{");
 		System.out.println("\t\"decryptedChallengeString \":\""+decryptedMessage+"\",");
 		System.out.println("\t\"receiverPrivateKey \":\""+Base64.getEncoder().encodeToString(receiverEncDecKeyPair.getPrivateKey()) +"\",");
-		System.out.println("\t\"senderPublicKey \":\""+Base64.getEncoder().encodeToString(senderEncDecKeyPair.getPublickKey()) +"\",");
+		System.out.println("\t\"senderPublicKey \":\""+Base64.getEncoder().encodeToString(senderEncDecKeyPair.getPublicKey()) +"\",");
 		System.out.println("\t\"match\":\""+message.equals(decryptedMessage)+"\"");
 			
 		System.out.println("}");
