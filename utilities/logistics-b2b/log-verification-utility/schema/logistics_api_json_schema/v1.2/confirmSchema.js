@@ -88,6 +88,7 @@ module.exports = {
           properties: {
             id: {
               type: "string",
+              pattern: "^[a-zA-Z0-9]{1,32}$",
               allOf: [
                 {
                   not: {
