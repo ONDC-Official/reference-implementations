@@ -206,9 +206,17 @@ module.exports = {
                       },
                       duration: {
                         type: "string",
+                        const: {
+                          $data:
+                            "/confirm/0/message/order/items/0/time/duration",
+                        },
                       },
                       timestamp: {
                         type: "string",
+                        const: {
+                          $data:
+                          "/confirm/0/message/order/items/0/time/timestamp",
+                        },
                       },
                     },
                     required: ["label", "duration", "timestamp"],
@@ -741,7 +749,7 @@ module.exports = {
                     $data: "/confirm/0/message/order/billing/name",
                   },
                   errorMessage:
-                    "mismatches in /billing in /confirm and /on_confirm",
+                    "mismatches in /billing from /confirm",
                 },
                 address: {
                   type: "object",
@@ -753,7 +761,7 @@ module.exports = {
                         $data: "/confirm/0/message/order/billing/address/name",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                     building: {
                       type: "string",
@@ -762,7 +770,7 @@ module.exports = {
                           "/confirm/0/message/order/billing/address/building",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                     locality: {
                       type: "string",
@@ -771,7 +779,7 @@ module.exports = {
                           "/confirm/0/message/order/billing/address/locality",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                     city: {
                       type: "string",
@@ -779,7 +787,7 @@ module.exports = {
                         $data: "/confirm/0/message/order/billing/address/city",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                     state: {
                       type: "string",
@@ -787,7 +795,7 @@ module.exports = {
                         $data: "/confirm/0/message/order/billing/address/state",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                     country: {
                       type: "string",
@@ -796,7 +804,7 @@ module.exports = {
                           "/confirm/0/message/order/billing/address/country",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                     area_code: {
                       type: "string",
@@ -805,7 +813,7 @@ module.exports = {
                           "/confirm/0/message/order/billing/address/area code",
                       },
                       errorMessage:
-                        "mismatches in /billing in /confirm and /on_confirm",
+                        "mismatches in /billing from /confirm",
                     },
                   },
                   additionalProperties: false,
@@ -825,7 +833,7 @@ module.exports = {
                     $data: "/confirm/0/message/order/billing/tax_number",
                   },
                   errorMessage:
-                    "mismatches in /billing in /confirm and /on_confirm",
+                    "mismatches in /billing from /confirm",
                 },
                 phone: {
                   type: "string",
@@ -833,7 +841,7 @@ module.exports = {
                     $data: "/confirm/0/message/order/billing/phone",
                   },
                   errorMessage:
-                    "mismatches in /billing in /confirm and /on_confirm",
+                    "mismatches in /billing from /confirm",
                 },
                 email: {
                   type: "string",
@@ -841,7 +849,7 @@ module.exports = {
                     $data: "/confirm/0/message/order/billing/email",
                   },
                   errorMessage:
-                    "mismatches in /billing in /confirm and /on_confirm",
+                    "mismatches in /billing from /confirm",
                 },
                 created_at: {
                   type: "string",
@@ -849,7 +857,7 @@ module.exports = {
                     $data: "/confirm/0/message/order/billing/created_at",
                   },
                   errorMessage:
-                    "mismatches in /billing in /confirm and /on_confirm",
+                    "mismatches in /billing from /confirm",
                 },
                 updated_at: {
                   type: "string",
@@ -857,7 +865,7 @@ module.exports = {
                     $data: "/confirm/0/message/order/billing/updated_at",
                   },
                   errorMessage:
-                    "mismatches in /billing in /confirm and /on_confirm",
+                    "mismatches in /billing from /confirm",
                 },
               },
               additionalProperties: false,
@@ -1072,7 +1080,7 @@ module.exports = {
               const: {
                 $data: "/confirm/0/message/order/created_at",
               },
-              errorMessage: "mismatches in /confirm and /on_confirm",
+              errorMessage: "mismatches from /confirm",
             },
             updated_at: {
               type: "string",

@@ -529,7 +529,7 @@ module.exports = {
                                   type: "integer",
                                 },
                               },
-                              required: ["measure", "count"],
+                              required: ["count"],
                             },
                             maximum: {
                               type: "object",
@@ -559,7 +559,7 @@ module.exports = {
                                   type: "integer",
                                 },
                               },
-                              required: ["measure", "count"],
+                              required: ["count"],
                             },
                             minimum: {
                               type: "object",
@@ -589,7 +589,7 @@ module.exports = {
                                   type: "integer",
                                 },
                               },
-                              required: ["measure", "count"],
+                              required: [ "count"],
                             },
                           },
                           required: ["unitized", "available"],
@@ -865,7 +865,6 @@ module.exports = {
                                     },
                                     value: {
                                       type: "string",
-                                      minLength: 1,
                                     },
                                   },
                                   required: ["descriptor", "value"],

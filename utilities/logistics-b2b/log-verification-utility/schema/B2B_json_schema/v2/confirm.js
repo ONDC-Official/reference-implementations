@@ -610,6 +610,62 @@ module.exports = {
               },
               required: ["price", "breakup", "ttl"],
             },
+            cancellation_terms: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  fulfillment_state: {
+                    type: "object",
+                    properties: {
+                      descriptor: {
+                        type: "object",
+                        properties: {
+                          code: {
+                            type: "string",
+                            enum: constants.FULFILLMENT_STATE
+                          },
+                        },
+                        required: ["code"],
+                      },
+                    },
+                    required: ["descriptor"],
+                  },
+                  reason_required: {
+                    type: "boolean",
+                  },
+                  cancellation_fee: {
+                    type: "object",
+                    maxProperties: 1,
+                    properties: {
+                      percentage: {
+                        type: "string",
+                      },
+                      amount: {
+                        type: "object",
+                        properties: {
+                          currency: {
+                            type: "string",
+                            enum: constants.CURRENCY
+                          },
+                          value: {
+                            type: "string",
+                          },
+                        },
+                        required: ["currency", "value"],
+                      },
+                    },
+                    required: [],
+                  },
+                },
+                additionalProperties: false,
+                required: [
+                  "fulfillment_state",
+                  "reason_required",
+                  "cancellation_fee",
+                ],
+              },
+            },
             payments: {
               type: "array",
               items: {
@@ -642,7 +698,7 @@ module.exports = {
                   },
                   collected_by: {
                     type: "string",
-                    enum: ["BAP", "BPP"],
+                    enum: constants.PAYMENT_COLLECTEDBY,
                   },
                   "@ondc/org/buyer_app_finder_fee_type": {
                     type: "string",
@@ -827,6 +883,7 @@ module.exports = {
             "items",
             "billing",
             "fulfillments",
+            "cancellation_terms",
             "quote",
             "payments",
             "created_at",

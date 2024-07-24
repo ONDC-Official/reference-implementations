@@ -57,6 +57,9 @@ module.exports = {
         },
         transaction_id: {
           type: "string",
+          const: { $data: "/select/0/context/transaction_id" },
+          errorMessage:
+            "Transaction ID should be same across the transaction: ${/select/0/context/transaction_id}",
         },
         message_id: {
           type: "string",
@@ -435,7 +438,7 @@ module.exports = {
             },
           },
           additionalProperties: false,
-          required: ["provider", "items", "fulfillments", "payments", "tags"],
+          required: ["provider", "items", "fulfillments", "tags"],
         },
       },
       required: ["order"],

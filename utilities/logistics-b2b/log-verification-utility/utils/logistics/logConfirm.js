@@ -7,6 +7,7 @@ const checkConfirm = (data, msgIdSet) => {
   let cnfrmObj = {};
   let confirm = data;
   const contextTimestamp = confirm.context.timestamp;
+  dao.setValue("cnfrmTimestamp",contextTimestamp);
   let version = confirm.context.core_version;
   let missingTags = [];
   let onSearchProvArr = dao.getValue("providersArr");

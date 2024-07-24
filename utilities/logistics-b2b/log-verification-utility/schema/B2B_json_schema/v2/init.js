@@ -283,6 +283,17 @@ module.exports = {
                 updated_at: {
                   type: "string",
                 },
+                country: {
+                  type: "object",
+                  properties: {
+                    code: {
+                      type: "string",
+                    },
+                  },
+                },
+                area_code: {
+                  type: "string",
+                },
               },
               additionalProperties: false,
               required: ["name", "address", "state", "city", "tax_id", "phone"],
@@ -500,7 +511,7 @@ module.exports = {
                   },
                   collected_by: {
                     type: "string",
-                    enum: ["BAP", "BPP"],
+                    enum: constants.PAYMENT_COLLECTEDBY,
                     const: {
                       $data:
                         "/on_select/0/message/order/payments/0/collected_by",

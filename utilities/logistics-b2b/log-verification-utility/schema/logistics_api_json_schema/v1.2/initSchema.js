@@ -372,15 +372,9 @@ module.exports = {
                 },
                 created_at: {
                   type: "string",
-                  const: { $data: "4/context/timestamp" },
-                  errorMessage:
-                    "does not match context timestamp - ${4/context/timestamp} ",
                 },
                 updated_at: {
                   type: "string",
-                  const: { $data: "4/context/timestamp" },
-                  errorMessage:
-                    "does not match context timestamp - ${4/context/timestamp} ",
                 },
               },
               required: [
@@ -396,63 +390,6 @@ module.exports = {
             payment: {
               type: "object",
               properties: {
-                "@ondc/org/settlement_details": {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      settlement_counterparty: {
-                        type: "string",
-                      },
-                      settlement_type: {
-                        type: "string",
-                        enum: constants.SETTLEMENT_TYPE,
-                      },
-                      beneficiary_name: {
-                        type: "string",
-                      },
-                      upi_address: {
-                        type: "string",
-                      },
-                      settlement_bank_account_no: {
-                        type: "string",
-                      },
-                      settlement_ifsc_code: {
-                        type: "string",
-                      },
-                    },
-                    allOf: [
-                      {
-                        if: {
-                          properties: {
-                            settlement_type: {
-                              const: "upi",
-                            },
-                          },
-                        },
-                        then: {
-                          required: ["upi_address"],
-                        },
-                      },
-                      {
-                        if: {
-                          properties: {
-                            settlement_type: {
-                              const: ["neft", "rtgs"],
-                            },
-                          },
-                        },
-                        then: {
-                          required: [
-                            "settlement_ifsc_code",
-                            "settlement_bank_account_no",
-                          ],
-                        },
-                      },
-                    ],
-                    required: ["settlement_counterparty", "settlement_type"],
-                  },
-                },
                 type: {
                   type: "string",
                   enum: constants.PAYMENT_TYPE,

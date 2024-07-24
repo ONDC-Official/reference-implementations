@@ -40,7 +40,7 @@ else {
     console.log(`Checking if PCC code required in case of P2P/P2H2P shipments`);
 
     fulfillments.forEach((fulfillment) => {
-      
+
       if(fulfillment["@ondc/org/awb_no"] && p2h2p) awbNo= true;
       if (
         rts === "yes" &&

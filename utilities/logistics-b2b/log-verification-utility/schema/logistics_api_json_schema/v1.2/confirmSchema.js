@@ -718,14 +718,14 @@ module.exports = {
                   const: {
                     $data: "/init/0/message/order/billing/created_at",
                   },
-                  errorMessage: "mismatches in /billing in /init and /confirm",
+                  errorMessage: "mismatches in /billing from /init",
                 },
                 updated_at: {
                   type: "string",
                   const: {
                     $data: "/init/0/message/order/billing/updated_at",
                   },
-                  errorMessage: "mismatches in /billing in /init and /confirm",
+                  errorMessage: "mismatches in /billing from /init",
                 },
               },
               additionalProperties: false,

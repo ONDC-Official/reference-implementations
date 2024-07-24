@@ -128,6 +128,7 @@ module.exports = {
                       required: ["start", "end"],
                     },
                   },
+                  required:["days","schedule","duration","range"]
                 },
               },
             },

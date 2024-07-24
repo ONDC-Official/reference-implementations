@@ -29,7 +29,7 @@ const checkOnSelect = async (data, msgIdSet) => {
         if (citycode === "std:999" && !fulfillmentTags) {
           onSelectObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
         }
-        ffId = fulfillment?.id;
+        if(fulfillment?.type==='Delivery') ffId = fulfillment?.id;
         ffState = fulfillment?.state?.descriptor?.code;
       });
     }
@@ -67,6 +67,8 @@ const checkOnSelect = async (data, msgIdSet) => {
       let quantity = breakup["@ondc/org/item_quantity"];
 
 
+      // console.log("flag",breakup["@ondc/org/title_type"],
+      //   breakup["@ondc/org/item_id"],ffId );
     
       if (
         breakup["@ondc/org/title_type"] === "delivery" &&

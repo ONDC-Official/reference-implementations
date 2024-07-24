@@ -108,10 +108,11 @@ module.exports = Object.freeze({
     "Immediate Delivery",
     "Same Day Delivery",
     "Next Day Delivery",
+    "Takeaway"
   ],
   PAYMENT_TYPE: ["ON-ORDER", "ON-FULFILLMENT", "POST-FULFILLMENT"],
-  PAYMENT_COLLECTEDBY: ["BAP", "BPP"],
-  UNITS_WEIGHT: ["unit","dozen","gram","kilogram","tonne","litre","millilitre"],
+  PAYMENT_COLLECTEDBY: ["BAP", "BPP","SOR"],
+  UNITS_WEIGHT: ["gram","kilogram"],
   UNITS_DIMENSIONS: ["centimeter", "meter"],
   CATEGORIES: [
     "Grocery",

@@ -89,7 +89,7 @@ const checkOnStatus = (data, msgIdSet) => {
           }
         }
         if (ffState === "Order-picked-up") {
-          if(!trackingEnabled){
+          if(!trackingEnabled && fulfillment.tracking === true){
             onStatusObj.trackingTagErr=`tracking tag to be provided in fulfillments/tags`
           }
           if (orderState !== "In-progress") {
@@ -150,7 +150,8 @@ const checkOnStatus = (data, msgIdSet) => {
           if (_.gt(deliveryTime, contextTime)) {
             onStatusObj.tmstmpErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be future dated w.r.t context/timestamp for fulfillment state - ${ffState}`;
           }
-          if (_.gte(pickupTime, deliveryTime)) {
+
+          if (_.gte(dao.getValue("pickupTime"), deliveryTime)) {
             onStatusObj.tmstmpErr = `Pickup timestamp (fulfillments/start/time/timestamp) cannot be greater than or equal to  delivery timestamp (fulfillments/end/time/timestamp) for fulfillment state - ${ffState}`;
           }
         }
