@@ -47,7 +47,7 @@ public class CryptoKeyPair {
 	 *
 	 * @return the public key
 	 */
-	public byte[] getPublickKey() {
+	public byte[] getPublicKey() {
 		return publicKey;
 	}
 	

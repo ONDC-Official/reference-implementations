@@ -12,7 +12,7 @@ public class Test {
         CryptoKeyPair signingKeyPair=CryptoFunctions.generateSigningKeyPair();
         byte[] privateKey = signingKeyPair.getPrivateKey();
         System.out.printf("Private Key: %s \n",Base64.getEncoder().encodeToString(privateKey));
-        System.out.printf("Public Key: %s \n",Base64.getEncoder().encodeToString(signingKeyPair.getPublickKey()));
+        System.out.printf("Public Key: %s \n",Base64.getEncoder().encodeToString(signingKeyPair.getPublicKey()));
 
         byte[] signMessage = Test.sign(privateKey,"IND|ONDC:RET10|sellerApp|std:080|ref-app-seller-staging-v2.ondc.org".getBytes());
         System.out.println(Base64.getEncoder().encodeToString(signMessage));
