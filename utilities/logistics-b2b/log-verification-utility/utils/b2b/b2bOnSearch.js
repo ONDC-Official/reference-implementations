@@ -32,8 +32,8 @@ const checkOnSearch = async (data, msgIdSet) => {
 
       dao.setValue("providersArr", providers);
       providers.forEach((provider, i) => {
-        console.log(citycode, provider?.creds);
-        if (citycode === "std:999" && !provider.creds || provider?.creds?.length<1) {
+        
+        if (citycode === "std:999" && (!provider.creds || provider?.creds?.length<1)) {
           onSrchObj.msngCreds = `Creds are required for exports in /providers`;
         }
         let itemsArr = provider.items;
