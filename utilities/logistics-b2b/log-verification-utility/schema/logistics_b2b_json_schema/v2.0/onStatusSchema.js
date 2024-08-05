@@ -1,4 +1,4 @@
-import {
+const {
 	CONTEXT_DOMAIN,
 	VERSION,
 	TERMS,
@@ -9,10 +9,10 @@ import {
 	FULFILLMENT_STATES,
 	DELIVERY_TERMS_TAGS,
 	QUOTE_TITLE,
-} from "../constants";
+} = require("../constants");
 
 module.exports = {
-	$id: "http://example.com/schema/onUpdateSchema",
+	$id: "http://example.com/schema/onStatusSchema",
 	type: "object",
 	properties: {
 		context: {
@@ -49,7 +49,7 @@ module.exports = {
 				},
 				action: {
 					type: "string",
-					const: "on_update",
+					const: "on_status",
 				},
 				version: {
 					type: "string",
@@ -106,6 +106,25 @@ module.exports = {
 						},
 						status: {
 							type: "string",
+							enum: ["In-progress", "Cancelled"],
+						},
+						cancellation: {
+							type: "object",
+							properties: {
+								cancelled_by: {
+									type: "string",
+								},
+								reason: {
+									type: "object",
+									properties: {
+										id: {
+											type: "string",
+										},
+									},
+									required: ["id"],
+								},
+							},
+							required: ["cancelled_by", "reason"],
 						},
 						provider: {
 							type: "object",
@@ -171,16 +190,10 @@ module.exports = {
 												type: "string",
 											},
 										},
-										required: ["label", "duration", "timestamp"],
+										required: ["label", "duration"],
 									},
 								},
-								required: [
-									"id",
-									"category_ids",
-									"fulfillment_ids",
-									"descriptor",
-									"time",
-								],
+								required: ["id", "category_ids", "descriptor", "time"],
 							},
 						},
 						quote: {
@@ -245,7 +258,7 @@ module.exports = {
 									},
 									type: {
 										type: "string",
-										enum: FULFILLMENT_TYPES,
+										enum : FULFILLMENT_TYPES
 									},
 									state: {
 										type: "object",
@@ -255,7 +268,7 @@ module.exports = {
 												properties: {
 													code: {
 														type: "string",
-														enum : FULFILLMENT_STATES
+													  enum: FULFILLMENT_STATES
 													},
 												},
 												required: ["code"],
@@ -442,7 +455,7 @@ module.exports = {
 																properties: {
 																	code: {
 																		type: "string",
-																		enum:DELIVERY_TERMS_TAGS
+																		enum: DELIVERY_TERMS_TAGS
 																	},
 																},
 																required: ["code"],
@@ -459,7 +472,7 @@ module.exports = {
 										},
 									},
 								},
-								required: ["id", "type", "state", "tracking", "stops"],
+								required: ["id", "type", "state", "tracking", "stops", "tags"],
 							},
 						},
 						billing: {
@@ -496,16 +509,7 @@ module.exports = {
 									required: ["timestamp"],
 								},
 							},
-							required: [
-								"name",
-								"address",
-								"city",
-								"state",
-								"tax_id",
-								"phone",
-								"email",
-								"time"
-							],
+							required: ["name", "address"],
 						},
 						payments: {
 							type: "array",
@@ -543,26 +547,27 @@ module.exports = {
 									},
 									type: {
 										type: "string",
+										enum: ["ON-ORDER","ON-FULFILLMENT","POST-FULFILLMENT"],
 									},
 									tags: {
 										type: "array",
-										items: [
-											{
-												type: "object",
-												properties: {
-													descriptor: {
-														type: "object",
-														properties: {
-															code: {
-																type: "string",
-																enum: PAYMENT_TERMS,
-															},
+										items: {
+											type: "object",
+											properties: {
+												descriptor: {
+													type: "object",
+													properties: {
+														code: {
+															type: "string",
+															enum: PAYMENT_TERMS,
 														},
-														required: ["code"],
 													},
-													list: {
-														type: "array",
-														items: {
+													required: ["code"],
+												},
+												list: {
+													type: "array",
+													items: [
+														{
 															type: "object",
 															properties: {
 																descriptor: {
@@ -580,12 +585,12 @@ module.exports = {
 																},
 															},
 															required: ["descriptor", "value"],
-														},
-													},
+														}
+													],
 												},
-												required: ["descriptor", "list"],
-											}
-										],
+											},
+											required: ["descriptor", "list"],
+										},
 									},
 								},
 								required: ["id", "collected_by", "params", "type", "tags"],
@@ -601,7 +606,6 @@ module.exports = {
 										properties: {
 											code: {
 												type: "string",
-												enum: TERMS,
 											},
 										},
 										required: ["code"],
@@ -616,7 +620,6 @@ module.exports = {
 													properties: {
 														code: {
 															type: "string",
-															enum: LOG_ORDER_TAGS,
 														},
 													},
 													required: ["code"],
@@ -645,6 +648,7 @@ module.exports = {
 						"fulfillments",
 						"billing",
 						"payments",
+						"tags",
 						"updated_at",
 					],
 				},

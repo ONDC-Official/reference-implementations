@@ -1,4 +1,4 @@
-import { CONTEXT_DOMAIN, VERSION } from "../constants";
+const { CONTEXT_DOMAIN, VERSION } = require("../constants");
 module.exports = {
 	$id: "http://example.com/schema/cancelSchema",
 	type: "object",

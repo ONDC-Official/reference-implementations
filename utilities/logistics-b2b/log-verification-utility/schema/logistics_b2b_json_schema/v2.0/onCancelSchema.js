@@ -1,19 +1,18 @@
-import {
+const {
+	CONTEXT_DOMAIN,
+	VERSION,
 	TERMS,
 	LOG_ORDER_TAGS,
-	VERSION,
-	CONTEXT_DOMAIN,
 	PAYMENT_TERMS,
 	PAYMENT_BPP_TERMS,
 	FULFILLMENT_TYPES,
-	FULFILLMENT_STATES,
 	PAYMENT_TYPES,
 	DELIVERY_TERMS_TAGS,
 	QUOTE_TITLE,
-} from "../constants";
+} = require("../constants");
 
 module.exports = {
-	$id: "http://example.com/schema/onConfirmSchema",
+	$id: "http://example.com/schema/onCancelSchema",
 	type: "object",
 	properties: {
 		context: {
@@ -21,7 +20,7 @@ module.exports = {
 			properties: {
 				domain: {
 					type: "string",
-					enum : CONTEXT_DOMAIN
+					enum: CONTEXT_DOMAIN,
 				},
 				location: {
 					type: "object",
@@ -50,10 +49,11 @@ module.exports = {
 				},
 				action: {
 					type: "string",
+					const: "on_cancel",
 				},
 				version: {
 					type: "string",
-					const : VERSION
+					const: VERSION,
 				},
 				bap_id: {
 					type: "string",
@@ -106,6 +106,25 @@ module.exports = {
 						},
 						status: {
 							type: "string",
+							const: "Cancelled",
+						},
+						cancellation: {
+							type: "object",
+							properties: {
+								cancelled_by: {
+									type: "string",
+								},
+								reason: {
+									type: "object",
+									properties: {
+										id: {
+											type: "string",
+										},
+									},
+									required: ["id"],
+								},
+							},
+							required: ["cancelled_by", "reason"],
 						},
 						provider: {
 							type: "object",
@@ -126,7 +145,7 @@ module.exports = {
 									},
 								},
 							},
-							required: ["id"],
+							required: ["id", "locations"],
 						},
 						items: {
 							type: "array",
@@ -142,27 +161,44 @@ module.exports = {
 											type: "string",
 										},
 									},
+									descriptor: {
+										type: "object",
+										properties: {
+											code: {
+												type: "string",
+												enum: ["P2P", "P2H2P"],
+											},
+										},
+										required: ["code"],
+									},
 									fulfillment_ids: {
 										type: "array",
 										items: {
 											type: "string",
 										},
 									},
-									descriptor: {
+									time: {
 										type: "object",
 										properties: {
-											code: {
+											label: {
+												type: "string",
+											},
+											duration: {
+												type: "string",
+											},
+											timestamp: {
 												type: "string",
 											},
 										},
-										required: ["code"],
+										required: ["label", "duration"],
 									},
 								},
 								required: [
 									"id",
 									"category_ids",
-									"fulfillment_ids",
 									"descriptor",
+									"fulfillment_ids",
+									"time",
 								],
 							},
 						},
@@ -197,7 +233,7 @@ module.exports = {
 											},
 											title: {
 												type: "string",
-												enum : QUOTE_TITLE
+												enum: QUOTE_TITLE,
 											},
 											price: {
 												type: "object",
@@ -228,7 +264,7 @@ module.exports = {
 									},
 									type: {
 										type: "string",
-										enum : FULFILLMENT_TYPES
+										enum: FULFILLMENT_TYPES,
 									},
 									state: {
 										type: "object",
@@ -238,6 +274,7 @@ module.exports = {
 												properties: {
 													code: {
 														type: "string",
+														enum: ["Cancelled", "RTO-Initiated"],
 													},
 												},
 												required: ["code"],
@@ -261,7 +298,7 @@ module.exports = {
 												},
 												type: {
 													type: "string",
-													enum : ["start","end"]
+													enum: ["start", "end"],
 												},
 												location: {
 													type: "object",
@@ -349,10 +386,7 @@ module.exports = {
 															required: ["content_type", "url"],
 														},
 													},
-													required: [
-														"short_desc",
-														"long_desc"
-													],
+													required: ["short_desc", "long_desc"],
 												},
 												time: {
 													type: "object",
@@ -394,7 +428,7 @@ module.exports = {
 													properties: {
 														code: {
 															type: "string",
-															enum: ["Delivery_Terms"],
+															enum: ["Delivery_Terms", "RTO_Event"],
 														},
 													},
 													required: ["code"],
@@ -427,59 +461,6 @@ module.exports = {
 									},
 								},
 								required: ["id", "type", "state", "tracking", "stops", "tags"],
-							},
-						},
-						cancellation_terms: {
-							type: "array",
-							items: {
-								type: "object",
-								properties: {
-									fulfillment_state: {
-										type: "object",
-										properties: {
-											descriptor: {
-												type: "object",
-												properties: {
-													code: {
-														type: "string",
-														enum: FULFILLMENT_STATES
-													},
-													short_desc: {
-														type: "string",
-													},
-												},
-												required: ["code", "short_desc"],
-											},
-										},
-										required: ["descriptor"],
-									},
-									reason_required: {
-										type: "boolean",
-									},
-									cancellation_fee: {
-										type: "object",
-										properties: {
-											amount: {
-												type: "object",
-												properties: {
-													currency: {
-														type: "string",
-													},
-													value: {
-														type: "string",
-													},
-												},
-												required: ["currency", "value"],
-											},
-										},
-										required: ["amount"],
-									},
-								},
-								required: [
-									"fulfillment_state",
-									"reason_required",
-									"cancellation_fee",
-								],
 							},
 						},
 						billing: {
@@ -516,16 +497,7 @@ module.exports = {
 									required: ["timestamp"],
 								},
 							},
-							required: [
-								"name",
-								"address",
-								"city",
-								"state",
-								"tax_id",
-								"phone",
-								"email",
-								"time",
-							],
+							required: ["name", "address"],
 						},
 						payments: {
 							type: "array",
@@ -537,6 +509,7 @@ module.exports = {
 									},
 									collected_by: {
 										type: "string",
+										enum: ["BAP", "BPP"],
 									},
 									params: {
 										type: "object",
@@ -554,16 +527,11 @@ module.exports = {
 												type: "string",
 											},
 										},
-										required: [
-											"amount",
-											"currency",
-											"bank_account_number",
-											"virtual_payment_address",
-										],
+										required: ["amount", "currency"],
 									},
 									type: {
 										type: "string",
-										enum : PAYMENT_TYPES
+										enum: PAYMENT_TYPES,
 									},
 									tags: {
 										type: "array",
@@ -620,6 +588,7 @@ module.exports = {
 										properties: {
 											code: {
 												type: "string",
+												enum: TERMS,
 											},
 										},
 										required: ["code"],
@@ -634,6 +603,7 @@ module.exports = {
 													properties: {
 														code: {
 															type: "string",
+															enum: LOG_ORDER_TAGS,
 														},
 													},
 													required: ["code"],
@@ -649,9 +619,6 @@ module.exports = {
 								required: ["descriptor", "list"],
 							},
 						},
-						created_at: {
-							type: "string",
-						},
 						updated_at: {
 							type: "string",
 						},
@@ -659,15 +626,14 @@ module.exports = {
 					required: [
 						"id",
 						"status",
+						"cancellation",
 						"provider",
 						"items",
 						"quote",
 						"fulfillments",
-						"cancellation_terms",
 						"billing",
 						"payments",
 						"tags",
-						"created_at",
 						"updated_at",
 					],
 				},

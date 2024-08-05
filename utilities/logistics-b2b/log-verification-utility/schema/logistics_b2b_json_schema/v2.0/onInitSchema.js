@@ -1,4 +1,4 @@
-import {
+const {
 	CONTEXT_DOMAIN,
 	VERSION,
 	TERMS,
@@ -6,13 +6,13 @@ import {
 	PAYMENT_TERMS,
 	PAYMENT_BPP_TERMS,
 	FULFILLMENT_TYPES,
+	FULFILLMENT_STATES,
 	PAYMENT_TYPES,
-	DELIVERY_TERMS_TAGS,
-	QUOTE_TITLE,
-} from "../constants";
+	QUOTE_TITLE
+} = require("../constants");
 
 module.exports = {
-	$id: "http://example.com/schema/onCancelSchema",
+	$id: "http://example.com/schema/onInitSchema",
 	type: "object",
 	properties: {
 		context: {
@@ -49,7 +49,7 @@ module.exports = {
 				},
 				action: {
 					type: "string",
-					const: "on_cancel",
+					const: "on_init",
 				},
 				version: {
 					type: "string",
@@ -101,31 +101,6 @@ module.exports = {
 				order: {
 					type: "object",
 					properties: {
-						id: {
-							type: "string",
-						},
-						status: {
-							type: "string",
-							const: "Cancelled",
-						},
-						cancellation: {
-							type: "object",
-							properties: {
-								cancelled_by: {
-									type: "string",
-								},
-								reason: {
-									type: "object",
-									properties: {
-										id: {
-											type: "string",
-										},
-									},
-									required: ["id"],
-								},
-							},
-							required: ["cancelled_by", "reason"],
-						},
 						provider: {
 							type: "object",
 							properties: {
@@ -145,7 +120,7 @@ module.exports = {
 									},
 								},
 							},
-							required: ["id", "locations"],
+							required: ["id"],
 						},
 						items: {
 							type: "array",
@@ -155,104 +130,21 @@ module.exports = {
 									id: {
 										type: "string",
 									},
-									category_ids: {
-										type: "array",
-										items: {
-											type: "string",
-										},
-									},
-									descriptor: {
-										type: "object",
-										properties: {
-											code: {
-												type: "string",
-												enum: ["P2P", "P2H2P"],
-											},
-										},
-										required: ["code"],
-									},
 									fulfillment_ids: {
 										type: "array",
 										items: {
 											type: "string",
 										},
 									},
-									time: {
-										type: "object",
-										properties: {
-											label: {
-												type: "string",
-											},
-											duration: {
-												type: "string",
-											},
-											timestamp: {
-												type: "string",
-											},
-										},
-										required: ["label", "duration"],
-									},
-								},
-								required: [
-									"id",
-									"category_ids",
-									"descriptor",
-									"fulfillment_ids",
-									"time",
-								],
-							},
-						},
-						quote: {
-							type: "object",
-							properties: {
-								price: {
-									type: "object",
-									properties: {
-										currency: {
-											type: "string",
-										},
-										value: {
+									category_ids: {
+										type: "array",
+										items: {
 											type: "string",
 										},
 									},
-									required: ["currency", "value"],
 								},
-								breakup: {
-									type: "array",
-									items: {
-										type: "object",
-										properties: {
-											item: {
-												type: "object",
-												properties: {
-													id: {
-														type: "string",
-													},
-												},
-												required: ["id"],
-											},
-											title: {
-												type: "string",
-												enum: QUOTE_TITLE,
-											},
-											price: {
-												type: "object",
-												properties: {
-													currency: {
-														type: "string",
-													},
-													value: {
-														type: "string",
-													},
-												},
-												required: ["currency", "value"],
-											},
-										},
-										required: ["item", "title", "price"],
-									},
-								},
+								required: ["id", "fulfillment_ids", "category_ids"],
 							},
-							required: ["price", "breakup"],
 						},
 						fulfillments: {
 							type: "array",
@@ -266,36 +158,11 @@ module.exports = {
 										type: "string",
 										enum: FULFILLMENT_TYPES,
 									},
-									state: {
-										type: "object",
-										properties: {
-											descriptor: {
-												type: "object",
-												properties: {
-													code: {
-														type: "string",
-														enum: ["Cancelled", "RTO-Initiated"],
-													},
-												},
-												required: ["code"],
-											},
-										},
-										required: ["descriptor"],
-									},
-									tracking: {
-										type: "boolean",
-									},
 									stops: {
 										type: "array",
 										items: {
 											type: "object",
 											properties: {
-												id: {
-													type: "string",
-												},
-												parent_stop_id: {
-													type: "string",
-												},
 												type: {
 													type: "string",
 													enum: ["start", "end"],
@@ -305,6 +172,10 @@ module.exports = {
 													properties: {
 														gps: {
 															type: "string",
+															pattern:
+																"^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
+															errorMessage:
+																"Incorrect gps value (minimum of six decimal places are required)",
 														},
 														address: {
 															type: "string",
@@ -330,9 +201,6 @@ module.exports = {
 														country: {
 															type: "object",
 															properties: {
-																name: {
-																	type: "string",
-																},
 																code: {
 																	type: "string",
 																},
@@ -357,6 +225,7 @@ module.exports = {
 													properties: {
 														phone: {
 															type: "string",
+															pattern: "^(\\d{10})$",
 														},
 														email: {
 															type: "string",
@@ -364,103 +233,12 @@ module.exports = {
 													},
 													required: ["phone"],
 												},
-												instructions: {
-													type: "object",
-													properties: {
-														short_desc: {
-															type: "string",
-														},
-														long_desc: {
-															type: "string",
-														},
-														additional_desc: {
-															type: "object",
-															properties: {
-																content_type: {
-																	type: "string",
-																},
-																url: {
-																	type: "string",
-																},
-															},
-															required: ["content_type", "url"],
-														},
-													},
-													required: ["short_desc", "long_desc"],
-												},
-												time: {
-													type: "object",
-													properties: {
-														range: {
-															type: "object",
-															properties: {
-																start: {
-																	type: "string",
-																},
-																end: {
-																	type: "string",
-																},
-															},
-															required: ["start", "end"],
-														},
-													},
-													required: ["range"],
-												},
 											},
-											required: [
-												"id",
-												"parent_stop_id",
-												"type",
-												"location",
-												"contact",
-												"instructions",
-												"time",
-											],
-										},
-									},
-									tags: {
-										type: "array",
-										items: {
-											type: "object",
-											properties: {
-												descriptor: {
-													type: "object",
-													properties: {
-														code: {
-															type: "string",
-															enum: ["Delivery_Terms", "RTO_Event"],
-														},
-													},
-													required: ["code"],
-												},
-												list: {
-													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															descriptor: {
-																type: "object",
-																properties: {
-																	code: {
-																		type: "string",
-																		enum: DELIVERY_TERMS_TAGS,
-																	},
-																},
-																required: ["code"],
-															},
-															value: {
-																type: "string",
-															},
-														},
-														required: ["descriptor", "value"],
-													},
-												},
-											},
-											required: ["descriptor", "list"],
+											required: ["type", "location", "contact"],
 										},
 									},
 								},
-								required: ["id", "type", "state", "tracking", "stops", "tags"],
+								required: ["id", "type", "stops"],
 							},
 						},
 						billing: {
@@ -499,6 +277,114 @@ module.exports = {
 							},
 							required: ["name", "address"],
 						},
+						quote: {
+							type: "object",
+							properties: {
+								price: {
+									type: "object",
+									properties: {
+										currency: {
+											type: "string",
+										},
+										value: {
+											type: "string",
+										},
+									},
+									required: ["currency", "value"],
+								},
+								breakup: {
+									type: "array",
+									items: {
+										type: "object",
+										properties: {
+											item: {
+												type: "object",
+												properties: {
+													id: {
+														type: "string",
+													},
+												},
+												required: ["id"],
+											},
+											title: {
+												type: "string",
+												enum : QUOTE_TITLE
+											},
+											price: {
+												type: "object",
+												properties: {
+													currency: {
+														type: "string",
+													},
+													value: {
+														type: "string",
+													},
+												},
+												required: ["currency", "value"],
+											},
+										},
+										required: ["item", "title", "price"],
+									},
+								},
+								ttl: {
+									type: "string",
+								},
+							},
+							required: ["price", "breakup", "ttl"],
+						},
+						cancellation_terms: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									fulfillment_state: {
+										type: "object",
+										properties: {
+											descriptor: {
+												type: "object",
+												properties: {
+													code: {
+														type: "string",
+														enum: FULFILLMENT_STATES,
+													},
+													short_desc: {
+														type: "string",
+													},
+												},
+												required: ["code", "short_desc"],
+											},
+										},
+										required: ["descriptor"],
+									},
+									reason_required: {
+										type: "boolean",
+									},
+									cancellation_fee: {
+										type: "object",
+										properties: {
+											amount: {
+												type: "object",
+												properties: {
+													currency: {
+														type: "string",
+													},
+													value: {
+														type: "string",
+													},
+												},
+												required: ["currency", "value"],
+											},
+										},
+										required: ["amount"],
+									},
+								},
+								required: [
+									"fulfillment_state",
+									"reason_required",
+									"cancellation_fee",
+								],
+							},
+						},
 						payments: {
 							type: "array",
 							items: {
@@ -509,7 +395,7 @@ module.exports = {
 									},
 									collected_by: {
 										type: "string",
-										enum: ["BAP", "BPP"],
+										enum: ["BAP","BPP"]
 									},
 									params: {
 										type: "object",
@@ -527,11 +413,16 @@ module.exports = {
 												type: "string",
 											},
 										},
-										required: ["amount", "currency"],
+										required: [
+											"amount",
+											"currency",
+											"bank_account_number",
+											"virtual_payment_address",
+										],
 									},
 									type: {
 										type: "string",
-										enum: PAYMENT_TYPES,
+										enum: PAYMENT_TYPES
 									},
 									tags: {
 										type: "array",
@@ -578,67 +469,88 @@ module.exports = {
 								required: ["id", "collected_by", "params", "type", "tags"],
 							},
 						},
+						xinput: {
+							type: "object",
+							properties: {
+								form: {
+									type: "object",
+									properties: {
+										url: {
+											type: "string",
+										},
+										mime_type: {
+											type: "string",
+										},
+										submission_id: {
+											type: "string",
+										},
+										status: {
+											type: "string",
+										},
+									},
+									required: ["url", "mime_type", "submission_id", "status"],
+								},
+								required: {
+									type: "boolean",
+								},
+							},
+							required: ["form", "required"],
+						},
 						tags: {
 							type: "array",
 							items: {
 								type: "object",
 								properties: {
-									descriptor: {
-										type: "object",
-										properties: {
-											code: {
-												type: "string",
-												enum: TERMS,
-											},
-										},
-										required: ["code"],
+									code: {
+										type: "string",
+										enum: ["BPP_Terms"],
 									},
 									list: {
 										type: "array",
 										items: {
 											type: "object",
 											properties: {
-												descriptor: {
-													type: "object",
-													properties: {
-														code: {
-															type: "string",
-															enum: LOG_ORDER_TAGS,
-														},
-													},
-													required: ["code"],
+												code: {
+													type: "string",
+													enum: LOG_ORDER_TAGS,
 												},
 												value: {
 													type: "string",
 												},
 											},
-											required: ["descriptor", "value"],
+											required: ["code", "value"],
 										},
 									},
 								},
-								required: ["descriptor", "list"],
+								required: ["code", "list"],
 							},
-						},
-						updated_at: {
-							type: "string",
 						},
 					},
 					required: [
-						"id",
-						"status",
-						"cancellation",
 						"provider",
 						"items",
-						"quote",
 						"fulfillments",
-						"billing",
+						"quote",
+						"cancellation_terms",
 						"payments",
+						"xinput",
 						"tags",
-						"updated_at",
 					],
 				},
 			},
 			required: ["order"],
+		},
+		error: {
+			type: "object",
+			properties: {
+				code: {
+					type: "string",
+				},
+				message: {
+					type: "string",
+				},
+			},
+			required: ["code", "message"],
 		},
 	},
 	required: ["context", "message"],

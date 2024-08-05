@@ -1,10 +1,10 @@
-import {
+const {
 	MESSAGE_INTENT_CATEGORY_DESCRIPTOR_CODE,
 	CONTEXT_DOMAIN,
 	VERSION,
 	PAYMENT_BPP_TERMS,
 	PAYMENT_TERMS,
-} from "../constants";
+} =  require("../constants");
 
 module.exports = {
 	$id: "http://example.com/schema/searchSchema",

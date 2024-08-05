@@ -1,4 +1,4 @@
-import { VERSION, CONTEXT_DOMAIN, DELIVERY_CATEGORIES, PROVIDER_TERMS,PROVIDER_TERMS_BPP,FULFILLMENT_TYPES } from "../constants";
+const { VERSION, CONTEXT_DOMAIN, DELIVERY_CATEGORIES, PROVIDER_TERMS,PROVIDER_TERMS_BPP,FULFILLMENT_TYPES } = require ("../constants");
 
 module.exports = {
 	$id: "http://example.com/schema/onSearchSchema",

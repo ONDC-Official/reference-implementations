@@ -22,6 +22,9 @@ const constants = require("./constants");
         case "services":
           map = constants.SRV_SORTED_INDEX;
           break;
+        case "logistics_b2b":
+          map = constants.LOG_SORTED_INDEX;
+          break;
       }
   
       mergedlogs = files.reduce((acc, item) => {

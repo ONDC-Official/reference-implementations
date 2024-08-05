@@ -1,17 +1,18 @@
-import {
+const {
 	CONTEXT_DOMAIN,
 	VERSION,
 	TERMS,
 	LOG_ORDER_TAGS,
 	PAYMENT_TERMS,
 	PAYMENT_BPP_TERMS,
-	CONFIRM_MESSAGE_ORDER_TAG_GROUPS,
-	PAYMENT_TYPES,
+	FULFILLMENT_TYPES,
+	FULFILLMENT_STATES,
+	DELIVERY_TERMS_TAGS,
 	QUOTE_TITLE,
-} from "../constants";
+} = require("../constants");
 
 module.exports = {
-	$id: "http://example.com/schema/confirmSchema",
+	$id: "http://example.com/schema/onUpdateSchema",
 	type: "object",
 	properties: {
 		context: {
@@ -48,7 +49,7 @@ module.exports = {
 				},
 				action: {
 					type: "string",
-					const: "confirm",
+					const: "on_update",
 				},
 				version: {
 					type: "string",
@@ -105,13 +106,6 @@ module.exports = {
 						},
 						status: {
 							type: "string",
-							enum: [
-								"Created",
-								"Accepted",
-								"In-Progress",
-								"Completed",
-								"Cancelled",
-							],
 						},
 						provider: {
 							type: "object",
@@ -142,13 +136,13 @@ module.exports = {
 									id: {
 										type: "string",
 									},
-									fulfillment_ids: {
+									category_ids: {
 										type: "array",
 										items: {
 											type: "string",
 										},
 									},
-									category_ids: {
+									fulfillment_ids: {
 										type: "array",
 										items: {
 											type: "string",
@@ -164,14 +158,82 @@ module.exports = {
 										},
 										required: ["code"],
 									},
+									time: {
+										type: "object",
+										properties: {
+											label: {
+												type: "string",
+											},
+											duration: {
+												type: "string",
+											},
+											timestamp: {
+												type: "string",
+											},
+										},
+										required: ["label", "duration", "timestamp"],
+									},
 								},
 								required: [
 									"id",
-									"fulfillment_ids",
 									"category_ids",
+									"fulfillment_ids",
 									"descriptor",
+									"time",
 								],
 							},
+						},
+						quote: {
+							type: "object",
+							properties: {
+								price: {
+									type: "object",
+									properties: {
+										currency: {
+											type: "string",
+										},
+										value: {
+											type: "string",
+										},
+									},
+									required: ["currency", "value"],
+								},
+								breakup: {
+									type: "array",
+									items: {
+										type: "object",
+										properties: {
+											item: {
+												type: "object",
+												properties: {
+													id: {
+														type: "string",
+													},
+												},
+												required: ["id"],
+											},
+											title: {
+												type: "string",
+												enum : QUOTE_TITLE
+											},
+											price: {
+												type: "object",
+												properties: {
+													currency: {
+														type: "string",
+													},
+													value: {
+														type: "string",
+													},
+												},
+												required: ["currency", "value"],
+											},
+										},
+										required: ["item", "title", "price"],
+									},
+								},
+							},
+							required: ["price", "breakup"],
 						},
 						fulfillments: {
 							type: "array",
@@ -183,22 +245,51 @@ module.exports = {
 									},
 									type: {
 										type: "string",
-										enum: ["Delivery", "Return"],
+										enum: FULFILLMENT_TYPES,
+									},
+									state: {
+										type: "object",
+										properties: {
+											descriptor: {
+												type: "object",
+												properties: {
+													code: {
+														type: "string",
+														enum : FULFILLMENT_STATES
+													},
+												},
+												required: ["code"],
+											},
+										},
+										required: ["descriptor"],
+									},
+									tracking: {
+										type: "boolean",
 									},
 									stops: {
 										type: "array",
 										items: {
 											type: "object",
 											properties: {
+												id: {
+													type: "string",
+												},
+												parent_stop_id: {
+													type: "string",
+												},
 												type: {
 													type: "string",
-													enum: ["start", "end"],
+													enum :["start","end"]
 												},
 												location: {
 													type: "object",
 													properties: {
 														gps: {
 															type: "string",
+															pattern:
+																"^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
+															errorMessage:
+																"Incorrect gps value (minimum of six decimal places are required)",
 														},
 														address: {
 															type: "string",
@@ -248,34 +339,102 @@ module.exports = {
 													properties: {
 														phone: {
 															type: "string",
+															pattern: "^(\\d{10})$",
 														},
 														email: {
 															type: "string",
 														},
 													},
-													required: ["phone", "email"],
+													required: ["phone"],
+												},
+												instructions: {
+													type: "object",
+													properties: {
+														code: {
+															type: "string",
+														},
+														short_desc: {
+															type: "string",
+														},
+														long_desc: {
+															type: "string",
+														},
+														additional_desc: {
+															type: "object",
+															properties: {
+																content_type: {
+																	type: "string",
+																},
+																url: {
+																	type: "string",
+																},
+															},
+															required: ["content_type", "url"],
+														},
+														images: {
+															type: "array",
+															items: [
+																{
+																	type: "string",
+																},
+															],
+														},
+													},
+													required: [
+														"short_desc",
+														"long_desc"
+													],
+												},
+												time: {
+													type: "object",
+													properties: {
+														range: {
+															type: "object",
+															properties: {
+																start: {
+																	type: "string",
+																},
+																end: {
+																	type: "string",
+																},
+															},
+															required: ["start", "end"],
+														},
+														timestamp: {
+															type: "string",
+														},
+													},
+													required: ["range"],
 												},
 											},
-											required: ["type", "location", "contact"],
+											required: [
+												"id",
+												"type",
+												"location",
+												"contact",
+												"instructions",
+												"time",
+											],
 										},
 									},
 									tags: {
-										type: "object",
-										properties: {
-											descriptor: {
-												type: "object",
-												properties: {
-													code: {
-														type: "string",
-														enum: ["Delivery_Terms"],
+										type: "array",
+										items: {
+											type: "object",
+											properties: {
+												descriptor: {
+													type: "object",
+													properties: {
+														code: {
+															type: "string",
+															const: "Delivery_Terms",
+														},
 													},
+													required: ["code"],
 												},
-												required: ["code"],
-											},
-											list: {
-												type: "array",
-												items: [
-													{
+												list: {
+													type: "array",
+													items: {
 														type: "object",
 														properties: {
 															descriptor: {
@@ -283,80 +442,25 @@ module.exports = {
 																properties: {
 																	code: {
 																		type: "string",
-																		enum: [
-																			"INCOTERMS",
-																			"NAMED_PLACE_OF_DELIVERY",
-																		],
+																		enum:DELIVERY_TERMS_TAGS
 																	},
 																},
 																required: ["code"],
 															},
 															value: {
 																type: "string",
-																enum: ["CIF", "EXW", "FOB", "DAP", "DDP"],
 															},
 														},
 														required: ["descriptor", "value"],
 													},
-												],
-											},
-										},
-									},
-								},
-								required: ["id", "type", "stops"],
-							},
-						},
-						quote: {
-							type: "object",
-							properties: {
-								price: {
-									type: "object",
-									properties: {
-										currency: {
-											type: "string",
-										},
-										value: {
-											type: "string",
-										},
-									},
-									required: ["currency", "value"],
-								},
-								breakup: {
-									type: "array",
-									items: {
-										type: "object",
-										properties: {
-											item: {
-												type: "object",
-												properties: {
-													id: {
-														type: "string",
-													},
 												},
-												required: ["id"],
 											},
-											title: {
-												type: "string",
-												enum: QUOTE_TITLE
-											},
-											price: {
-												type: "object",
-												properties: {
-													currency: {
-														type: "string",
-													},
-													value: {
-														type: "string",
-													},
-												},
-												required: ["currency", "value"],
-											},
+											required: ["descriptor", "list"],
 										},
-										required: ["item", "title", "price"],
 									},
 								},
+								required: ["id", "type", "state", "tracking", "stops"],
 							},
-							required: ["price", "breakup"],
 						},
 						billing: {
 							type: "object",
@@ -400,6 +504,7 @@ module.exports = {
 								"tax_id",
 								"phone",
 								"email",
+								"time"
 							],
 						},
 						payments: {
@@ -412,7 +517,6 @@ module.exports = {
 									},
 									collected_by: {
 										type: "string",
-										enum: ["BAP", "BPP", "SOR"],
 									},
 									params: {
 										type: "object",
@@ -439,48 +543,49 @@ module.exports = {
 									},
 									type: {
 										type: "string",
-										enum: PAYMENT_TYPES
 									},
 									tags: {
 										type: "array",
-										items: {
-											type: "object",
-											properties: {
-												descriptor: {
-													type: "object",
-													properties: {
-														code: {
-															type: "string",
-															enum: PAYMENT_TERMS,
-														},
-													},
-													required: ["code"],
-												},
-												list: {
-													type: "array",
-													items: {
+										items: [
+											{
+												type: "object",
+												properties: {
+													descriptor: {
 														type: "object",
 														properties: {
-															descriptor: {
-																type: "object",
-																properties: {
-																	code: {
-																		type: "string",
-																		enum: PAYMENT_BPP_TERMS,
-																	},
-																},
-																required: ["code"],
-															},
-															value: {
+															code: {
 																type: "string",
+																enum: PAYMENT_TERMS,
 															},
 														},
-														required: ["descriptor", "value"],
+														required: ["code"],
+													},
+													list: {
+														type: "array",
+														items: {
+															type: "object",
+															properties: {
+																descriptor: {
+																	type: "object",
+																	properties: {
+																		code: {
+																			type: "string",
+																			enum: PAYMENT_BPP_TERMS,
+																		},
+																	},
+																	required: ["code"],
+																},
+																value: {
+																	type: "string",
+																},
+															},
+															required: ["descriptor", "value"],
+														},
 													},
 												},
-											},
-											required: ["descriptor", "list"],
-										},
+												required: ["descriptor", "list"],
+											}
+										],
 									},
 								},
 								required: ["id", "collected_by", "params", "type", "tags"],
@@ -496,7 +601,7 @@ module.exports = {
 										properties: {
 											code: {
 												type: "string",
-												enum: CONFIRM_MESSAGE_ORDER_TAG_GROUPS,
+												enum: TERMS,
 											},
 										},
 										required: ["code"],
@@ -527,9 +632,6 @@ module.exports = {
 								required: ["descriptor", "list"],
 							},
 						},
-						created_at: {
-							type: "string",
-						},
 						updated_at: {
 							type: "string",
 						},
@@ -539,12 +641,10 @@ module.exports = {
 						"status",
 						"provider",
 						"items",
-						"fulfillments",
 						"quote",
+						"fulfillments",
 						"billing",
 						"payments",
-						"tags",
-						"created_at",
 						"updated_at",
 					],
 				},

@@ -1,7 +1,17 @@
-import { CONTEXT_DOMAIN, VERSION, PAYMENT_TERMS,PAYMENT_BPP_TERMS } from "../constants";
+const {
+	CONTEXT_DOMAIN,
+	VERSION,
+	TERMS,
+	LOG_ORDER_TAGS,
+	PAYMENT_TERMS,
+	PAYMENT_BPP_TERMS,
+	CONFIRM_MESSAGE_ORDER_TAG_GROUPS,
+	PAYMENT_TYPES,
+	QUOTE_TITLE,
+} = require("../constants");
 
 module.exports = {
-	$id: "http://example.com/schema/initSchema",
+	$id: "http://example.com/schema/confirmSchema",
 	type: "object",
 	properties: {
 		context: {
@@ -38,7 +48,7 @@ module.exports = {
 				},
 				action: {
 					type: "string",
-					const: "init",
+					const: "confirm",
 				},
 				version: {
 					type: "string",
@@ -64,7 +74,6 @@ module.exports = {
 				},
 				timestamp: {
 					type: "string",
-					format: "date-time",
 				},
 				ttl: {
 					type: "string",
@@ -91,6 +100,19 @@ module.exports = {
 				order: {
 					type: "object",
 					properties: {
+						id: {
+							type: "string",
+						},
+						status: {
+							type: "string",
+							enum: [
+								"Created",
+								"Accepted",
+								"In-Progress",
+								"Completed",
+								"Cancelled",
+							],
+						},
 						provider: {
 							type: "object",
 							properties: {
@@ -110,8 +132,7 @@ module.exports = {
 									},
 								},
 							},
-							required: ["id"],
-							additionalProperties: false,
+							required: ["id", "locations"],
 						},
 						items: {
 							type: "array",
@@ -121,13 +142,13 @@ module.exports = {
 									id: {
 										type: "string",
 									},
-									category_ids: {
+									fulfillment_ids: {
 										type: "array",
 										items: {
 											type: "string",
 										},
 									},
-									fulfillment_ids: {
+									category_ids: {
 										type: "array",
 										items: {
 											type: "string",
@@ -138,7 +159,7 @@ module.exports = {
 										properties: {
 											code: {
 												type: "string",
-												enum: ["P2H2P", "P2P"],
+												enum: ["P2P", "P2H2P"],
 											},
 										},
 										required: ["code"],
@@ -146,8 +167,8 @@ module.exports = {
 								},
 								required: [
 									"id",
-									"category_ids",
 									"fulfillment_ids",
+									"category_ids",
 									"descriptor",
 								],
 							},
@@ -285,6 +306,58 @@ module.exports = {
 								required: ["id", "type", "stops"],
 							},
 						},
+						quote: {
+							type: "object",
+							properties: {
+								price: {
+									type: "object",
+									properties: {
+										currency: {
+											type: "string",
+										},
+										value: {
+											type: "string",
+										},
+									},
+									required: ["currency", "value"],
+								},
+								breakup: {
+									type: "array",
+									items: {
+										type: "object",
+										properties: {
+											item: {
+												type: "object",
+												properties: {
+													id: {
+														type: "string",
+													},
+												},
+												required: ["id"],
+											},
+											title: {
+												type: "string",
+												enum: QUOTE_TITLE
+											},
+											price: {
+												type: "object",
+												properties: {
+													currency: {
+														type: "string",
+													},
+													value: {
+														type: "string",
+													},
+												},
+												required: ["currency", "value"],
+											},
+										},
+										required: ["item", "title", "price"],
+									},
+								},
+							},
+							required: ["price", "breakup"],
+						},
 						billing: {
 							type: "object",
 							properties: {
@@ -319,21 +392,58 @@ module.exports = {
 									required: ["timestamp"],
 								},
 							},
-							required: ["name", "address"],
+							required: [
+								"name",
+								"address",
+								"city",
+								"state",
+								"tax_id",
+								"phone",
+								"email",
+							],
 						},
 						payments: {
-							type: "object",
-							properties: {
-								collected_by: {
-									type: "string",
-								},
-								type: {
-									type: "string",
-								},
-								tags: {
-									type: "array",
-									items: [
-										{
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									id: {
+										type: "string",
+									},
+									collected_by: {
+										type: "string",
+										enum: ["BAP", "BPP", "SOR"],
+									},
+									params: {
+										type: "object",
+										properties: {
+											amount: {
+												type: "string",
+											},
+											currency: {
+												type: "string",
+											},
+											bank_account_number: {
+												type: "string",
+											},
+											virtual_payment_address: {
+												type: "string",
+											},
+										},
+										required: [
+											"amount",
+											"currency",
+											"bank_account_number",
+											"virtual_payment_address",
+										],
+									},
+									type: {
+										type: "string",
+										enum: PAYMENT_TYPES
+									},
+									tags: {
+										type: "array",
+										items: {
 											type: "object",
 											properties: {
 												descriptor: {
@@ -348,69 +458,94 @@ module.exports = {
 												},
 												list: {
 													type: "array",
-													items: [
-														{
-															type: "object",
-															properties: {
-																descriptor: {
-																	type: "object",
-																	properties: {
-																		code: {
-																			type: "string",
-																			enum: PAYMENT_BPP_TERMS,
-																		},
+													items: {
+														type: "object",
+														properties: {
+															descriptor: {
+																type: "object",
+																properties: {
+																	code: {
+																		type: "string",
+																		enum: PAYMENT_BPP_TERMS,
 																	},
-																	required: ["code"],
 																},
-																value: {
-																	type: "string",
-																},
+																required: ["code"],
 															},
-															required: ["descriptor", "value"],
+															value: {
+																type: "string",
+															},
 														},
-													],
+														required: ["descriptor", "value"],
+													},
 												},
 											},
 											required: ["descriptor", "list"],
 										},
-									],
+									},
 								},
+								required: ["id", "collected_by", "params", "type", "tags"],
 							},
-							required: ["type"],
 						},
-						xinput: {
-							type: "object",
-							properties: {
-								form: {
-									type: "object",
-									properties: {
-										url: {
-											type: "string",
+						tags: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									descriptor: {
+										type: "object",
+										properties: {
+											code: {
+												type: "string",
+												enum: CONFIRM_MESSAGE_ORDER_TAG_GROUPS,
+											},
 										},
-										mime_type: {
-											type: "string",
-										},
-										submission_id: {
-											type: "string",
-										},
-										status: {
-											type: "string",
-											const: "SUCCESS",
+										required: ["code"],
+									},
+									list: {
+										type: "array",
+										items: {
+											type: "object",
+											properties: {
+												descriptor: {
+													type: "object",
+													properties: {
+														code: {
+															type: "string",
+															enum: LOG_ORDER_TAGS,
+														},
+													},
+													required: ["code"],
+												},
+												value: {
+													type: "string",
+												},
+											},
+											required: ["descriptor", "value"],
 										},
 									},
 								},
-								required: {
-									type: "boolean",
-								},
+								required: ["descriptor", "list"],
 							},
+						},
+						created_at: {
+							type: "string",
+						},
+						updated_at: {
+							type: "string",
 						},
 					},
 					required: [
+						"id",
+						"status",
 						"provider",
 						"items",
 						"fulfillments",
+						"quote",
 						"billing",
 						"payments",
+						"tags",
+						"created_at",
+						"updated_at",
 					],
 				},
 			},
