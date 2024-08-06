@@ -12,8 +12,7 @@ module.exports = {
   },
 
   isStartTimeValid: (data) => {
-    const startStop = data.find((stop) => stop.type === "start");
-
+    const startStop = data?.stops.find((stop) => stop.type === "start");
     if (!startStop || !startStop.time?.range) {
       return false;
     }

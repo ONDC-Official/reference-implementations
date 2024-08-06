@@ -13,7 +13,6 @@ const checkSearch = async (data, msgIdSet) => {
   let stops = search?.fulfillments?.stops || [];
   const startLocation = stops.find((stop) => stop.type === "start");
   const endLocation = stops.find((stop) => stop.type === "end");
-  console.log(endLocation);
   try {
     console.log(`Checking if holidays are in past date or not`);
     let holidays = search?.provider?.time?.schedule?.holidays;
@@ -89,7 +88,7 @@ const checkSearch = async (data, msgIdSet) => {
     console.log("Error in end location", error);
   }
 
-  dao.setValue("searchObj", searchObj); // Updated the argument from `search` to `searchObj`
+  dao.setValue("searchObj", search); 
   return searchObj;
 };
 
