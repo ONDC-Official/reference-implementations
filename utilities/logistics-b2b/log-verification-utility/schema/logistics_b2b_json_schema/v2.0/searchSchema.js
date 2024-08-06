@@ -159,7 +159,7 @@ module.exports = {
               },
               required: ["time"],
             },
-            fulfillments: {
+            fulfillment: {
               type: "object",
               properties: {
                 type: {
@@ -319,7 +319,7 @@ module.exports = {
               },
             },
           },
-          required: ["provider", "fulfillments", "payment", "tags"],
+          required: ["provider", "fulfillment", "payment", "tags"],
         },
       },
       required: ["intent"],

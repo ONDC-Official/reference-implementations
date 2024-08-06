@@ -8,10 +8,6 @@ const {
 const {
   hasRequiredFulfillments,
 } = require("./v2.0/keywords/onSearch");
-const {
-  validateFulfillmentStops,
-  validateBillingTimeStamp,
-} = require("./v2.0/keywords/init");
 const { validateQuote, isQuoteMatching } = require("./v2.0/keywords/onInit");
 const {
   validateTime,
@@ -113,12 +109,6 @@ const validate_schema = (data, schema, version) => {
       })
       .addKeyword("hasRequiredFulfillments", {
         validate: (schema, data) => hasRequiredFulfillments(data),
-      })
-      .addKeyword("validateFulfillmentStops", {
-        validate: (schema, data) => validateFulfillmentStops(data),
-      })
-      .addKeyword("validateBillingTimeStamp", {
-        validate: (schema, data) => validateBillingTimeStamp(data),
       })
       .addKeyword("validateQuote", {
         validate: (schema, data) => validateQuote(data),

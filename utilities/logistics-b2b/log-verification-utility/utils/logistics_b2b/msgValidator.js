@@ -1,5 +1,6 @@
 const checkSearch = require("./logSearch");
 const checkOnSearch = require("./logOnSearch");
+const checkInit = require("./logInit");
 const _ = require("lodash");
 
 const logisticsB2BVal = async (element, action, msgIdSet) => {
@@ -9,6 +10,8 @@ const logisticsB2BVal = async (element, action, msgIdSet) => {
       return checkSearch(element, msgIdSet);
     case "on_search":
       return checkOnSearch(element, msgIdSet);
+    case "init":
+      return checkInit(element, msgIdSet);
   }
   return busnsErr;
 };

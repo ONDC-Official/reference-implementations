@@ -10,7 +10,7 @@ const checkSearch = async (data, msgIdSet) => {
   let search = data;
   let contextTime = search.context.timestamp;
   search = search.message.intent;
-  let stops = search?.fulfillments?.stops || [];
+  let stops = search?.fulfillment?.stops || [];
   const startLocation = stops.find((stop) => stop.type === "start");
   const endLocation = stops.find((stop) => stop.type === "end");
   try {
