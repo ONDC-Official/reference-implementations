@@ -5,6 +5,7 @@ const utils = require("../utils");
 
 const checkInit = async (data, msgIdSet) => {
   let initObj = {};
+  let init = data?.message?.order;
   let onSearch = dao.getValue("onSearchObj");
   let items = onSearch?.providers?.[0]?.items || [];
   const validateBillingTimeStamp = () => {
@@ -106,6 +107,7 @@ const checkInit = async (data, msgIdSet) => {
     }
   }
   validateItems(data.message.order.items, items, initObj);
+  dao.setValue("initObj", init); 
   return initObj;
 };
 
