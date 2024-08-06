@@ -1,6 +1,7 @@
 const fs = require("fs");
 
 const {
+  isEndTimeGreater,
   hasStartAndEndStops,
   isStartTimeValid,
 } = require("./v2.0/keywords/search");
@@ -8,6 +9,8 @@ const {
   hasRequiredFulfillments,
   validateItemTimestamps,
   validateItemIDs,
+  validateEffectiveDate,
+  validateItemTags,
 } = require("./v2.0/keywords/onSearch");
 const {
   validateFulfillmentStops,
@@ -103,6 +106,9 @@ const validate_schema = (data, schema, version) => {
       .addSchema(cancelSchema)
       .addSchema(onCancelSchema)
       .addSchema(commonSchemaV2_0)
+      .addKeyword("isEndTimeGreater", {
+        validate: (schema, data) => isEndTimeGreater(data),
+      })
       .addKeyword("hasStartAndEndStops", {
         validate: (schema, data) => hasStartAndEndStops(data),
       })
@@ -117,6 +123,12 @@ const validate_schema = (data, schema, version) => {
       })
       .addKeyword("validateItemIDs", {
         validate: (schema, data) => validateItemIDs(data),
+      })
+      .addKeyword("validateEffectiveDate", {
+        validate: (schema, data) => validateEffectiveDate(data),
+      })
+      .addKeyword("validateItemTags", {
+        validate: (schema, data) => validateItemTags(data),
       })
       .addKeyword("validateFulfillmentStops", {
         validate: (schema, data) => validateFulfillmentStops(data),

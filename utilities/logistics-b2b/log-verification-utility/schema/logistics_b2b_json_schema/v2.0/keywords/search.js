@@ -1,24 +1,27 @@
 module.exports = {
-  hasStartAndEndStops : (data) => {
-    const stops = data?.message?.intent?.fulfillments?.stops || [];
-  
-    const hasStart = stops.some(stop => stop.type === 'start');
-    const hasEnd = stops.some(stop => stop.type === 'end');
-  
+  isEndTimeGreater: (data) => {
+    const startTime = parseInt(data?.start);
+    const endTime = parseInt(data?.end);
+    return startTime < endTime;
+  },
+  hasStartAndEndStops: (data) => {
+    const hasStart = data.some((stop) => stop.type === "start");
+    const hasEnd = data.some((stop) => stop.type === "end");
+
     return hasStart && hasEnd;
   },
-  isStartTimeValid : (data) => {
-    const stops = data?.message?.intent?.fulfillments?.stops || [];
-    const startStop = stops.find(stop => stop.type === 'start');
-  
+
+  isStartTimeValid: (data) => {
+    const startStop = data.find((stop) => stop.type === "start");
+
     if (!startStop || !startStop.time?.range) {
       return false;
     }
-  
+
     const { start, end } = startStop.time.range;
     const startTime = new Date(start).getTime();
     const endTime = new Date(end).getTime();
-  
+
     return startTime < endTime;
-  }
+  },
 };
