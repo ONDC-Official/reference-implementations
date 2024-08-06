@@ -7,10 +7,6 @@ const {
 } = require("./v2.0/keywords/search");
 const {
   hasRequiredFulfillments,
-  validateItemTimestamps,
-  validateItemIDs,
-  validateEffectiveDate,
-  validateItemTags,
 } = require("./v2.0/keywords/onSearch");
 const {
   validateFulfillmentStops,
@@ -117,18 +113,6 @@ const validate_schema = (data, schema, version) => {
       })
       .addKeyword("hasRequiredFulfillments", {
         validate: (schema, data) => hasRequiredFulfillments(data),
-      })
-      .addKeyword("validateItemTimestamps", {
-        validate: (schema, data) => validateItemTimestamps(data),
-      })
-      .addKeyword("validateItemIDs", {
-        validate: (schema, data) => validateItemIDs(data),
-      })
-      .addKeyword("validateEffectiveDate", {
-        validate: (schema, data) => validateEffectiveDate(data),
-      })
-      .addKeyword("validateItemTags", {
-        validate: (schema, data) => validateItemTags(data),
       })
       .addKeyword("validateFulfillmentStops", {
         validate: (schema, data) => validateFulfillmentStops(data),
