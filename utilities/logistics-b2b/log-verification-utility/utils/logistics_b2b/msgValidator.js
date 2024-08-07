@@ -5,6 +5,7 @@ const _ = require("lodash");
 const checkOnInit = require("./logOnInit");
 const checkConfirm = require("./logConfirm");
 const checkOnConfirm = require("./logOnConfirm");
+const checkUpdate = require("./logUpdate");
 
 const logisticsB2BVal = async (element, action, msgIdSet) => {
   const busnsErr = {};
@@ -21,6 +22,8 @@ const logisticsB2BVal = async (element, action, msgIdSet) => {
       return checkConfirm(element, msgIdSet);
     case "on_confirm":
       return checkOnConfirm(element, msgIdSet);
+    case "update":
+      return checkUpdate(element, msgIdSet);
   }
   return busnsErr;
 };
