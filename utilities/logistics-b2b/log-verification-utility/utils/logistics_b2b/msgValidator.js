@@ -3,6 +3,7 @@ const checkOnSearch = require("./logOnSearch");
 const checkInit = require("./logInit");
 const _ = require("lodash");
 const checkOnInit = require("./logOnInit");
+const checkConfirm = require("./logConfirm");
 
 const logisticsB2BVal = async (element, action, msgIdSet) => {
   const busnsErr = {};
@@ -15,6 +16,8 @@ const logisticsB2BVal = async (element, action, msgIdSet) => {
       return checkInit(element, msgIdSet);
     case "on_init":
       return checkOnInit(element, msgIdSet);
+    case "confirm":
+      return checkConfirm(element, msgIdSet);
   }
   return busnsErr;
 };

@@ -8,7 +8,7 @@ const {
 const {
   hasRequiredFulfillments,
 } = require("./v2.0/keywords/onSearch");
-const { validateQuote, isQuoteMatching } = require("./v2.0/keywords/onInit");
+const { isQuoteMatching } = require("./v2.0/keywords/onInit");
 const {
   validateTime,
   validateAcceptBPP_Terms,
@@ -109,9 +109,6 @@ const validate_schema = (data, schema, version) => {
       })
       .addKeyword("hasRequiredFulfillments", {
         validate: (schema, data) => hasRequiredFulfillments(data),
-      })
-      .addKeyword("validateQuote", {
-        validate: (schema, data) => validateQuote(data),
       })
       .addKeyword("isQuoteMatching", {
         validate: (schema, data) => isQuoteMatching(data),
