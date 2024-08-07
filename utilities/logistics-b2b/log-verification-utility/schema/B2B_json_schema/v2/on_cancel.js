@@ -407,8 +407,6 @@ module.exports = {
                           required: [
                             "name",
                             "short_desc",
-                            "long_desc",
-                            "images",
                           ],
                         },
                         contact: {

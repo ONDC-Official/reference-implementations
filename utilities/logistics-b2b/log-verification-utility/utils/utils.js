@@ -492,12 +492,12 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
 
               if (!tagFound) {
                 console.log(
-                  `Mandatory tag field [${tagName}] missing for ${categoryName} item[${index}]`
+                  `Mandatory tag field [${tagName.toLowerCase()}] missing for ${categoryName} item[${index}]`
                 );
                 const key = `missingTagsItem[${i}][${index}] : ${tagName}`;
                 errorObj[
                   key
-                ] = `Mandatory tag field [${tagName}] missing for ${categoryName} item[${index}]`;
+                ] = `Mandatory tag field [${tagName.toLowerCase()}] missing for ${categoryName} item[${index}]`;
               } else {
                 if (tagInfo.value.length > 0) {
                   let isValidValue = false;
@@ -522,7 +522,7 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
                     console.log(
                       `The item value can only be one of the possible values or match the regex pattern.`
                     );
-                    const key = `InvldValueforItem[${i}][${index}] : ${tagName}`;
+                    const key = `InvldValueforItem[${i}][${index}] : ${tagName.toLowerCase()}`;
                     errorObj[
                       key
                     ] = `Invalid item value: [${originalTag}]. It must be one of the allowed values or match the regex pattern [${regexPattern}].`;
