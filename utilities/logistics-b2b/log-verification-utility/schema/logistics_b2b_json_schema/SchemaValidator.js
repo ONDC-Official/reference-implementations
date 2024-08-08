@@ -5,16 +5,13 @@ const {
   hasStartAndEndStops,
   isStartTimeValid,
 } = require("./v2.0/keywords/search");
-const {
-  hasRequiredFulfillments,
-} = require("./v2.0/keywords/onSearch");
+const { hasRequiredFulfillments } = require("./v2.0/keywords/onSearch");
 const { isQuoteMatching } = require("./v2.0/keywords/onInit");
 const {
   validateTime,
   validateAcceptBPP_Terms,
 } = require("./v2.0/keywords/confirm");
 const { validateBillDetails } = require("./v2.0/keywords/onConfirm");
-
 const formatted_error = (errors) => {
   error_list = [];
   let status = "";
