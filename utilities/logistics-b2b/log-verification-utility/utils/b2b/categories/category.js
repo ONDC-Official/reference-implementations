@@ -243,7 +243,7 @@ const groceryObj = {
   
   const AutoPartObj = {
     Brand_Name: {
-      mandatory: true,
+      mandatory: false,
       value: [],
     },
     Item_Condition: {
@@ -562,7 +562,7 @@ const groceryObj = {
   
   const ConstructionSuppliesObj = {
     Brand_Name: {
-      mandatory: true,
+      mandatory: false,
       value: [],
     },
     Model_Number: {
@@ -1008,7 +1008,7 @@ const groceryObj = {
   
   const HardwareObj = {
     Brand_Name: {
-      mandatory: true,
+      mandatory: false,
       value: [],
     },
     Product_Name: {
@@ -1031,7 +1031,7 @@ const groceryObj = {
       mandatory: true,
       value: [],
     },
-    Manufacturer_Name: {
+    Manufacturer_Name_And_Address: {
       mandatory: true,
       value: [],
     },
@@ -1942,7 +1942,7 @@ const groceryObj = {
   
   const ChemicalObj = {
     Brand_Name: {
-      mandatory: true,
+      mandatory: false,
       value: [],
     },
     Model_Number: {
@@ -1958,7 +1958,7 @@ const groceryObj = {
       value: [],
     },
     Brand_Name: {
-      mandatory: true,
+      mandatory: false,
       value: [],
     },
     Colour: {
@@ -1969,7 +1969,7 @@ const groceryObj = {
       mandatory: true,
       value: [],
     },
-    Manufacturer_Name: {
+    Manufacturer_Name_And_Address: {
       mandatory: true,
       value: [],
     },
@@ -1985,7 +1985,7 @@ const groceryObj = {
       mandatory: true,
       value: [],
     },
-    Active_Ingredient: {
+    Active_Ingredients: {
       mandatory: true,
       value: [],
     },

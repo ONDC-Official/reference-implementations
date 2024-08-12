@@ -3,8 +3,9 @@ const dao = require("../../dao/dao");
 const constants = require("../constants");
 const utils = require("../utils");
 const { reverseGeoCodingCheck } = require("../reverseGeoCoding");
-const { electronicsData } = require("./categories/electronics")
-const {BPCJSON} = require("./categories/category")
+const { electronicsData } = require("./categories/electronics");
+const {fashion} = require("./categories/fashion")
+const { BPCJSON,ChemicalJSON,healthJSON,ConstructionSuppliesJSON,HardwareJSON,AutoPartsJSON,groceryJSON } = require("./categories/category");
 
 const checkOnSearch = async (data, msgIdSet) => {
   const onSrchObj = {};
@@ -12,7 +13,7 @@ const checkOnSearch = async (data, msgIdSet) => {
   let citycode = onSearch?.context?.location?.city?.code;
   let domain = onSearch.context.domain;
   onSearch = onSearch.message.catalog;
-  let domCode = domain.split('ONDC:')[1];
+  let domCode = domain.split("ONDC:")[1];
   //saving fulfillments
   try {
     console.log("checking attr");
@@ -32,8 +33,10 @@ const checkOnSearch = async (data, msgIdSet) => {
 
       dao.setValue("providersArr", providers);
       providers.forEach((provider, i) => {
-        
-        if (citycode === "std:999" && (!provider.creds || provider?.creds?.length<1)) {
+        if (
+          citycode === "std:999" &&
+          (!provider.creds || provider?.creds?.length < 1)
+        ) {
           onSrchObj.msngCreds = `Creds are required for exports in /providers`;
         }
         let itemsArr = provider.items;
@@ -97,14 +100,14 @@ const checkOnSearch = async (data, msgIdSet) => {
               if (missingTags.length > 0) {
                 onSrchObj.mssngTagErr = `'${missingTags}' code/s required in providers/tags for serviceability`;
               }
-              tag?.list.forEach(list=>{
-                const {descriptor,value} = list;
-                if(descriptor.code==='category'){
-                  if(!value.startsWith(domCode)){
-                    onSrchObj.srvcCatgryErr=`Serviceability category must be defined for the same domain code as in context - ${domCode}`
+              tag?.list.forEach((list) => {
+                const { descriptor, value } = list;
+                if (descriptor.code === "category") {
+                  if (!value.startsWith(domCode)) {
+                    onSrchObj.srvcCatgryErr = `Serviceability category must be defined for the same domain code as in context - ${domCode}`;
                   }
                 }
-              })
+              });
             }
           });
         }
@@ -133,7 +136,6 @@ const checkOnSearch = async (data, msgIdSet) => {
       } catch (error) {
         console.log(error);
       }
-
 
       let locations = provider.locations;
       provider.items.forEach((item, k) => {
@@ -339,41 +341,120 @@ const checkOnSearch = async (data, msgIdSet) => {
         // }
       });
 
-        // Checking for mandatory Items in provider IDs
-  try {
-    domain = domain.split(':')[1]
-    console.log(`Checking for item tags in bpp/providers[0].items.tags in ${domain}`)
-   
-      const items =  provider.items
-      let errors;
-      switch (domain) {
-        // case 'RET10':
-        //   errors = checkMandatoryTags(i, items, errorObj, groceryJSON, 'Grocery')
-        //   break
-        // case 'RET12':
-        //   onSrchObj = checkMandatoryTags(i, items, errorObj, fashion, 'Fashion')
-        //   break
-        case 'RET13':
-          onSrchObj = utils.checkMandatoryTags(i, items, onSrchObj, BPCJSON, 'BPC')
-          break
-        case 'RET14':
-          onSrchObj = utils.checkMandatoryTags(i, items, onSrchObj, electronicsData, 'Electronics')
-          break
-        // case 'RET15':
-        //   errors = checkMandatoryTags(i, items, errorObj, applianceData, 'Appliances')
-        //   break
-        // case 'RET16':
-        //   errors = checkMandatoryTags(i, items, errorObj, homeJSON, 'Home & Kitchen')
-        //   break
-        // case 'RET18':
-        //   errors = checkMandatoryTags(i, items, errorObj, healthJSON, 'Health & Wellness')
-        //   break
+      // Checking for mandatory Items in provider IDs
+      try {
+        domain = domain.split(":")[1];
+        console.log(
+          `Checking for item tags in bpp/providers[0].items.tags in ${domain}`
+        );
+
+        const items = provider.items;
+        let errors;
+        switch (domain) {
+          case "RET10":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              groceryJSON,
+              "Grocery"
+            );
+            break;
+          case "RET12":
+            onSrchObj = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              fashion,
+              "Fashion"
+            );
+            break;
+          case "RET13":
+            onSrchObj = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              BPCJSON,
+              "BPC"
+            );
+            break;
+          case "RET14":
+            onSrchObj = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              electronicsData,
+              "Electronics"
+            );
+            break;
+          case "RET15":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              applianceData,
+              "Appliances"
+            );
+            break;
+          case "RET16":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              homeJSON,
+              "Home & Kitchen"
+            );
+            break;
+          case "RET18":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              healthJSON,
+              "Health & Wellness"
+            );
+            break;
+          case "RET1A":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              AutoPartsJSON,
+              "Automotives, Components & Accessories"
+            );
+            break;
+          case "RET1B":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              HardwareJSON,
+              "Hardware and Industrial"
+            );
+            break;
+          case "RET1C":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              ConstructionSuppliesJSON,
+              "Building and construction supplies"
+            );
+            break;
+          case "RET1D":
+            errors = utils.checkMandatoryTags(
+              i,
+              items,
+              onSrchObj,
+              ChemicalJSON,
+              "Chemicals"
+            );
+            break;
+        }
+      } catch (error) {
+        console.log();
+        `!!Errors while checking for items in bpp/providers/items, ${error.stack}`;
       }
-  
-  
-  } catch (error) {
-    console.log();(`!!Errors while checking for items in bpp/providers/items, ${error.stack}`)
-  }
     }
   }
 
