@@ -134,7 +134,6 @@ const checkOnUpdate = (data, msgIdSet) => {
   } catch (e) {
     console.log(e);
   }
-  console.log(onUpdateObj);
   return onUpdateObj;
 };
 

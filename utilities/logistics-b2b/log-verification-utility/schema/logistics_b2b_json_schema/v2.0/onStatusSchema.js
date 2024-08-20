@@ -714,25 +714,6 @@ module.exports = {
                 required: ["descriptor", "list"],
               },
             },
-
-            required: ["tags"],
-            anyOf: [
-              {
-                properties: {
-                  tags: {
-                    const: { $data: "/confirm/0/message/order/tags" },
-                  },
-                },
-              },
-              {
-                properties: {
-                  tags: {
-                    const: { $data: "/update/0/message/order/tags" },
-                  },
-                },
-              },
-            ],
-
             updated_at: {
               type: "string",
             },

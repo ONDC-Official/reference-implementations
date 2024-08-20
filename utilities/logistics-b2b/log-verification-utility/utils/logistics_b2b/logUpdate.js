@@ -27,6 +27,8 @@ const checkUpdate = (data, msgIdSet) => {
   function findMatchingDescriptor(list, code) {
     return list.find((item) => item.descriptor.code === code);
   }
+
+  // Makes sure that the tags in onConfirm are present in update. 
   function compareTags(onConfirmTags, updateTags) {
     try {
       // Iterate over each tag in onConfirmTags
@@ -54,13 +56,6 @@ const checkUpdate = (data, msgIdSet) => {
             ] = `Missing in updateTags: ${confirmItem.descriptor.code}`;
             return;
           }
-
-          // Compare values
-          if (confirmItem.value !== matchingUpdateItem.value) {
-            updateObj[
-              `tags[${index}].list[${itemIndex}].value`
-            ] = `Mismatch: ${confirmItem.value} != ${matchingUpdateItem.value}`;
-          }
         });
       });
     } catch (error) {
@@ -69,7 +64,7 @@ const checkUpdate = (data, msgIdSet) => {
   }
 
   try {
-    console.log("Checking if tags are same between /on_confirm and /update");
+    console.log("Checking if tags present in /on_confirm are present in /update");
     compareTags(onConfirmTags, updateTags);
   } catch (error) {
     updateObj.general_error = `Error during validation: ${error.message}`;

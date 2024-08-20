@@ -16,7 +16,6 @@ const checkOnCancel = (data, msgIdSet) => {
   let reference = dao.getValue("onUpdateObj")
     ? dao.getValue("onUpdateObj")
     : dao.getValue("onConfirmObj");
-  console.log(reference);
   function compareObjects(obj1, obj2, path = "") {
     if (typeof obj1 !== typeof obj2) {
       onCancelObj[path] = `Type mismatch: ${typeof obj1} != ${typeof obj2}`;
@@ -68,7 +67,6 @@ const checkOnCancel = (data, msgIdSet) => {
   } catch (error) {
     onCancelObj.general_error = `Error during validation: ${error.message}`;
   }
-  console.log(onCancelObj);
   dao.setValue("onCancelObj", on_cancel);
   return onCancelObj;
 };

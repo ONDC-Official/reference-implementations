@@ -71,7 +71,6 @@ const checkOnConfirm = (data, msgIdSet) => {
   } catch (error) {
     onConfirmObj.general_error = `Error during validation: ${error.message}`;
   }
-  console.log(onConfirmObj);
   return onConfirmObj;
 };
 
