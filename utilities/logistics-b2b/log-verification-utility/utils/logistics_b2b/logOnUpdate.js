@@ -16,49 +16,52 @@ const checkOnUpdate = (data, msgIdSet) => {
       "order/updated_at cannot be future dated w.r.t context/timestamp";
   }
 
-  function compareObjects(obj1, obj2, path = "") {
-    if (typeof obj1 !== typeof obj2) {
-      onUpdateObj[path] = `Type mismatch: ${typeof obj1} != ${typeof obj2}`;
-      return;
+  const compareTagValues = (confirmItem, onConfirmItem, path) => {
+    if (confirmItem.value !== onConfirmItem.value) {
+      onUpdateObj[
+        `${path}.value`
+      ] = `Mismatch: ${confirmItem.value} != ${onConfirmItem.value}`;
     }
+  };
 
-    if (obj1 === null || obj2 === null) {
-      if (obj1 !== obj2) {
-        onUpdateObj[path] = `Mismatch: ${obj1} != ${obj2}`;
-      }
-      return;
-    }
+  const mapAndCompareTags = (confirmList, onConfirmList, path) => {
+    const confirmMap = new Map();
+    const onConfirmMap = new Map();
 
-    if (typeof obj1 !== "object") {
-      if (obj1 !== obj2) {
-        onUpdateObj[path] = `Mismatch: ${obj1} != ${obj2}`;
-      }
-      return;
-    }
-
-    // Exclude 'updated_at' and 'status' from validation
-    const excludedKeys = ["updated_at", "status"];
-    const keys1 = Object.keys(obj1).filter(
-      (key) => !excludedKeys.includes(key)
-    );
-    const keys2 = Object.keys(obj2).filter(
-      (key) => !excludedKeys.includes(key)
-    );
-
-    // Check for missing keys in onUpdate
-    keys1.forEach((key) => {
-      if (!obj2.hasOwnProperty(key)) {
-        onUpdateObj[`${path}.${key}`] = `Missing in onUpdate: ${key}`;
-        return;
-      }
-      compareObjects(obj1[key], obj2[key], `${path}.${key}`);
+    // Map confirmList and onConfirmList by descriptor.code
+    confirmList.forEach((obj) => {
+      obj.list.forEach((item) => confirmMap.set(item.descriptor.code, item));
     });
-  }
+    onConfirmList.forEach((obj) => {
+      obj.list.forEach((item) => onConfirmMap.set(item.descriptor.code, item));
+    });
+
+    // Compare objects based on descriptor.code
+    confirmMap.forEach((confirmItem, code) => {
+      const onConfirmItem = onConfirmMap.get(code);
+      if (!onConfirmItem) {
+        onUpdateObj[`${path}.list.${code}`] = `Missing in on_confirm: ${code}`;
+      } else {
+        compareTagValues(confirmItem, onConfirmItem, `${path}.list.${code}`);
+      }
+    });
+
+    // Check for any tags present in onConfirm but missing in confirm
+    onConfirmMap.forEach((onConfirmItem, code) => {
+      if (!confirmMap.has(code)) {
+        onUpdateObj[`${path}.list.${code}`] = `Missing in confirm: ${code}`;
+      }
+    });
+  };
+
+  const validateTags = (confirm, on_confirm) => {
+    mapAndCompareTags(confirm.tags, on_confirm.tags, "tags");
+  };
 
   try {
     console.log("Comparing the payment.tags in /on_confirm and /on_update");
 
-    compareObjects(on_confirm?.payments[0]?.tags, on_update?.payments[0]?.tags);
+    validateTags(on_confirm?.payments[0], on_update?.payments[0]);
   } catch (e) {
     console.log(e);
   }
@@ -82,48 +85,24 @@ const checkOnUpdate = (data, msgIdSet) => {
   }
 
   function validateFulfillments(update, on_update) {
-    function mapAndCompareTags(updateList, onUpdateList, path) {
+    function mapAndCompareObjects(updateList, onUpdateList, path) {
       const updateMap = new Map();
-      const onUpdateMap = new Map();
+      updateList.forEach((obj) => updateMap.set(obj.id, obj)); // Assuming each fulfillment has a unique 'id' field
 
-      // Map updateList and onUpdateList by descriptor.code
-      updateList.forEach((obj) => {
-        obj.list.forEach((item) => updateMap.set(item.descriptor.code, item));
-      });
-      onUpdateList.forEach((obj) => {
-        obj.list.forEach((item) => onUpdateMap.set(item.descriptor.code, item));
-      });
-
-      // Compare objects based on descriptor.code
-      updateMap.forEach((updateItem, code) => {
-        const onUpdateItem = onUpdateMap.get(code);
-        if (!onUpdateItem) {
-          onUpdateObj[`${path}.list.${code}`] = `Missing in onUpdate: ${code}`;
-        } else {
-          compareTagValues(updateItem, onUpdateItem, `${path}.list.${code}`);
+      onUpdateList.forEach((obj, index) => {
+        const updateObj = updateMap.get(obj.id);
+        if (!updateObj) {
+          onUpdateObj[`${path}[${index}]`] = "Missing fulfillment";
+          return;
         }
-      });
-
-      // Check for any tags present in onUpdate but missing in update
-      onUpdateMap.forEach((onUpdateItem, code) => {
-        if (!updateMap.has(code)) {
-          onUpdateObj[`${path}.list.${code}`] = `Missing in update: ${code}`;
-        }
+        compareObjects(updateObj, obj, `${path}[${index}]`);
       });
     }
 
-    function compareTagValues(updateItem, onUpdateItem, path) {
-      if (updateItem.value !== onUpdateItem.value) {
-        onUpdateObj[
-          `${path}.value`
-        ] = `Mismatch: ${updateItem.value} != ${onUpdateItem.value}`;
-      }
-    }
-
-    mapAndCompareTags(
-      update.fulfillments[0].tags,
-      on_update.fulfillments[0].tags,
-      "fulfillments[0].tags"
+    mapAndCompareObjects(
+      update.fulfillments,
+      on_update.fulfillments,
+      "fulfillments"
     );
   }
 
@@ -134,6 +113,7 @@ const checkOnUpdate = (data, msgIdSet) => {
   } catch (e) {
     console.log(e);
   }
+  console.log(onUpdateObj);
   return onUpdateObj;
 };
 
