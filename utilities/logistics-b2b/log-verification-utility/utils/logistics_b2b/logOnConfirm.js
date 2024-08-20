@@ -66,11 +66,11 @@ const checkOnConfirm = (data, msgIdSet) => {
 
   // Assuming confirm and onConfirm are your data objects
   try {
+    console.log("Validating /on_confirm with /confirm");
     compareObjects(confirm, on_confirm);
   } catch (error) {
     onConfirmObj.general_error = `Error during validation: ${error.message}`;
   }
-
   console.log(onConfirmObj);
   return onConfirmObj;
 };
