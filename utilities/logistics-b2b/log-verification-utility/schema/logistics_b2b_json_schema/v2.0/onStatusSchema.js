@@ -90,7 +90,6 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          format: "date-time",
         },
       },
       required: [
@@ -675,67 +674,65 @@ module.exports = {
                 required: ["id", "collected_by", "params", "type", "tags"],
               },
             },
+
             tags: {
-              type: "object",
-              properties: {
-                tags: {
-                  type: "array",
-                  items: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  descriptor: {
                     type: "object",
                     properties: {
-                      descriptor: {
-                        type: "object",
-                        properties: {
-                          code: {
-                            type: "string",
-                          },
-                        },
-                        required: ["code"],
+                      code: {
+                        type: "string",
                       },
-                      list: {
-                        type: "array",
-                        items: {
+                    },
+                    required: ["code"],
+                  },
+                  list: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        descriptor: {
                           type: "object",
                           properties: {
-                            descriptor: {
-                              type: "object",
-                              properties: {
-                                code: {
-                                  type: "string",
-                                },
-                              },
-                              required: ["code"],
-                            },
-                            value: {
+                            code: {
                               type: "string",
                             },
                           },
-                          required: ["descriptor", "value"],
+                          required: ["code"],
+                        },
+                        value: {
+                          type: "string",
                         },
                       },
+                      required: ["descriptor", "value"],
                     },
-                    required: ["descriptor", "list"],
+                  },
+                },
+                required: ["descriptor", "list"],
+              },
+            },
+
+            required: ["tags"],
+            anyOf: [
+              {
+                properties: {
+                  tags: {
+                    const: { $data: "/confirm/0/message/order/tags" },
                   },
                 },
               },
-              required: ["tags"],
-              oneOf: [
-                {
-                  properties: {
-                    tags: {
-                      const: { $data: "/confirm/0/message/order/tags" },
-                    },
+              {
+                properties: {
+                  tags: {
+                    const: { $data: "/update/0/message/order/tags" },
                   },
                 },
-                {
-                  properties: {
-                    tags: {
-                      const: { $data: "/update/0/message/order/tags" },
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
+
             updated_at: {
               type: "string",
             },

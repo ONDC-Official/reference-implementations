@@ -82,24 +82,48 @@ const checkOnUpdate = (data, msgIdSet) => {
   }
 
   function validateFulfillments(update, on_update) {
-    function mapAndCompareObjects(updateList, onUpdateList, path) {
+    function mapAndCompareTags(updateList, onUpdateList, path) {
       const updateMap = new Map();
-      updateList.forEach((obj) => updateMap.set(obj.id, obj)); // Assuming each fulfillment has a unique 'id' field
+      const onUpdateMap = new Map();
 
-      onUpdateList.forEach((obj, index) => {
-        const updateObj = updateMap.get(obj.id);
-        if (!updateObj) {
-          onUpdateObj[`${path}[${index}]`] = "Missing fulfillment";
-          return;
+      // Map updateList and onUpdateList by descriptor.code
+      updateList.forEach((obj) => {
+        obj.list.forEach((item) => updateMap.set(item.descriptor.code, item));
+      });
+      onUpdateList.forEach((obj) => {
+        obj.list.forEach((item) => onUpdateMap.set(item.descriptor.code, item));
+      });
+
+      // Compare objects based on descriptor.code
+      updateMap.forEach((updateItem, code) => {
+        const onUpdateItem = onUpdateMap.get(code);
+        if (!onUpdateItem) {
+          onUpdateObj[`${path}.list.${code}`] = `Missing in onUpdate: ${code}`;
+        } else {
+          compareTagValues(updateItem, onUpdateItem, `${path}.list.${code}`);
         }
-        compareObjects(updateObj, obj, `${path}[${index}]`);
+      });
+
+      // Check for any tags present in onUpdate but missing in update
+      onUpdateMap.forEach((onUpdateItem, code) => {
+        if (!updateMap.has(code)) {
+          onUpdateObj[`${path}.list.${code}`] = `Missing in update: ${code}`;
+        }
       });
     }
 
-    mapAndCompareObjects(
-      update.fulfillments,
-      on_update.fulfillments,
-      "fulfillments"
+    function compareTagValues(updateItem, onUpdateItem, path) {
+      if (updateItem.value !== onUpdateItem.value) {
+        onUpdateObj[
+          `${path}.value`
+        ] = `Mismatch: ${updateItem.value} != ${onUpdateItem.value}`;
+      }
+    }
+
+    mapAndCompareTags(
+      update.fulfillments[0].tags,
+      on_update.fulfillments[0].tags,
+      "fulfillments[0].tags"
     );
   }
 

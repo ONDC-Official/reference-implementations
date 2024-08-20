@@ -8,6 +8,7 @@ const checkOnConfirm = require("./logOnConfirm");
 const checkUpdate = require("./logUpdate");
 const checkOnUpdate = require("./logOnUpdate");
 const checkOnCancel = require("./logOnCancel");
+const checkOnStatus = require("./logOnStatus");
 
 const logisticsB2BVal = async (element, action, msgIdSet) => {
   const busnsErr = {};
@@ -30,6 +31,8 @@ const logisticsB2BVal = async (element, action, msgIdSet) => {
       return checkOnUpdate(element, msgIdSet);
     case "on_cancel":
       return checkOnCancel(element, msgIdSet);
+    case "on_status":
+      return checkOnStatus(element, msgIdSet);
   }
   return busnsErr;
 };
