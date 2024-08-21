@@ -8,6 +8,7 @@ const checkOnUpdate = (data, msgIdSet) => {
   on_update = on_update.message.order;
   dao.setValue("onUpdateObj", on_update);
   let on_confirm = dao.getValue("onConfirmObj");
+  let update = dao.getValue("updateObj");
   let fulfillments = on_update.fulfillments;
   let items = on_update.items;
 
@@ -84,34 +85,48 @@ const checkOnUpdate = (data, msgIdSet) => {
     console.log(e);
   }
 
-  function validateFulfillments(update, on_update) {
-    function mapAndCompareObjects(updateList, onUpdateList, path) {
+  // Makes sure that the tags in update are present in onConfirm.
+  function compareTags(updateTags, onUpdateTags) {
+    try {
       const updateMap = new Map();
-      updateList.forEach((obj) => updateMap.set(obj.id, obj)); // Assuming each fulfillment has a unique 'id' field
+      const onUpdateMap = new Map();
 
-      onUpdateList.forEach((obj, index) => {
-        const updateObj = updateMap.get(obj.id);
-        if (!updateObj) {
-          onUpdateObj[`${path}[${index}]`] = "Missing fulfillment";
-          return;
-        }
-        compareObjects(updateObj, obj, `${path}[${index}]`);
+      // Map updateTags and onUpdateTags by descriptor.code
+      updateTags.forEach((tag) => {
+        tag.list.forEach((item) => updateMap.set(item.descriptor.code, item));
       });
-    }
+      onUpdateTags.forEach((tag) => {
+        tag.list.forEach((item) => onUpdateMap.set(item.descriptor.code, item));
+      });
 
-    mapAndCompareObjects(
-      update.fulfillments,
-      on_update.fulfillments,
-      "fulfillments"
-    );
+      // Compare objects based on descriptor.code
+      updateMap.forEach((updateItem, code) => {
+        const onUpdateItem = onUpdateMap.get(code);
+        if (!onUpdateItem) {
+          onUpdateObj[
+            `fulfillments[0].tags.${code}`
+          ] = `Missing in on_update: ${code}`;
+        } else if (updateItem.value !== onUpdateItem.value) {
+          onUpdateObj[
+            `fulfillments[0].tags.${code}.value`
+          ] = `Mismatch: ${updateItem.value} != ${onUpdateItem.value}`;
+        }
+      });
+    } catch (error) {
+      onUpdateObj.general_error = `Error during fulfillment tags validation: ${error.message}`;
+    }
   }
 
-  let update = dao.getValue("updateObj");
   try {
-    console.log("Validating fulfillments");
-    validateFulfillments(update, on_update);
-  } catch (e) {
-    console.log(e);
+    console.log(
+      "Checking if fulfillments tags in /update and /on_update are the same"
+    );
+    compareTags(
+      update?.fulfillments[0]?.tags || [],
+      on_update?.fulfillments[0]?.tags || []
+    );
+  } catch (error) {
+    onUpdateObj.general_error = `Error during fulfillment tags validation: ${error.message}`;
   }
   console.log(onUpdateObj);
   return onUpdateObj;
