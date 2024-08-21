@@ -199,6 +199,8 @@ const timestampCheck = (date) => {
 
 const getVersion = (data, vertical) => {
   if (vertical === "logistics") {
+    if (data?.search && data?.search[0]?.context?.version === "2.0.0")
+      return "v2.0";
     if (data?.search && data?.search[0]?.context?.core_version === "1.1.0")
       return "v1.1";
     else return "v1.2";
@@ -208,7 +210,6 @@ const getVersion = (data, vertical) => {
       return "v1";
     else return "v2";
   }
-  if (vertical === "logistics_b2b") return "v2.0";
   if (vertical === "services") return "v2";
 };
 function compareDates(dateString1, dateString2) {
