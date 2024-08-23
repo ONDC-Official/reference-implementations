@@ -25,6 +25,13 @@ const checkOnConfirm = (data, msgIdSet) => {
     onConfirmObj.updatedAtErr = `order/updated_at should be updated w.r.t context/timestamp`;
   }
 
+  /**
+   * Compares the value of a tag in confirm and on_confirm.
+   * If the values don't match, sets an error in the onConfirmObj.
+   * @param {Object} confirmItem - The tag object from confirm.
+   * @param {Object} onConfirmItem - The tag object from on_confirm.
+   * @param {String} path - The path of the tag in the onConfirmObj.
+   */
   const compareTagValues = (confirmItem, onConfirmItem, path) => {
     if (confirmItem.value !== onConfirmItem.value) {
       onConfirmObj[
@@ -33,6 +40,14 @@ const checkOnConfirm = (data, msgIdSet) => {
     }
   };
 
+  /**
+   * Maps confirmList and onConfirmList by descriptor.code, and then compares the values
+   * of the tags in confirm and on_confirm. If the values don't match, sets an error in the
+   * onConfirmObj.
+   * @param {Array} confirmList - The list of tags from confirm.
+   * @param {Array} onConfirmList - The list of tags from on_confirm.
+   * @param {String} path - The path of the tag in the onConfirmObj.
+   */
   const mapAndCompareTags = (confirmList, onConfirmList, path) => {
     const confirmMap = new Map();
     const onConfirmMap = new Map();
@@ -63,11 +78,30 @@ const checkOnConfirm = (data, msgIdSet) => {
     });
   };
 
+  /**
+   * Compares tags in confirm and on_confirm. If any tag is missing in either side or
+   * has different values, sets an error in the onConfirmObj.
+   * @param {Object} confirm - The confirm object.
+   * @param {Object} on_confirm - The on_confirm object.
+   */
   const validateTags = (confirm, on_confirm) => {
     mapAndCompareTags(confirm.tags, on_confirm.tags, "tags");
   };
 
+  /**
+   * Compares payments in confirm and on_confirm. If any payment is missing in either
+   * side or has different collected_by, params, or tags, sets an error in the onConfirmObj.
+   * @param {Object} confirm - The confirm object.
+   * @param {Object} on_confirm - The on_confirm object.
+   */
   const validatePayments = (confirm, on_confirm) => {
+  /**
+   * Compares each parameter in confirmParams with onConfirmParams. If any
+   * parameter has a different value, sets an error in the onConfirmObj.
+   * @param {Object} confirmParams - The params object from confirm.
+   * @param {Object} onConfirmParams - The params object from on_confirm.
+   * @param {String} path - The path of the parameter in the onConfirmObj.
+   */
     const compareParams = (confirmParams, onConfirmParams, path) => {
       // Compare each parameter in confirmParams with onConfirmParams
       for (const [key, value] of Object.entries(confirmParams)) {
@@ -148,52 +182,6 @@ const checkOnConfirm = (data, msgIdSet) => {
   } catch (error) {
     onConfirmObj.general_error = `Error during validation: ${error.message}`;
   }
-  // function compareObjects(obj1, obj2, path = "") {
-  //   if (typeof obj1 !== typeof obj2) {
-  //     onConfirmObj[path] = `Type mismatch: ${typeof obj1} != ${typeof obj2}`;
-  //     return;
-  //   }
-
-  //   if (obj1 === null || obj2 === null) {
-  //     if (obj1 !== obj2) {
-  //       onConfirmObj[path] = `Mismatch: ${obj1} != ${obj2}`;
-  //     }
-  //     return;
-  //   }
-
-  //   if (typeof obj1 !== "object") {
-  //     if (obj1 !== obj2) {
-  //       onConfirmObj[path] = `Mismatch: ${obj1} != ${obj2}`;
-  //     }
-  //     return;
-  //   }
-
-  //   // Exclude 'updated_at' and 'status' from validation
-  //   const excludedKeys = ["updated_at", "status"];
-  //   const keys1 = Object.keys(obj1).filter(
-  //     (key) => !excludedKeys.includes(key)
-  //   );
-  //   const keys2 = Object.keys(obj2).filter(
-  //     (key) => !excludedKeys.includes(key)
-  //   );
-
-  //   // Check for missing keys in onConfirm
-  //   keys1.forEach((key) => {
-  //     if (!obj2.hasOwnProperty(key)) {
-  //       onConfirmObj[`${path}.${key}`] = `Missing in onConfirm: ${key}`;
-  //       return;
-  //     }
-  //     compareObjects(obj1[key], obj2[key], `${path}.${key}`);
-  //   });
-  // }
-
-  // // Assuming confirm and onConfirm are your data objects
-  // try {
-  //   console.log("Validating /on_confirm with /confirm");
-  //   compareObjects(confirm, on_confirm);
-  // } catch (error) {
-  //   onConfirmObj.general_error = `Error during validation: ${error.message}`;
-  // }
   return onConfirmObj;
 };
 

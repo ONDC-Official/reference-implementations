@@ -24,11 +24,23 @@ const checkUpdate = (data, msgIdSet) => {
   let onConfirmTags = dao.getValue("onConfirmObj")?.fulfillments[0]?.tags;
   let updateTags = update?.fulfillments[0]?.tags;
 
+  /**
+   * Finds the first item in the given list which has a descriptor with the given
+   * code. If no such item is found, returns undefined.
+   * @param {Array<{descriptor: {code: string}}>} list
+   * @param {string} code
+   * @returns {undefined|{descriptor: {code: string}}}
+   */
   function findMatchingDescriptor(list, code) {
     return list.find((item) => item.descriptor.code === code);
   }
 
-  // Makes sure that the tags in onConfirm are present in update. 
+  /**
+   * Compares the tags in onConfirmTags with updateTags.
+   * @param {Array<{descriptor: {code: string}, list: Array<{descriptor: {code: string}}>}>} onConfirmTags
+   * @param {Array<{descriptor: {code: string}, list: Array<{descriptor: {code: string}}>}>} updateTags
+   * @returns {void}
+   */
   function compareTags(onConfirmTags, updateTags) {
     try {
       // Iterate over each tag in onConfirmTags

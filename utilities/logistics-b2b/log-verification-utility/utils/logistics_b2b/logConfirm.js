@@ -31,6 +31,14 @@ const checkConfirm = (data, msgIdSet) => {
 
   let confirm = data;
   confirm = confirm.message.order;
+  /**
+   * Checks if tags are the same between /search and /confirm responses.
+   *
+   * @param {Object} search - The search response object.
+   * @param {Object} confirm - The confirm response object.
+   * @param {Object} transformedBPPTerms - The transformed BPP terms to be added to search tags.
+   * @param {Object} confirmObj - The object to store any discrepancies found.
+   */
   try {
     console.log("Checking if tags are same between /search and /confirm");
     let searchTags = search?.tags;
@@ -84,6 +92,12 @@ const checkConfirm = (data, msgIdSet) => {
 
   try {
     console.log("Validating quote in /confirm with quote received in /onInit");
+    /**
+     * Compares two fields and adds an entry to confirmObj if there is a mismatch.
+     * @param {string} fieldName - The name of the field to store the mismatch in confirmObj.
+     * @param {any} confirmValue - The value of the field from the /confirm response.
+     * @param {any} onInitValue - The value of the field from the /onInit response.
+     */
     function compareFields(fieldName, confirmValue, onInitValue) {
       if (confirmValue !== onInitValue) {
         confirmObj[fieldName] = `Mismatch: ${confirmValue} != ${onInitValue}`;
