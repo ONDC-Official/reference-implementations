@@ -200,7 +200,7 @@ module.exports = Object.freeze({
   BPP_PAYMENT_TAGS:["signature","dsa","ttl"],
   ON_SEEARCH_ITEMTAGS:["g2","g3","origin"],
   ON_SEARCH_PROVIDERTAGS:["serviceability","seller_id","seller_terms"],
-  B2B_PAYMENT_TYPE:["PRE-FULFILLMENT","ON-FULFILLMENT"],
+  B2B_PAYMENT_TYPE:["PRE-FULFILLMENT","ON-FULFILLMENT","POST-FULFILLMENT"],
   PRECANCEL_BEFORE_RTO:["Pending",
   "Packed",
   "Searching-for-Agent",

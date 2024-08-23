@@ -222,7 +222,7 @@ module.exports = {
                     },
                   },
                 },
-                required: ["id", "location_ids", "quantity", "fulfillment_ids"],
+                required: ["id", "location_ids", "quantity"],
               },
             },
             fulfillments: {
