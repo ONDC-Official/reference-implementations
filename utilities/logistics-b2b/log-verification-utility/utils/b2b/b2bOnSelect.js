@@ -147,7 +147,7 @@ const checkOnSelect = async (data, msgIdSet) => {
     if (ffState === "Non-serviceable" && !data.error) {
       onSelectObj.nonSrvcableErr = `Error object with appropriate error code should be sent in case fulfillment is 'Non-serviceable`;
     }
-    if (ffState === "Serviceable" && data.error.code==='30009') {
+    if (ffState === "Serviceable" && data?.error?.code==='30009') {
       onSelectObj.nonSrvcableErr1 = `Fulfillments/state should be 'Non-serviceable`;
     }
   } catch (error) {

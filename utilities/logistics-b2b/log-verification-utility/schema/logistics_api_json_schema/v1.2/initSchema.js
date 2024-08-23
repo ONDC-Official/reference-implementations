@@ -217,6 +217,7 @@ module.exports = {
                         properties: {
                           phone: {
                             type: "string",
+                            pattern: "^[0-9]{10,11}$",
                           },
                           email: {
                             type: "string",

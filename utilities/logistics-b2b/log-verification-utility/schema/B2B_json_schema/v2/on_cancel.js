@@ -575,9 +575,6 @@ module.exports = {
                       },
                       amount: {
                         type: "string",
-                        const: { $data: "4/quote/price/value" },
-                        errorMessage:
-                          "should be updated to updated quote price - ${4/quote/price/value}",
                       },
                     },
                     required: ["currency", "amount"],

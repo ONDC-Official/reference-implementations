@@ -211,7 +211,7 @@ module.exports = {
                               },
                               value: {
                                 type: "string",
-                                "minLength": 1
+                                minLength: 1,
                               },
                             },
                             required: ["descriptor", "value"],
@@ -259,6 +259,14 @@ module.exports = {
                             },
                           },
                           required: ["gps", "area_code"],
+                        },
+                        contact: {
+                          type: "object",
+                          properties: {
+                            phone: {
+                              type: "string",
+                            },
+                          },
                         },
                       },
                       required: ["type", "location"],
@@ -343,7 +351,7 @@ module.exports = {
                               },
                               value: {
                                 type: "string",
-                                "minLength": 1
+                                minLength: 1,
                               },
                             },
                             if: {
@@ -388,7 +396,7 @@ module.exports = {
                 properties: {
                   type: {
                     type: "string",
-                    enum : constants.B2B_PAYMENT_TYPE,
+                    enum: constants.B2B_PAYMENT_TYPE,
                   },
                 },
                 required: ["type"],
@@ -426,7 +434,7 @@ module.exports = {
                         },
                         value: {
                           type: "string",
-                          "minLength": 1
+                          minLength: 1,
                         },
                       },
                       required: ["descriptor", "value"],
