@@ -16,6 +16,14 @@ const checkOnCancel = (data, msgIdSet) => {
   let reference = dao.getValue("onUpdateObj")
     ? dao.getValue("onUpdateObj")
     : dao.getValue("onConfirmObj");
+  /**
+   * Recursively compares two objects and logs any type mismatches or value differences
+   * to the onCancelObj object. Excludes 'updated_at', 'status', 'quote', 'cancellation_terms',
+   * 'payments' and 'fulfillments' from validation.
+   * @param {Object} obj1 first object to compare
+   * @param {Object} obj2 second object to compare
+   * @param {String} path current path being compared
+   */
   function compareObjects(obj1, obj2, path = "") {
     if (typeof obj1 !== typeof obj2) {
       onCancelObj[path] = `Type mismatch: ${typeof obj1} != ${typeof obj2}`;

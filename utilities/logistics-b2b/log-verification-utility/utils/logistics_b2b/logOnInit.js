@@ -11,6 +11,11 @@ const checkOnInit = async (data, msgIdSet) => {
 
   let items = init?.items || [];
 
+  /**
+   * Validates that the amount in payment params matches the value in quote price.
+   * @param {Object} data - The data object from the message.
+   * @returns {boolean} - True if the amounts match, false otherwise.
+   */
   const validateQuote = (data) => {
     return (
       data.message.order.payments.params.amount ===
@@ -28,6 +33,21 @@ const checkOnInit = async (data, msgIdSet) => {
     console.log("Error while validating quote");
   }
 
+  /**
+   * Validates order items against a set of reference items.
+   *
+   * @param {Array} orderItems - The items to be validated.
+   * @param {Array} referenceItems - The reference items to validate against.
+   * @param {Object} initObj - An object to store error messages in.
+   *
+   * Performs the following validations:
+   * 1. Checks if each order item exists in the reference items by ID.
+   * 2. Compares the 'tags' property of each order item with the corresponding reference item.
+   * 3. Recursively compares the properties of nested objects in each order item with the corresponding reference item.
+   * 4. Compares simple property values (non-objects) of each order item with the corresponding reference item.
+   *
+   * If any discrepancies are found, adds an error message to the initObj with a specific key indicating the type of error and the affected item ID.
+   */
   function validateItems(orderItems, referenceItems, initObj) {
     try {
       console.log("Validating order items");
