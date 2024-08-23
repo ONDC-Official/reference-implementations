@@ -80,7 +80,13 @@ const checkOnInit = async (data, msgIdSet) => {
         "An error occurred while validating order items";
     }
   }
-  validateItems(data.message.order.items, items, onInitObj);
+  try{
+    validateItems(data.message.order.items, items, onInitObj);
+  }catch(e){
+    console.log("Error while validating order items", e);
+    onInitObj["itemValidationError"] =
+      "An error occurred while validating order items";
+  }
   dao.setValue("onInitObj", onInit);
   return onInitObj;
 };
