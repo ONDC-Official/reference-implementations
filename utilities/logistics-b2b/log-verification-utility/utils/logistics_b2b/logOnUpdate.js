@@ -17,6 +17,13 @@ const checkOnUpdate = (data, msgIdSet) => {
       "order/updated_at cannot be future dated w.r.t context/timestamp";
   }
 
+  /**
+   * Compares the value of a tag in onConfirm with the same tag in confirm.
+   * If the values don't match, sets an error in onUpdateObj at the given path
+   * @param {Object} confirmItem - The tag from confirm
+   * @param {Object} onConfirmItem - The tag from onConfirm
+   * @param {String} path - The path to set the error at in onUpdateObj
+   */
   const compareTagValues = (confirmItem, onConfirmItem, path) => {
     if (confirmItem.value !== onConfirmItem.value) {
       onUpdateObj[
@@ -25,6 +32,14 @@ const checkOnUpdate = (data, msgIdSet) => {
     }
   };
 
+  /**
+   * Maps confirmList and onConfirmList by descriptor.code, and then compares the values
+   * of the tags in confirm and on_confirm. If the values don't match, sets an error in the
+   * onUpdateObj.
+   * @param {Array} confirmList - The list of tags from confirm.
+   * @param {Array} onConfirmList - The list of tags from on_confirm.
+   * @param {String} path - The path of the tag in the onUpdateObj.
+   */
   const mapAndCompareTags = (confirmList, onConfirmList, path) => {
     const confirmMap = new Map();
     const onConfirmMap = new Map();
@@ -85,7 +100,13 @@ const checkOnUpdate = (data, msgIdSet) => {
     console.log(e);
   }
 
-  // Makes sure that the tags in update are present in onConfirm.
+  /**
+   * Compares the tags in /update and /on_update.
+   * Maps both lists of tags by descriptor.code and then compares the values.
+   * If the values don't match, sets an error in the onUpdateObj.
+   * @param {Array} updateTags - The list of tags from /update.
+   * @param {Array} onUpdateTags - The list of tags from /on_update.
+   */
   function compareTags(updateTags, onUpdateTags) {
     try {
       const updateMap = new Map();

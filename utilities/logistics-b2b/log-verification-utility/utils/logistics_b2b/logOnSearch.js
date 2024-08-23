@@ -7,13 +7,22 @@ const checkOnSearch = async (data, msgIdSet) => {
   let onSearchObj = {};
   let onSearch = data;
   onSearch = onSearch?.message?.catalog;
-  const fulfillments = onSearch.fulfillments || [];
+  const fulfillments = onSearch?.fulfillments || [];
   const categories = onSearch?.providers?.[0]?.categories || [];
   const items = onSearch?.providers?.[0]?.items || [];
   const contextTimestamp = new Date(data?.context?.timestamp || "");
 
+  /**
+   * Extracts the number of days from a duration string in ISO 8601 format.
+   *
+   * @param {string} duration - The duration string to parse (e.g. "P30D").
+   * @returns {number} The number of days extracted from the duration string, or 0 if the string is invalid.
+   */
   const getDurationInDays = (duration) => {
+    // Regular expression to match the duration string in ISO 8601 format (PXD)
     const match = duration.match(/^P(\d+)D$/);
+
+    // If the string matches the pattern, return the extracted number of days as an integer
     return match ? parseInt(match[1], 10) : 0;
   };
 
@@ -21,6 +30,16 @@ const checkOnSearch = async (data, msgIdSet) => {
     return date.toISOString().split("T")[0];
   };
 
+  /**
+   * Validates the timestamp of an item in the on_search response.
+   *
+   * @param {object} item - The item to validate.
+   * @returns {boolean} Whether the timestamp is valid.
+   *
+   * The timestamp is considered valid if the duration is not provided or is invalid.
+   * If the duration is valid, the timestamp is considered valid if it is equal to the
+   * current timestamp plus the duration.
+   */
   const validateTimestamp = (item) => {
     const duration = item.time?.duration || "";
     const expectedDays = getDurationInDays(duration);
@@ -56,6 +75,16 @@ const checkOnSearch = async (data, msgIdSet) => {
     const fulfillmentMap = new Map(fulfillments.map((f) => [f.id, f]));
     const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
+    /**
+     * Validates the category_ids and fulfillment_ids of an item in the on_search response.
+     *
+     * @param {object} item - The item to validate.
+     * @returns {boolean} Whether the category_ids and fulfillment_ids are valid.
+     *
+     * The function goes over each item and makes sure the category IDs and fulfillment IDs
+     *  provided in the item match the ones provided in on_search.message.catalog.fulfillments and
+     * on_search.message.catalog.providers[0].categories.
+     */
     const validateItemIds = (item) => {
       const validCategoryIds = item.category_ids || [];
       const validFulfillmentIds = item.fulfillment_ids || [];
@@ -81,6 +110,11 @@ const checkOnSearch = async (data, msgIdSet) => {
   }
   try {
     console.log("Validating effective date");
+    /**
+     * Finds the value of the "Effective_Date" tag in the on_search response.
+     *
+     * @returns {string|null} The value of the "Effective_Date" tag, or null if not found.
+     */
     const getEffectiveDate = () => {
       const tags = onSearch?.descriptor?.tags;
       if (tags) {
@@ -88,7 +122,7 @@ const checkOnSearch = async (data, msgIdSet) => {
           if (tag?.descriptor?.code === "BPP_Terms") {
             for (let item of tag.list) {
               if (item?.descriptor?.code === "Effective_Date") {
-                return item.value;
+                return item?.value;
               }
             }
           }
@@ -110,6 +144,9 @@ const checkOnSearch = async (data, msgIdSet) => {
     console.log("Error while validating effective date");
   }
 
+// For each provider in the on_search response, iterate over its items.
+// Check if each item has tags and if those tags follow the required structure
+// of Cargo_Details, which includes a specific list of tags.
   try {
     console.log("Validating item tags");
     const requiredTagStructure = {
@@ -169,7 +206,7 @@ const checkOnSearch = async (data, msgIdSet) => {
   } catch (e) {
     console.log("Error while validating item tags", e);
   }
-  dao.setValue("onSearchObj", onSearch); 
+  dao.setValue("onSearchObj", onSearch);
   return onSearchObj;
 };
 

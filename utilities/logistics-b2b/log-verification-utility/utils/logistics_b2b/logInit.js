@@ -8,6 +8,13 @@ const checkInit = async (data, msgIdSet) => {
   let init = data?.message?.order;
   let onSearch = dao.getValue("onSearchObj");
   let items = onSearch?.providers?.[0]?.items || [];
+
+  /**
+   * Validates if the billing order timestamp matches the context order timestamp.
+   *
+   * @param {none} No arguments are taken.
+   * @returns {boolean} True if timestamps match, false otherwise.
+   */
   const validateBillingTimeStamp = () => {
     billingOrderTimestamp = data.message.order.billing.time.timestamp;
     contextOrderTimestamp = data.context.timestamp;
@@ -22,22 +29,32 @@ const checkInit = async (data, msgIdSet) => {
   } catch (e) {
     console.log("Error while validating billing order timestamp");
   }
+
+  /**
+   * Validates the fulfillment stops of an order, checking for:
+   *  - At least one fulfillment
+   *  - At least two stops per fulfillment
+   *  - Unique GPS locations for each stop in a fulfillment
+   *
+   * @param {void} - No parameters are taken, data is assumed to be available in the scope.
+   * @returns {boolean} - True if the order has valid fulfillment stops, false otherwise.
+   */
   const validateFulfillmentStops = () => {
     const order = data.message.order;
 
-    if (!order.fulfillments || order.fulfillments.length === 0) {
+    if (!order?.fulfillments || order?.fulfillments?.length === 0) {
       return false;
     }
 
     for (const fulfillment of order.fulfillments) {
-      if (fulfillment.stops && fulfillment.stops.length > 1) {
+      if (fulfillment?.stops && fulfillment?.stops?.length > 1) {
         const gpsSet = new Set();
 
         for (const stop of fulfillment.stops) {
-          if (gpsSet.has(stop.location.gps)) {
+          if (gpsSet.has(stop?.location?.gps)) {
             return false; // Duplicate GPS found
           }
-          gpsSet.add(stop.location.gps);
+          gpsSet.add(stop?.location?.gps);
         }
       } else {
         return false; // Each fulfillment must have at least two stops
@@ -54,6 +71,22 @@ const checkInit = async (data, msgIdSet) => {
   } catch (e) {
     console.log("Error while validating fulfillment stops");
   }
+
+  /**
+   * Validates order items against a set of reference items.
+   *
+   * @param {Array} orderItems - The items to be validated.
+   * @param {Array} referenceItems - The reference items to validate against.
+   * @param {Object} initObj - An object to store error messages in.
+   *
+   * Performs the following validations:
+   * 1. Checks if each order item exists in the reference items by ID.
+   * 2. Compares the 'tags' property of each order item with the corresponding reference item.
+   * 3. Recursively compares the properties of nested objects in each order item with the corresponding reference item.
+   * 4. Compares simple property values (non-objects) of each order item with the corresponding reference item.
+   *
+   * If any discrepancies are found, adds an error message to the initObj with a specific key indicating the type of error and the affected item ID.
+   */
   function validateItems(orderItems, referenceItems, initObj) {
     try {
       console.log("Validating order items");
@@ -107,7 +140,7 @@ const checkInit = async (data, msgIdSet) => {
     }
   }
   validateItems(data.message.order.items, items, initObj);
-  dao.setValue("initObj", init); 
+  dao.setValue("initObj", init);
   return initObj;
 };
 
