@@ -209,6 +209,7 @@ const getVersion = (data, vertical) => {
     else return "v2";
   }
   if (vertical === "services") return "v2";
+  if (vertical === "b2c-exports") return "v2.0.2";
 };
 function compareDates(dateString1, dateString2) {
   const date1 = new Date(dateString1);

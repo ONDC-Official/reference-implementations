@@ -14,6 +14,7 @@ module.exports = Object.freeze({
   SUPPORTED_DOMAINS_SORTED_INDEX: {
     logistics: 'LOG_SORTED_INDEX',
     b2b: 'B2B_SORTED_INDEX',
+    b2cExport: 'B2C_EXP_SORTED_INDEX'
   }, // must match mergesort.js
   SERVER_LOG_DEST: "/public/server",
   FULL_ACTION_LIST: [
@@ -53,6 +54,18 @@ module.exports = Object.freeze({
     "on_init",
     "confirm",
     "on_confirm",
+  ],
+  B2C_EXP_SORTED_INDEX: [
+    "search",
+    "on_search",
+    "select",
+    "on_select",
+    "init",
+    "on_init",
+    "confirm",
+    "on_confirm",
+    "status",
+    "on_status",
   ],
   SRV_SORTED_INDEX: [
     "search",
@@ -111,6 +124,7 @@ module.exports = Object.freeze({
   ],
   PAYMENT_TYPE: ["ON-ORDER", "ON-FULFILLMENT", "POST-FULFILLMENT"],
   PAYMENT_COLLECTEDBY: ["BAP", "BPP"],
+  PAYMENT_EXP_COLLECTEDBY: ["SOR"],
   UNITS_WEIGHT: ["unit","dozen","gram","kilogram","tonne","litre","millilitre"],
   UNITS_DIMENSIONS: ["centimeter", "meter"],
   CATEGORIES: [
@@ -179,6 +193,10 @@ module.exports = Object.freeze({
     "RTO-Disposed",
     "Cancelled",
   ],
+  FULFILLMENT_EXP_STATE: [
+    "Domestic-Custom-Cleared",
+    "Pickup-Approved"
+  ],
   CURRENCY:["INR","AUD","USD","SGD"],
   CANCELLATION_TAGS_CODES:["rto_event","precancel_state"],
   RTO_EVENT_TAGS:["retry_count","rto_id","cancellation_reason_id","cancelled_by"],
@@ -199,6 +217,7 @@ module.exports = Object.freeze({
   ON_SEEARCH_ITEMTAGS:["g2","g3","origin"],
   ON_SEARCH_PROVIDERTAGS:["serviceability","seller_id","seller_terms"],
   B2B_PAYMENT_TYPE:["PRE-FULFILLMENT","ON-FULFILLMENT"],
+  B2C_EXP_PAYMENT_TYPE:["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
   PRECANCEL_BEFORE_RTO:["Pending",
   "Packed",
   "Searching-for-Agent",
