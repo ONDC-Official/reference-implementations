@@ -8,6 +8,7 @@ const checkTrack = (data, msgIdSet) => {
   let track = data;
 
   let trackId = track.message.order_id;
+
   dao.setValue("trackOrderId", trackId);
 };
 

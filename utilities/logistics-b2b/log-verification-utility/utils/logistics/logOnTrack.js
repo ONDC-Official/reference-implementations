@@ -14,7 +14,7 @@ const checkOnTrack = (data, msgIdSet) => {
   if (tags) {
     tags.forEach((tag) => {
       if (tag?.code === "order") {
-        tag?.list.forEach((listTag) => {
+        tag?.list.forEach((listTag) => {   
           if (
             listTag?.code === "id" &&
             listTag?.value != dao.getValue("trackOrderId")
