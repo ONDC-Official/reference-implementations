@@ -775,6 +775,7 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
+                        enum: constants.SETTLEMENT_COUNTERPARTY
                       },
                       settlement_type: {
                         type: "string",
@@ -986,7 +987,7 @@ module.exports = {
                       properties: {
                         unit: {
                           type: "string",
-                          enum: constants.UNITS_WEIGHT,
+                          enum: constants.DEAD_wEIGHT,
                         },
                         value: {
                           type: "number",
