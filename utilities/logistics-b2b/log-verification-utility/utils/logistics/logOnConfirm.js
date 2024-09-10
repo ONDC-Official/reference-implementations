@@ -57,9 +57,9 @@ console.log(avgPickupTime,dao.getValue(`${fulfillment?.id}-avgPickupTime`));
        
         onCnfrmObj.strtRangeErr = `start/time/range is required in /fulfillments when ready_to_ship = yes in /confirm`;
       }
-      if (rts === "yes" && !fulfillment?.end?.time?.range) {
-        onCnfrmObj.endRangeErr = `end/time/range is required in /fulfillments when ready_to_ship = yes in /confirm`;
-      }
+      // if (rts === "yes" && !fulfillment?.end?.time?.range) {
+      //   onCnfrmObj.endRangeErr = `end/time/range is required in /fulfillments when ready_to_ship = yes in /confirm`;
+      // }
     });
 
   } catch (error) {

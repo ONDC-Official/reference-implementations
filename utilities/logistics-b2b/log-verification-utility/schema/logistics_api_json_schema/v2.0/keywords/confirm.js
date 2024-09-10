@@ -4,11 +4,11 @@ module.exports = {
   },
 
   validateAcceptBPP_Terms: (data) => {
-    const bapTerms = data.find((tag) => tag.descriptor.code === "BAP_Terms");
+    const bapTerms = data.find((tag) => tag?.descriptor?.code === "BAP_Terms");
 
     if (bapTerms) {
       const acceptBPP_Terms = bapTerms.list.find(
-        (item) => item.descriptor.code === "Accept_BPP_Terms"
+        (item) => item?.descriptor?.code === "Accept_BPP_Terms"
       );
       if (acceptBPP_Terms) {
         return acceptBPP_Terms.value === "Y";
