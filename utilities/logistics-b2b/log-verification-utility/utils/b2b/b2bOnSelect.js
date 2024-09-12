@@ -42,7 +42,6 @@ const checkOnSelect = async (data, msgIdSet) => {
   try {
     console.log("Comparing items object with /select");
     const itemDiff = utils.findDifferencesInArrays(items, selectedItems);
-    console.log(itemDiff);
 
     itemDiff.forEach((item, i) => {
       let index = item.attributes.indexOf("fulfillment_ids");
@@ -77,7 +76,6 @@ const checkOnSelect = async (data, msgIdSet) => {
       ) {
         deliveryQuoteItem = true;
         deliveryCharge = breakup?.price?.value;
-        console.log("deliverycharge", deliveryCharge);
       }
       if (
         breakup["@ondc/org/title_type"] === "item" &&
@@ -108,13 +106,16 @@ const checkOnSelect = async (data, msgIdSet) => {
       let itemQuant = item?.quantity?.selected?.count;
 
       quote?.breakup.forEach((breakup) => {
+        const available = parseInt(breakup?.item?.quantity?.available?.count)
+
+        
         if (
           breakup["@ondc/org/title_type"] === "item" &&
           breakup["@ondc/org/item_id"] === itemId
         ) {
           if (
             itemQuant === breakup["@ondc/org/item_quantity"].count &&
-            outOfStock == true
+            outOfStock == true && itemQuant>available
           ) {
             onSelectObj.quoteItemQuantity = `In case of item quantity unavailable, item quantity in quote breakup should be updated to the available quantity`;
           }

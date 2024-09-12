@@ -88,7 +88,7 @@ module.exports = {
           properties: {
             id: {
               type: "string",
-              pattern: "^[a-zA-Z0-9-]{1,32}$",
+              pattern: "^[a-zA-Z0-9-_]{1,32}$",
               allOf: [
                 {
                   not: {
@@ -978,7 +978,7 @@ module.exports = {
                             const: { $data: "4/order/id" },
                           },
                           errorMessage:
-                            "Linked Order ID should not be equal to logistics order Id: ${4/order/id}",
+                            "Is linked retail order Id equal to logistics order Id?",
                         },
                       ],
                     },

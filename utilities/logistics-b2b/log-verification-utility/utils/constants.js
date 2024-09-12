@@ -194,7 +194,7 @@ module.exports = Object.freeze({
     "Cancelled",
   ],
   CURRENCY: ["INR", "AUD", "USD", "SGD"],
-  CANCELLATION_TAGS_CODES: ["rto_event", "precancel_state"],
+  CANCELLATION_TAGS_CODES: ["state","rto_action","rto_event", "precancel_state"],
   RTO_EVENT_TAGS: [
     "retry_count",
     "rto_id",
@@ -202,6 +202,7 @@ module.exports = Object.freeze({
     "cancelled_by",
   ],
   CANCELLATION_TAGS_LIST: [
+    "ready_to_ship","return_to_origin",
     "retry_count",
     "rto_id",
     "cancellation_reason_id",
