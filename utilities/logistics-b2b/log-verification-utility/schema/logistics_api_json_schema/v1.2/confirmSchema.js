@@ -978,7 +978,7 @@ module.exports = {
                             const: { $data: "4/order/id" },
                           },
                           errorMessage:
-                            "Is linked retail order Id equal to logistics order Id?",
+                            "Is linked retail order Id same as logistics order Id?",
                         },
                       ],
                     },
