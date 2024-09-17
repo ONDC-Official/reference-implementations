@@ -14,5 +14,5 @@ func SetupRoutes(r *gin.Engine) {
         
     }
 
-	r.GET("/ondc-site-verification.html", handlers.SiteVerificationHandler)
+	r.GET("/ondc-site-verification.html", handlers.OndcSiteVerificationHandler)
 }

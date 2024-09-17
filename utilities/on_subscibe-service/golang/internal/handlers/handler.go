@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"fmt"
+	configs "golang/config"
+	"golang/internal/utils"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,21 +39,19 @@ func OnSubscribeHandler(c *gin.Context) {
 }
 
 // SiteVerificationHandler handles the /ondc-site-verification.html endpoint
-func SiteVerificationHandler(c *gin.Context) {
-    // Define the HTML content as a raw string
-    htmlContent := `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site Verification</title>
-</head>
-<body>
-    <h1>Site Verification</h1>
-    <p>Your site verification content goes here.</p>
-</body>
-</html>`
+func OndcSiteVerificationHandler(c *gin.Context) {
+    fmt.Println(configs.GlobalConfigs.OndcConfigs.SigningPrivateKey)
+    
+    // Create signed content
+    signedContent, err := utils.CreateSignedData(configs.GlobalConfigs.OndcConfigs.RequestId, configs.GlobalConfigs.OndcConfigs.SigningPrivateKey)
+    if err != nil {
+        c.String(http.StatusInternalServerError, fmt.Sprintf("Error creating signed data: %s", err))
+        return
+    }
 
-    // Return the HTML content directly as an HTTP response
-    c.String(http.StatusOK, htmlContent)
+    // Modify HTML with signed content
+    modifiedHTML := strings.Replace(utils.HtmlFile, "SIGNED_UNIQUE_REQ_ID", signedContent, 1)
+    
+    // Serve the modified HTML
+    c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(modifiedHTML))
 }
