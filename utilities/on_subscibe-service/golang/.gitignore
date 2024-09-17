@@ -1,0 +1,34 @@
+# Go binary
+/bin/
+/build/
+/*_test.go
+
+# Dependency directories
+/vendor/
+
+# Build artifacts
+*.exe
+*.test
+*.out
+*.a
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Go module cache
+/go.sum
+/go.mod
+
+# Other files that should be ignored
+*.prof
+*.cache
