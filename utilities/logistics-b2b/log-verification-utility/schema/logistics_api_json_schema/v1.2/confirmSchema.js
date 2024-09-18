@@ -189,7 +189,13 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: ["id", "category_id", "descriptor","time", "fulfillment_id"],
+                required: [
+                  "id",
+                  "category_id",
+                  "descriptor",
+                  "time",
+                  "fulfillment_id",
+                ],
                 // anyOf: [
                 //   {
                 //     allOf: [
@@ -300,7 +306,7 @@ module.exports = {
             },
             fulfillments: {
               type: "array",
-              minItems:1,
+              minItems: 1,
               items: {
                 type: "object",
                 properties: {
@@ -327,9 +333,15 @@ module.exports = {
                         },
                         required: ["name"],
                       },
-                      duration: {
-                        type: "string",
-                        format: "duration",
+                      time: {
+                        type: "object",
+                        properties: {
+                          duration: {
+                            type: "string",
+                            format: "duration",
+                          },
+                        },
+                        required: ["duration"],
                       },
                       location: {
                         type: "object",
@@ -444,7 +456,7 @@ module.exports = {
                         ],
                       },
                     },
-                    required: ["person", "location", "contact"],
+                    required: ["person", "location", "time", "contact"],
                   },
                   end: {
                     type: "object",
@@ -531,9 +543,13 @@ module.exports = {
                         properties: {
                           short_desc: {
                             type: "string",
-                            not: { const: { $data: "3/start/instructions/short_desc" } },
-                                errorMessage:
-                                  "PCC should not be same as DCC ${3/start/instructions/short_desc}",
+                            not: {
+                              const: {
+                                $data: "3/start/instructions/short_desc",
+                              },
+                            },
+                            errorMessage:
+                              "PCC should not be same as DCC ${3/start/instructions/short_desc}",
                           },
                           long_desc: {
                             type: "string",
@@ -775,7 +791,7 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
-                        enum: constants.SETTLEMENT_COUNTERPARTY
+                        enum: constants.SETTLEMENT_COUNTERPARTY,
                       },
                       settlement_type: {
                         type: "string",
