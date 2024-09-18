@@ -349,7 +349,7 @@ module.exports = {
                             type: "string",
                             pattern:
                               "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
-                            errorMessage: "Incorrect gps value",
+                            errorMessage: "Incorrect gps value (min 6 decimal digits required)",
                           },
                           address: {
                             type: "object",
@@ -475,7 +475,7 @@ module.exports = {
                             type: "string",
                             pattern:
                               "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
-                            errorMessage: "Incorrect gps value",
+                            errorMessage: "Incorrect gps value (min 6 decimal digits required)",
                           },
                           address: {
                             type: "object",
