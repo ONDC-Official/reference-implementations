@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	configs "golang/config"
 	"golang/internal/utils"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,10 +12,24 @@ import (
 
 // GenerateKeysHandler handles the /generate-keys endpoint
 func GenerateKeysHandler(c *gin.Context) {
-    // Example response for generating keys
+    signingPublicKey, signingPrivateKey, err := utils.GenerateSigningKeys()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Error generating signing keys: %s", err)
+        return
+    }
+    
+    encPublicKey, encPrivateKey, err := utils.GenerateEncryptionKeys()
+    if err != nil {
+        c.String(http.StatusInternalServerError, "Error generating encryption keys: %s", err)
+        return
+    }
+
+    // Send response
     c.JSON(http.StatusOK, gin.H{
-        "message": "Keys generated successfully",
-        "keys":    "example-keys", // Replace with actual key generation logic
+        "signing_public_key":    signingPublicKey,
+        "signing_private_key":   signingPrivateKey,
+        "encryption_public_key": encPublicKey,
+        "encryption_private_key": encPrivateKey,
     })
 }
 
@@ -40,10 +54,10 @@ func OnSubscribeHandler(c *gin.Context) {
 
 // SiteVerificationHandler handles the /ondc-site-verification.html endpoint
 func OndcSiteVerificationHandler(c *gin.Context) {
-    fmt.Println(configs.GlobalConfigs.OndcConfigs.SigningPrivateKey)
+    fmt.Println("++++++ Private key", os.Getenv("SIGNING_PRIVATE_KEY"))
     
     // Create signed content
-    signedContent, err := utils.CreateSignedData(configs.GlobalConfigs.OndcConfigs.RequestId, configs.GlobalConfigs.OndcConfigs.SigningPrivateKey)
+    signedContent, err := utils.CreateSignedData(os.Getenv("REQUEST_ID"), os.Getenv("SIGNING_PRIVATE_KEY"))
     if err != nil {
         c.String(http.StatusInternalServerError, fmt.Sprintf("Error creating signed data: %s", err))
         return
