@@ -6,7 +6,7 @@ const utils = require("../utils");
 const checkInit = (data, msgIdSet) => {
   const billing = data.message.order.billing
   const billingAdd= billing.address
-
+  const contextTimestamp = data?.context.timestamp
   const initObj = {};
   let init = data;
   let p2h2p = false;
@@ -62,6 +62,15 @@ const checkInit = (data, msgIdSet) => {
     );
   }
 
+  //billing check
+
+  if (billing?.created_at > contextTimestamp) {
+    initObj.BilngcreatedAtErr = `billing/created_at cannot be future dated w.r.t context/timestamp`;
+  }
+
+  if (billing?.updated_at > contextTimestamp) {
+    initObj.BilngupdtdAtErr = `billing/updated_at cannot be future dated w.r.t context/timestamp`;
+  }
   //item check
   try {
     console.log(`Comparing item object in /init and /on_search`);

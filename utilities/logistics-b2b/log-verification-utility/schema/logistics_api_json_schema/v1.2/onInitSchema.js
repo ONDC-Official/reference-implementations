@@ -371,6 +371,7 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
+                        enum: constants.SETTLEMENT_COUNTERPARTY
                       },
                       settlement_type: {
                         type: "string",

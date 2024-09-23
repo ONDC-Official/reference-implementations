@@ -7,10 +7,14 @@ const checkConfirm = (data, msgIdSet) => {
   let cnfrmObj = {};
   let confirm = data;
   const contextTimestamp = confirm.context.timestamp;
+  dao.setValue("cnfrmTimestamp", contextTimestamp);
   let version = confirm.context.core_version;
   let missingTags = [];
   let onSearchProvArr = dao.getValue("providersArr");
   confirm = confirm.message.order;
+  const orderTags = confirm?.tags;
+  let bpp_terms = false;
+  let bap_terms = false;
   let rts;
   let linkedOrder = confirm["@ondc/org/linked_order"];
   if (confirm?.updated_at > contextTimestamp) {
@@ -118,8 +122,10 @@ const checkConfirm = (data, msgIdSet) => {
       console.log(parseFloat(item?.price?.value));
       orderPrice += parseFloat(item?.price?.value);
     });
-    if(orderPrice>dao.getValue('orderPrice')){
-      cnfrmObj.ordrPrice=`Linked order price value - ${orderPrice} cannot be more than the one provided in /search in Payload details - ${dao.getValue("orderPrice")}`
+    if (orderPrice > dao.getValue("orderPrice")) {
+      cnfrmObj.ordrPrice = `Linked order price value - ${orderPrice} cannot be more than the one provided in /search in Payload details - ${dao.getValue(
+        "orderPrice"
+      )}`;
     }
     let orderWeight = linkedOrder?.order?.weight?.value;
     const unit = linkedOrder?.order?.weight?.unit;
@@ -153,6 +159,31 @@ const checkConfirm = (data, msgIdSet) => {
   } catch (error) {
     console.log(error);
   }
+
+  try {
+    console.log("Checking order tags in /confirm");
+    if (orderTags) {
+      orderTags.forEach((tag) => {
+        if (tag?.code === "bpp_terms") {
+          bpp_terms = true;
+        }
+        if (tag?.code === "bap_terms") {
+          bap_terms = true;
+        }
+      });
+    }
+    console.log(bpp_terms, bap_terms);
+
+    if (bpp_terms && !dao.getValue("bppTerms")) {
+      cnfrmObj.bppTermsErr = `Which terms LBNP is providing as LSP did not provide bpp_terms in on_init?`;
+    }
+    if (!bpp_terms && bap_terms) {
+      cnfrmObj.bapTermsErr = `What terms are being accepted by LBNP here?`;
+    }
+    if (!bpp_terms && dao.getValue("bppTerms")) {
+      cnfrmObj.bppTermsErr1 = `BPP terms are missing which were provided by LSP in /on_init`;
+    }
+  } catch (error) {}
   dao.setValue("awbNo", awbNo);
   return cnfrmObj;
 };

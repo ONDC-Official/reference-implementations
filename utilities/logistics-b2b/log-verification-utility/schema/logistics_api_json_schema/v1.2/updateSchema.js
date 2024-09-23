@@ -387,7 +387,7 @@ module.exports = {
                       properties: {
                         unit: {
                           type: "string",
-                          enum: constants.UNITS_WEIGHT,
+                          enum: constants.DEAD_wEIGHT,
                         },
                         value: {
                           type: "number",
@@ -441,9 +441,11 @@ module.exports = {
                       required: ["length", "breadth", "height"],
                     },
                   },
+                  additionalProperties:false,
                   required: ["id", "weight"],
                 },
               },
+              additionalProperties:false,
               required: ["items", "order"],
             },
             updated_at: {

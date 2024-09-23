@@ -70,7 +70,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          const:"PT30S"
+          const: "PT30S",
         },
       },
       required: [
@@ -380,8 +380,6 @@ module.exports = {
                           required: [
                             "name",
                             "short_desc",
-                            "long_desc",
-                            "images",
                           ],
                         },
                         contact: {
@@ -444,27 +442,61 @@ module.exports = {
                   "state",
                   "stops",
                 ],
-                anyof: [
-                  {
+              },
+            },
+            cancellation_terms: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  fulfillment_state: {
+                    type: "object",
                     properties: {
-                      state: {
-                        const: "Order-picked-up",
-                      },
-                      stops: {
-                        type: "array",
-                        items: {
-                          properties: {
-                            type: {
-                              const: "start",
-                            },
-                            time: {
-                              required: ["range", "timestamp"],
-                            },
+                      descriptor: {
+                        type: "object",
+                        properties: {
+                          code: {
+                            type: "string",
+                            enum: constants.FULFILLMENT_STATE
                           },
                         },
+                        required: ["code"],
                       },
                     },
+                    required: ["descriptor"],
                   },
+                  reason_required: {
+                    type: "boolean",
+                  },
+                  cancellation_fee: {
+                    type: "object",
+                    maxProperties: 1,
+                    properties: {
+                      percentage: {
+                        type: "string",
+                      },
+                      amount: {
+                        type: "object",
+                        properties: {
+                          currency: {
+                            type: "string",
+                            enum: constants.CURRENCY
+                          },
+                          value: {
+                            type: "string",
+                          },
+                        },
+                        required: ["currency", "value"],
+                      },
+                    },
+                    required: [],
+                  },
+                },
+                additionalProperties: false,
+                required: [
+                  "fulfillment_state",
+                  "reason_required",
+                  "cancellation_fee",
                 ],
               },
             },
@@ -534,9 +566,11 @@ module.exports = {
                             required: ["currency", "value"],
                           },
                         },
+                        additionalProperties: false,
                         required: ["price"],
                       },
                     },
+
                     if: {
                       properties: {
                         "@ondc/org/title_type": {
@@ -579,6 +613,7 @@ module.exports = {
                   type: "string",
                 },
               },
+              additionalProperties: false,
               isQuoteMatching: true,
 
               required: ["price", "breakup", "ttl"],
@@ -609,7 +644,7 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    enum : constants.B2B_PAYMENT_TYPE,
+                    enum: constants.B2B_PAYMENT_TYPE,
 
                     const: {
                       $data: "/on_confirm/0/message/order/payments/0/type",
@@ -621,7 +656,7 @@ module.exports = {
                       $data:
                         "/on_confirm/0/message/order/payments/0/collected_by",
                     },
-                    enum: ["BAP", "BPP"],
+                    enum: constants.PAYMENT_COLLECTEDBY,
                   },
                   "@ondc/org/buyer_app_finder_fee_type": {
                     type: "string",
@@ -758,10 +793,47 @@ module.exports = {
                   },
                   label: {
                     type: "string",
-                    enum:["PROFORMA_INVOICE","Invoice","INVOICE"]
+                    enum: ["PROFORMA_INVOICE", "Invoice", "INVOICE"],
                   },
                 },
                 required: ["url", "label"],
+              },
+            },
+            tags: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  descriptor: {
+                    properties: {
+                      code: {
+                        type: "string",
+                        enum: constants.TERMS
+                      },
+                    },
+                  },
+                  list: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        descriptor: {
+                          properties: {
+                            code: {
+                              type: "string",
+                              enum: constants.B2B_BPP_TERMS
+                            },
+                          },
+                        },
+                        value: {
+                          type: "string",
+                        },
+                      },
+                      required: ["descriptor", "value"],
+                    },
+                  },
+                },
+                required: ["descriptor", "list"],
               },
             },
             created_at: {
@@ -774,6 +846,8 @@ module.exports = {
             updated_at: {
               type: "string",
               format: "date-time",
+               not:{const: { $data: "/confirm/0/message/order/created_at" }},
+              errorMessage:"should not be same as 'created_at'"
             },
           },
           additionalProperties: false,

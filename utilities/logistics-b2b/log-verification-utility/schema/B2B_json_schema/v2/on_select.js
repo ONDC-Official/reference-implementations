@@ -476,7 +476,7 @@ module.exports = {
                   },
                   collected_by: {
                     type: "string",
-                    enum: ["BAP", "BPP"],
+                    enum: constants.PAYMENT_COLLECTEDBY,
                   },
                 },
                 required: ["type", "collected_by"],

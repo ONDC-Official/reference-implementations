@@ -3,10 +3,10 @@ module.exports = {
     let quotePrice = parseFloat(data?.price?.value);
     const breakupArr = data?.breakup;
     let totalBreakup = 0;
-    breakupArr.forEach((breakup) => {
+    breakupArr?.forEach((breakup) => {
       totalBreakup += parseFloat(breakup?.price?.value);
     });
-    // console.log(quotePrice,totalBreakup);
+    console.log(quotePrice,totalBreakup);
     totalBreakup= parseFloat(totalBreakup).toFixed(2)
     quotePrice=quotePrice.toFixed(2)
     if (quotePrice != totalBreakup) return false;

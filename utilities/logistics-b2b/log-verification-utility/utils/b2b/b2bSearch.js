@@ -63,10 +63,14 @@ const checkSearch = async (data, msgIdSet) => {
       );
       const stdCode = data.context?.location?.city?.code.split(":")[1];
       const area_code = endLocation?.area_code;
+      console.log("debug",pinToStd[area_code] ,stdCode);
       if (pinToStd[area_code] && pinToStd[area_code] != stdCode) {
         srchObj[
           "CityCode-Err"
         ] = `CityCode ${stdCode} should match the city for the fulfillment end location ${area_code}, ${pinToStd[area_code]}`;
+      }
+      if(!pinToStd[area_code]){
+        srchObj.areaCodeErr=`STD code could not be validated from the gps location`
       }
     } catch (err) {
       console.error("Error in city code check: ", err.message);

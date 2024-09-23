@@ -177,7 +177,7 @@ module.exports = {
                 },
                 collected_by: {
                   type: "string",
-                  enum: ["BAP", "BPP"],
+                  enum: constants.PAYMENT_COLLECTEDBY,
                 },
                 "@ondc/org/buyer_app_finder_fee_type": {
                   type: "string",

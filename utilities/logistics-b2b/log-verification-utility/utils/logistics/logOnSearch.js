@@ -83,7 +83,28 @@ const checkOnSearch = async (data, msgIdSet) => {
     console.log(
       `Checking forward and backward shipment in ${constants.LOG_ONSEARCH} api`
     );
+    function validateFulfillments(categories, fulfillments) {
+      // Filter all Delivery fulfillments
+      const deliveryFulfillments = fulfillments.filter(f => f.type === "Delivery");
+      
+      // Check if there are at least two categories
+      if (categories.length >= 2) {
+          // Ensure there is a Delivery fulfillment for each category
+          if (deliveryFulfillments.length !== categories.length) {
+              onSrchObj.flflmentsErr = `Separate fulfillments should be created for each category as the estimate pickup time could be different`
+          }
+          
+          // Optionally, check that each fulfillment is unique (if needed)
+          const uniqueFulfillments = new Set(deliveryFulfillments.map(f => f.id));
+          if (uniqueFulfillments.size !== deliveryFulfillments.length) {
+              onSrchObj.flflmentsErr1 = `Delivery' fulfillments should have unique IDs`
+          }
+      }
+      
+     return;
+  }
 
+  validateFulfillments(onSearch["bpp/providers"][0].categories,onSearch["bpp/providers"][0].fulfillments)
     if (
       onSearch["bpp/fulfillments"] ||
       onSearch["bpp/providers"][0].fulfillments

@@ -4,7 +4,16 @@ const { isLengthValid } = require("./v1.2/keywords/init");
 const { isQuoteMatching } = require("./v1.2/keywords/onInit");
 const { isFutureDated } = require("./v1.2/keywords/confirm");
 const { isEndTimeGreater } = require("./v1.2/keywords/search");
-
+const {
+  hasStartAndEndStops,
+  isStartTimeValid,
+} = require("./v2.0/keywords/search");
+const { hasRequiredFulfillments } = require("./v2.0/keywords/onSearch");
+const {
+  validateTime,
+  validateAcceptBPP_Terms,
+} = require("./v2.0/keywords/confirm");
+const { validateBillDetails } = require("./v2.0/keywords/onConfirm");
 const formatted_error = (errors) => {
   error_list = [];
   let status = "";
@@ -109,6 +118,24 @@ const validate_schema = (data, schema, version) => {
       })
       .addKeyword("isLengthValid", {
         validate: (schema, data) => isLengthValid(data),
+      })
+      .addKeyword("hasStartAndEndStops", {
+        validate: (schema, data) => hasStartAndEndStops(data),
+      })
+      .addKeyword("isStartTimeValid", {
+        validate: (schema, data) => isStartTimeValid(data),
+      })
+      .addKeyword("hasRequiredFulfillments", {
+        validate: (schema, data) => hasRequiredFulfillments(data),
+      })
+      .addKeyword("validateTime", {
+        validate: (schema, data) => validateTime(data),
+      })
+      .addKeyword("validateAcceptBPP_Terms", {
+        validate: (schema, data) => validateAcceptBPP_Terms(data),
+      })
+      .addKeyword("validateBillDetails", {
+        validate: (schema, data) => validateBillDetails(data),
       });
 
     validate = validate.compile(schema);
