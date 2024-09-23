@@ -3,12 +3,18 @@ package handlers
 import (
 	"fmt"
 	"golang/internal/utils"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+type On_SubscribeResponse struct {
+    SubscriberId string `json:"subscriber_id"`
+    Challenge    string `json:"challenge"`
+}
 
 // GenerateKeysHandler handles the /generate-keys endpoint
 func GenerateKeysHandler(c *gin.Context) {
@@ -34,23 +40,40 @@ func GenerateKeysHandler(c *gin.Context) {
 }
 
 // OnSubscribeHandler handles the /on_subscribe POST endpoint
-func OnSubscribeHandler(c *gin.Context) {
-    var requestData map[string]interface{}
-    
-    // Bind the request body to the requestData map
-    if err := c.BindJSON(&requestData); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": "Invalid request payload",
-        })
+func OnSubscribeResponse(c *gin.Context) {
+    var response On_SubscribeResponse
+
+    // Log the incoming request body (as raw JSON) for debugging
+    if err := c.BindJSON(&response); err != nil {
+        log.Printf("Failed to bind JSON: %v", err)
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
 
-    // Example response for subscription
-    c.JSON(http.StatusOK, gin.H{
-        "message": "Subscription received",
-        "data":    requestData,
-    })
+    log.Printf("Request Body: %+v", response) // Log the request body
+    log.Printf("Encryption private key: %s", os.Getenv("ENCRYPTION_PRIVATE_KEY"))
+
+    decryptedText, err := utils.Decrypt(
+        os.Getenv("ENCRYPTION_PRIVATE_KEY"),
+        os.Getenv("ENCRYPTION_PUBLIC_KEY"),
+        response.Challenge,
+    )
+
+    if err != nil {
+        log.Printf("Decryption failed: %v", err) // Log any decryption error
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Log the decrypted text
+    log.Printf("Decrypted Text: %s", decryptedText)
+
+    // Respond with the decrypted text
+    c.JSON(http.StatusOK, gin.H{"answer": decryptedText})
 }
+
+
+
 
 // SiteVerificationHandler handles the /ondc-site-verification.html endpoint
 func OndcSiteVerificationHandler(c *gin.Context) {

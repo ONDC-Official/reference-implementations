@@ -10,7 +10,7 @@ func SetupRoutes(r *gin.Engine) {
     v1 := r.Group("/api/v1")
     {
         v1.GET("/generate-keys", handlers.GenerateKeysHandler)
-        v1.POST("/on_subscribe", handlers.OnSubscribeHandler)
+        v1.POST("/on_subscribe", handlers.OnSubscribeResponse)
         
     }
 
