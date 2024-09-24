@@ -50,12 +50,12 @@ func OnSubscribeResponse(c *gin.Context) {
         return
     }
 
-    log.Printf("Request Body: %+v", response) // Log the request body
+    log.Printf("Request Body: %+v", response.Challenge) // Log the request body
     log.Printf("Encryption private key: %s", os.Getenv("ENCRYPTION_PRIVATE_KEY"))
-
+    log.Printf("Encryption public key: %s", os.Getenv("ONDC_PUBLIC_KEY"))
     decryptedText, err := utils.Decrypt(
         os.Getenv("ENCRYPTION_PRIVATE_KEY"),
-        os.Getenv("ENCRYPTION_PUBLIC_KEY"),
+        os.Getenv("ONDC_PUBLIC_KEY"),
         response.Challenge,
     )
 
