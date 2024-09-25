@@ -316,7 +316,7 @@ function checkParameters(onSearch,  errObj){
 
         let missingTags = [];
 
-        for (let tag of constants.ON_SEEARCH_ITEMTAGS) {
+        for (let tag of constants.ON_SEEARCH_ITEMTAGS_B2C) {
           if (!itemTagsSet.has(tag)) {
             missingTags.push(tag);
           }
@@ -328,6 +328,9 @@ function checkParameters(onSearch,  errObj){
             itemKey
           ] = `'${missingTags}' tag/s  required in /items/tags`;
         }
+
+        // TODO -- define missing tags based on domain
+
         if (constants.ATTR_DOMAINS.includes(domain) && !attrPresent) {
           let itemKey = `attrMissing-${k}-err`;
           errObj[
@@ -459,9 +462,9 @@ function checkItemsAndFulfillmentsForSelect(data, errObj) {
         fulfillments.forEach((fulfillment, i) => {
           let fulfillmentTags = fulfillment?.tags;
 
-          if (citycode === "std:999" && !fulfillmentTags) {
-            errObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
-          }
+          // if (citycode === "std:999" && !fulfillmentTags) {
+          //   errObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
+          // }
           let bppfulfillment = fulfillmentsArr?.find(
             (element) => element.id === fulfillment.id
           );
@@ -522,9 +525,9 @@ function checkFulfillmentForOnSelect(data, errObj) {
       fulfillments.forEach((fulfillment) => {
         let fulfillmentTags = fulfillment?.tags;
           
-        if (citycode === "std:999" && !fulfillmentTags) {
-          errObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
-        }
+        // if (citycode === "std:999" && !fulfillmentTags) {
+        //   errObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
+        // }
         ffId = fulfillment?.id;
         ffState = fulfillment?.state?.descriptor?.code;
       });
@@ -641,13 +644,13 @@ function checkFulfillmentForInit(data, errObj) {
 
   try {
     console.log("Comparing items and fulfillments object with /on_select");
-    fulfillments.forEach((fulfillment, i) => {
-      let fulfillmentTags = fulfillment?.tags;
+    // fulfillments.forEach((fulfillment, i) => {
+    //   let fulfillmentTags = fulfillment?.tags;
 
-      if (citycode === "std:999" && !fulfillmentTags) {
-        errObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
-      }
-    });
+    //   if (citycode === "std:999" && !fulfillmentTags) {
+    //     errObj.fullfntTagErr = `Delivery terms (INCOTERMS) are required for exports in /fulfillments/tags`;
+    //   }
+    // });
 
     const itemDiff = utils.findDifferencesInArrays(items, selectedItems);
     console.log(itemDiff);
@@ -713,6 +716,7 @@ function checkPaymentForOnInit(data, errObj) {
         }
       }
       if (feeType != dao.getValue("buyerFinderFeeType")) {
+        console.log("buyerFinderFeeType -- ", feeType, " ", dao.getValue("buyerFinderFeeType"));
         errObj.feeTypeErr = `Buyer Finder Fee type mismatches from /search`;
       }
       if (

@@ -286,10 +286,9 @@ module.exports={
                     },
                     required: [
                       "name",
-                      "code",
                       "short_desc",
                       "long_desc",
-                      "images"
+                      "images",
                     ],
                   },
                   rating: {
@@ -381,7 +380,6 @@ module.exports={
                         "state",
                         "country",
                         "area_code",
-                        
                       ],
                       
                     },
@@ -1163,7 +1161,6 @@ module.exports={
                                 properties: {
                                   url: {
                                     type: "string",
-                                    
                                   },
                                   
                                 },

@@ -215,6 +215,7 @@ module.exports = Object.freeze({
   "ZMB", "ZWE", "MOZ", "GRC", "PRT", "CZE", "HUN", "SGP", "ISR", "ARE"],
   BPP_PAYMENT_TAGS:["signature","dsa","ttl"],
   ON_SEEARCH_ITEMTAGS:["g2","g3","origin"],
+  ON_SEEARCH_ITEMTAGS_B2C:["g2","origin"],
   ON_SEARCH_PROVIDERTAGS:["serviceability","seller_id","seller_terms"],
   B2B_PAYMENT_TYPE:["PRE-FULFILLMENT","ON-FULFILLMENT"],
   B2C_EXP_PAYMENT_TYPE:["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],

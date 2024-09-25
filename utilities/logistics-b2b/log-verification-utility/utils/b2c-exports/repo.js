@@ -2,9 +2,9 @@ const dao = require("../../dao/dao");
 
 function setBuyerAppFinderFeeValue(data) {
   try {
+      data = data?.message?.intent;
       console.log("Checking buyer app finder fee in /search");
-  
-      data.tags.forEach((tag) => {
+        data.tags.forEach((tag) => {
         if (tag?.descriptor?.code === "bap_terms" && tag?.list) {
           tag.list.forEach((val) => {
             if (val?.descriptor?.code === "finder_fee_type") {

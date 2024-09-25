@@ -7,7 +7,7 @@ const checkSearch = (data, msgId) => {
     try {
         srchObj = utility.isCityCodeValidForExport(data, srchObj);
         srchObj = utility.doesNotHaveBuyerIdInTags(data, srchObj);
-        repo.setBuyerAppFinderFeeValue(data);
+        repo.setBuyerAppFinderFeeValue(data);     
         srchObj = utility.checkValidDestination(data, srchObj);
         dao.setValue("searchObj", srchObj);
     } catch (error) {
