@@ -128,6 +128,7 @@ module.exports = {
                       required: ["start", "end"],
                     },
                   },
+                  required:["days","schedule","duration","range"]
                 },
               },
             },
@@ -147,8 +148,8 @@ module.exports = {
                         gps: {
                           type: "string",
                           pattern:
-                            "^(-?[0-9]{1,3}(?:.[0-9]{1,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{1,15})?)$",
-                          errorMessage: "Incorrect gps value",
+                            "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
+                          errorMessage: "Incorrect gps value (min 6 decimal digits required)",
                         },
                         address: {
                           type: "object",
@@ -174,7 +175,7 @@ module.exports = {
                         gps: {
                           type: "string",
                           pattern:
-                            "^(-?[0-9]{1,3}(?:.[0-9]{1,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{1,15})?)$",
+                            "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
                           allOf: [
                             {
                               not: {
@@ -184,7 +185,7 @@ module.exports = {
                                 "cannot be equal to start/location/gps '${3/start/location/gps}'",
                             },
                           ],
-                          errorMessage: "Incorrect gps value",
+                          errorMessage: "Incorrect gps value (min 6 decimal digits required)",
                         },
                         address: {
                           type: "object",

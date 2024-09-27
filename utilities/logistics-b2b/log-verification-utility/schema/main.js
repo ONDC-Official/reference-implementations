@@ -18,7 +18,7 @@ const {
 const fs = require("fs");
 
 const validate_schema_for_domain_json = (vertical, data, version) => {
-  version = getVersion(data,vertical);
+  version = getVersion(data, vertical);
   switch (vertical) {
     case "logistics":
       res = validate_schema_master(data, version);
@@ -27,7 +27,7 @@ const validate_schema_for_domain_json = (vertical, data, version) => {
       res = validate_schema_b2b_master(data,version);
       return res;
     case "services":
-      res = validate_schema_srv_master(data,version);
+      res = validate_schema_srv_master(data, version);
       return res;
     case "b2c-exports":
       res = validate_schema_b2c_export(data,version);

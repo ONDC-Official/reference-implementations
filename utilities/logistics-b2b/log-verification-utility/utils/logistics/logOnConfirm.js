@@ -26,6 +26,10 @@ const checkOnConfirm = (data, msgIdSet) => {
   if (on_confirm?.created_at > on_confirm?.updated_at) {
     onCnfrmObj.createdAtErr = `order/created_at cannot be future dated w.r.t order/updated_at`;
   }
+
+  if(on_confirm?.updated_at < dao.getValue("cnfrmTimestamp")){
+    onCnfrmObj.updatedAtErr = `order/updated_at should be updated w.r.t context/timestamp`;
+  }
   let categoryId;
   items.forEach(item=>{
     categoryId=item.category_id;
@@ -43,8 +47,8 @@ console.log(avgPickupTime,dao.getValue(`${fulfillment?.id}-avgPickupTime`));
     if(fulfillment?.start?.time?.timestamp){
       onCnfrmObj.flflmentTmstmpErr=`Pickup timestamp cannot be provided when the fulfillment is in '${ffState}' state`
     }
-      if(categoryId==='Immediate Delivery' && fulfillment.tracking !== true){
-        onCnfrmObj.trckErr= `tracking should be enabled (true) for hyperlocal (Immediate Delivery)`
+      if(!p2h2p && fulfillment.tracking !== true){
+        onCnfrmObj.trckErr= `tracking should be enabled (true) for hyperlocal P2P orders`
       }
       if(fulfillment["@ondc/org/awb_no"] && p2h2p) awbNo= true;
       console.log("rts",rts)
@@ -53,9 +57,9 @@ console.log(avgPickupTime,dao.getValue(`${fulfillment?.id}-avgPickupTime`));
        
         onCnfrmObj.strtRangeErr = `start/time/range is required in /fulfillments when ready_to_ship = yes in /confirm`;
       }
-      if (rts === "yes" && !fulfillment?.end?.time?.range) {
-        onCnfrmObj.endRangeErr = `end/time/range is required in /fulfillments when ready_to_ship = yes in /confirm`;
-      }
+      // if (rts === "yes" && !fulfillment?.end?.time?.range) {
+      //   onCnfrmObj.endRangeErr = `end/time/range is required in /fulfillments when ready_to_ship = yes in /confirm`;
+      // }
     });
 
   } catch (error) {

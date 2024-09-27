@@ -71,6 +71,7 @@ const checkOnStatus = (data, msgIdSet) => {
               }
             }
           });
+          if(!invoice && rfq) onStatusObj.invoiceErr=`/documents (Proforma Invoice) is required before order is picked up for RFQ Flow.`
           if(invoice && !rfq) onStatusObj.invoiceErr=`/documents (Invoice) is not required before order is picked up for Non RFQ Flow.`
         }
         //Order-picked-up
@@ -82,6 +83,9 @@ const checkOnStatus = (data, msgIdSet) => {
           }
           fulfillment.stops.forEach((stop) => {
             if (stop.type === "start") {
+              if(!stop?.time?.range){
+                onStatusObj.rangeErr1=`Pickup time range (fulfillments/start/time/range) is required for fulfillment state - ${ffState}`
+              }
               pickupTime = stop?.time?.timestamp;
               dao.setValue("pickupTime", pickupTime);
               if (!pickupTime) {
@@ -91,14 +95,21 @@ const checkOnStatus = (data, msgIdSet) => {
               if (_.gt(pickupTime, contextTime)) {
                 onStatusObj.tmstmpErr = `Pickup timestamp (fulfillments/start/time/timestamp) cannot be future dated w.r.t context/timestamp for fulfillment state - ${ffState}`;
               }
+              if(!stop?.instructions?.images){
+                onStatusObj.pickupProofErr=`Pickup proof (fulfillments/stops/start/instructions/images) is required once the order is picked-up`
+              }
             }
 
             if (stop.type === "end") {
+              if(!stop?.time?.range){
+                onStatusObj.rangeErr2=`Delivery time range (fulfillments/end/time/range) is required for fulfillment state - ${ffState}`
+              }
               if (stop?.time?.timestamp) {
                 onStatusObj.deliveryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
               }
             }
           });
+          
           if(!invoice) onStatusObj.invoiceErr=`/documents (Invoice) is required once the order is picked up`
         }
 
@@ -111,7 +122,9 @@ const checkOnStatus = (data, msgIdSet) => {
           fulfillment.stops.forEach((stop) => {
             if (stop.type === "start") {
               pickupTime = stop?.time?.timestamp;
-
+              if(!stop?.time?.range){
+                onStatusObj.rangeErr1=`Pickup time range (fulfillments/start/time/range) is required for fulfillment state - ${ffState}`
+              }
               if (!pickupTime) {
                 onStatusObj.pickupTimeErr = `Pickup timestamp (fulfillments/start/time/timestamp) is required for fulfillment state - ${ffState}`;
               } else if (
@@ -123,6 +136,9 @@ const checkOnStatus = (data, msgIdSet) => {
             }
 
             if (stop.type === "end") {
+              if(!stop?.time?.range){
+                onStatusObj.rangeErr2=`Delivery time range (fulfillments/end/time/range) is required for fulfillment state - ${ffState}`
+              }
               if (stop?.time?.timestamp) {
                 onStatusObj.deliveryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
               }
@@ -140,6 +156,9 @@ const checkOnStatus = (data, msgIdSet) => {
           fulfillment.stops.forEach((stop) => {
             if (stop.type === "start") {
               pickupTime = stop?.time?.timestamp;
+              if(!stop?.time?.range){
+                onStatusObj.rangeErr1=`Pickup time range (fulfillments/start/time/range) is required for fulfillment state - ${ffState}`
+              }
               if (!pickupTime) {
                 onStatusObj.pickupTimeErr = `Pickup timestamp (fulfillments/start/time/timestamp) is required for fulfillment state - ${ffState}`;
               } else if (
@@ -154,6 +173,9 @@ const checkOnStatus = (data, msgIdSet) => {
               deliveryTime = stop?.time?.timestamp;
               dao.setValue("deliveryTime", deliveryTime);
 
+              if(!stop?.time?.range){
+                onStatusObj.rangeErr2=`Delivery time range (fulfillments/end/time/range) is required for fulfillment state - ${ffState}`
+              }
               if (!deliveryTime) {
                 onStatusObj.deliveryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) is required for fulfillment state - ${ffState}`;
               }
@@ -162,6 +184,9 @@ const checkOnStatus = (data, msgIdSet) => {
               }
               if (_.gte(pickupTime, deliveryTime)) {
                 onStatusObj.tmstmpErr = `Pickup timestamp (fulfillments/start/time/timestamp) cannot be greater than or equal to  delivery timestamp (fulfillments/end/time/timestamp) for fulfillment state - ${ffState}`;
+              }
+              if(!stop?.instructions?.images){
+                onStatusObj.pickupProofErr=`Delivery proof (fulfillments/stops/end/instructions/images) is required once the order is delivered`
               }
             }
           });

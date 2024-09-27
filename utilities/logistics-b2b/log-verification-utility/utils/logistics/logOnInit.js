@@ -1,7 +1,6 @@
 const fs = require("fs");
 const _ = require("lodash");
 const dao = require("../../dao/dao");
-const validateSchema = require("../schemaValidation");
 const constants = require("../constants");
 const utils = require("../utils");
 
@@ -11,6 +10,8 @@ const checkOnInit = (data, msgIdSet) => {
 
   on_init = on_init.message.order;
   let provId = on_init.provider.id;
+  const orderTags = on_init?.tags;
+  let bppTerms = false;
 
   let onSearchProvArr = dao.getValue("providersArr");
 
@@ -38,6 +39,7 @@ const checkOnInit = (data, msgIdSet) => {
           ] = `Price value for '${breakup["@ondc/org/title_type"]}' should not have more than 2 decimal places`;
         }
         totalBreakup += parseFloat(breakup?.price?.value);
+        totalBreakup = parseFloat(totalBreakup.toFixed(2));
         if (breakup["@ondc/org/title_type"] === "tax") tax_present = true;
         onSearchProvArr?.forEach((provider) => {
           if (provider.id === provId) {
@@ -79,6 +81,21 @@ const checkOnInit = (data, msgIdSet) => {
       `!!Error fetching order quote price in ${constants.LOG_ONINIT}`,
       err
     );
+  }
+
+  try {
+    console.log("Checking order tags in /on_init");
+    if (orderTags) {
+      orderTags.forEach((tag) => {
+        if (tag?.code === "bpp_terms") {
+          bppTerms = true;
+        }
+      });
+    }
+    dao.setValue("bppTerms", bppTerms);
+  } catch (error) {
+    console.log(error);
+    
   }
 
   return onInitObj;

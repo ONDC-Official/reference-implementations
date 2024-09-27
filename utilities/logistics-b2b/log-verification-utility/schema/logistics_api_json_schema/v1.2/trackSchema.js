@@ -87,6 +87,7 @@ module.exports = {
           const: { $data: "/confirm/0/message/order/id" },
         }
       },
+      additionalProperties: false,
       required: ["order_id"],
     },
   },

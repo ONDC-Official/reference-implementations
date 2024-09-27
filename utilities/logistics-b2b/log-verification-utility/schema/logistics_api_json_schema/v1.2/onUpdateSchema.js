@@ -159,14 +159,14 @@ module.exports = {
                         type: "string",
                         const: {
                           $data:
-                            "/on_confirm/0/message/order/items/0/time/duration",
+                            "/confirm/0/message/order/items/0/time/duration",
                         },
                       },
                       timestamp: {
                         type: "string",
                         const: {
                           $data:
-                          "/on_confirm/0/message/order/items/0/time/timestamp",
+                          "/confirm/0/message/order/items/0/time/timestamp",
                         },
                       },
                     },
@@ -232,6 +232,10 @@ module.exports = {
                   },
                   tracking: {
                     type: "boolean",
+                    const: {
+                      $data:
+                      "/on_confirm/0/message/order/fulfillments/0/tracking",
+                    },
                   },
                   start: {
                     $merge: {

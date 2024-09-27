@@ -187,9 +187,10 @@ const checkOnCancel = (data, msgIdSet) => {
             }
           }
         });
+        const REQUIRED_TAGS = ["rto_event", "precancel_state"]
         missingTags = utils.findRequiredTags(
           fulfillmentTagSet,
-          constants.CANCELLATION_TAGS_CODES
+          REQUIRED_TAGS
         );
 
         if(missingTags.includes("rto_event") && constants.PRECANCEL_BEFORE_RTO.includes(preCnclState)){
