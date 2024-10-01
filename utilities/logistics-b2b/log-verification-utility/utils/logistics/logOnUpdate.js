@@ -33,7 +33,7 @@ const checkOnUpdate = (data, msgIdSet) => {
       let avgPickupTime= fulfillment?.start?.time?.duration;
       console.log(avgPickupTime,dao.getValue(`${fulfillment?.id}-avgPickupTime`));
           if(avgPickupTime && dao.getValue(`${fulfillment?.id}-avgPickupTime`) && avgPickupTime!==dao.getValue(`${fulfillment?.id}-avgPickupTime`)){
-            onCnfrmObj.avgPckupErr=`Average Pickup Time ${avgPickupTime} (fulfillments/start/time/duration) mismatches from the one provided in /on_search (${dao.getValue(`${fulfillment?.id}-avgPickupTime`)})`
+            onUpdtObj.avgPckupErr=`Average Pickup Time ${avgPickupTime} (fulfillments/start/time/duration) mismatches from the one provided in /on_search (${dao.getValue(`${fulfillment?.id}-avgPickupTime`)})`
           }
       if (fulfillment["@ondc/org/awb_no"]) {
         awbNo = true;

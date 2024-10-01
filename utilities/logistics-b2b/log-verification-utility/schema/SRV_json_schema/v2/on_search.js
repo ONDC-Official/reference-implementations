@@ -517,8 +517,11 @@ module.exports = {
                             maximum_value: {
                               type: "string",
                             },
+                            minimum_value: {
+                              type: "string",
+                            },
                           },
-                          required: ["currency", "value"],
+                          required: ["currency"],
                         },
                         category_ids: {
                           type: "array",

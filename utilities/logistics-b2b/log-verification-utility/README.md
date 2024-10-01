@@ -2,9 +2,7 @@
 
 ### APIs Log Verification tool for Pre-Prod participants
 
-The tool is a NODE.js based server to check the conformance and compliance of the API logs for [logistics](https://docs.google.com/document/d/10GpEuKZE2g96DFJT3HKq6wIEMhPC-kkMZhXNn2jHHXc/edit?pli=1) and [B2B](https://github.com/ONDC-Official/ONDC-RET-Specifications) based on the examples in the API Contract.
-
-The Log Verification Server is a tool designed to validate log files for the [logistics](https://docs.google.com/document/d/10GpEuKZE2g96DFJT3HKq6wIEMhPC-kkMZhXNn2jHHXc/edit?pli=1) and [B2B](https://github.com/ONDC-Official/ONDC-RET-Specifications) domains. It offers an endpoint that allows users to submit a directory path containing log files for verification. The server then responds with a log report, indicating any errors found in the log files.
+The tool is a NODE.js based server to check the conformance and compliance of the API logs for Logistics (B2C and B2B), B2B Retail, B2C Exports, Services domains based on the model specifications provided by ONDC. It offers an endpoint that allows users to submit a directory path containing log files for verification. The server then responds with a log report, indicating any errors found in the log files.
 
 ### Tech
 
@@ -45,6 +43,13 @@ The server will be up and running at `http://localhost:3000`
 ```code
 http://localhost:3000/validate/<domainName>
 ```
+| Domain        | domainName   |
+|---------------|--------------|
+| Logistics     | logistics    |
+| B2B Retail    | b2b          |
+| Services      | services     |
+| B2C Exports   | b2c-exports  |
+
 
 5. Send a POST request to the endpoint with the following parameters:
 ```code
@@ -74,6 +79,7 @@ _Notes:_
 * [logistics](https://docs.google.com/document/d/10GpEuKZE2g96DFJT3HKq6wIEMhPC-kkMZhXNn2jHHXc/edit?pli=1)
 
 * [B2B](https://github.com/ONDC-Official/ONDC-RET-Specifications)
+* [Services](https://github.com/ONDC-Official/ONDC-SRV-Specifications)
 
 > Test cases to be referred here -> [logsitics](https://docs.google.com/document/d/1ttixilM-I6dutEdHL10uzqRFd8RcJlEO_9wBUijtdDc/edit) and [B2B](https://docs.google.com/document/d/10ouiTKLY4dm1KnXCuhFwK38cYd9_aDQ30bklkqnPRkM/edit)
 
