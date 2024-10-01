@@ -194,7 +194,12 @@ module.exports = Object.freeze({
     "Cancelled",
   ],
   CURRENCY: ["INR", "AUD", "USD", "SGD"],
-  CANCELLATION_TAGS_CODES: ["state","rto_action","rto_event", "precancel_state"],
+  CANCELLATION_TAGS_CODES: [
+    "state",
+    "rto_action",
+    "rto_event",
+    "precancel_state",
+  ],
   RTO_EVENT_TAGS: [
     "retry_count",
     "rto_id",
@@ -202,7 +207,8 @@ module.exports = Object.freeze({
     "cancelled_by",
   ],
   CANCELLATION_TAGS_LIST: [
-    "ready_to_ship","return_to_origin",
+    "ready_to_ship",
+    "return_to_origin",
     "retry_count",
     "rto_id",
     "cancellation_reason_id",
@@ -355,4 +361,18 @@ module.exports = Object.freeze({
     "reschedule_fee",
     "reschedule_within",
   ],
+  // Allowed offer descriptor codes
+  allowedOfferCodes: ["Disc_Pct", "Disc_Amt", "Freebie", "BuyXGetY"],
+  // Define the required descriptor codes for each offer type
+  mandatoryOfferTags: {
+    Disc_Pct: [
+      "qualifier_min_value",
+      "max_benefit",
+      "discount_unit",
+      "discount_value",
+    ],
+    Disc_Amt: ["qualifier_min_value", "max_benefit", "discount_value"],
+    Freebie: ["qualifier_min_value"],
+    BuyXGetY: ["item_required", "item_free"],
+  },
 });

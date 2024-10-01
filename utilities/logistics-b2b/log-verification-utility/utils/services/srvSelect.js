@@ -100,14 +100,14 @@ const checkSelect = async (data, msgIdSet) => {
             itemkey
           ] = `Location ids for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
-
+        
         if (
-            item.parent_item_id!==itemObj.parent_item_id
+          item?.parent_item_id && item?.parent_item_id!==itemObj?.parent_item_id
           ) {
             let itemkey = `parentItmIdErr${i}`;
             selectObj[
               itemkey
-            ] = `Parent item id ${item.parent_item_id} for item with id '${item.id}' does not match with the catalog provided in /on_search`;
+            ] = `Parent item id ${item?.parent_item_id} for item with id '${item.id}' does not match with the catalog provided in /on_search`;
           }
   
         //checking fulfillments
