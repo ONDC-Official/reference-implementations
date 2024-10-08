@@ -76,6 +76,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const: "PT30S",
         },
       },
       required: [
@@ -100,65 +101,10 @@ module.exports = {
           type: "object",
           properties: {
             provider: {
-              type: "object",
-              properties: {
-                id: {
-                  type: "string",
-                },
-                locations: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id: {
-                        type: "string",
-                      },
-                    },
-                    required: ["id"],
-                  },
-                },
-              },
-              required: ["id", "locations"],
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/provider",
             },
             items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: {
-                    type: "string",
-                  },
-                  parent_item_id: {
-                    type: "string",
-                  },
-                  fulfillment_ids: {
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
-                  },
-                  quantity: {
-                    type: "object",
-                    properties: {
-                      selected: {
-                        type: "object",
-                        properties: {
-                          count: {
-                            type: "integer",
-                          },
-                        },
-                        required: ["count"],
-                      },
-                    },
-                    required: ["selected"],
-                  },
-                },
-                required: [
-                  "id",
-                  "fulfillment_ids",
-                  "quantity",
-                ],
-              },
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/items",
             },
             billing: {
               type: "object",
@@ -214,11 +160,15 @@ module.exports = {
                 properties: {
                   id: {
                     type: "string",
-                    const: { $data: "/on_select/0/message/order/fulfillments/0/id" },
+                    const: {
+                      $data: "/on_select/0/message/order/fulfillments/0/id",
+                    },
                   },
                   type: {
                     type: "string",
-                    const: { $data: "/on_select/0/message/order/fulfillments/0/type" },
+                    const: {
+                      $data: "/on_select/0/message/order/fulfillments/0/type",
+                    },
                   },
                   stops: {
                     type: "array",
@@ -291,7 +241,7 @@ module.exports = {
                           properties: {
                             label: {
                               type: "string",
-                              enum:["confirmed"]
+                              enum: ["confirmed"],
                             },
                             range: {
                               type: "object",
@@ -305,7 +255,6 @@ module.exports = {
                               },
                               required: ["start", "end"],
                             },
-                         
                           },
                           required: ["label", "range"],
                         },
@@ -334,7 +283,7 @@ module.exports = {
                     },
                   },
                 },
-                required: ["type","collected_by"],
+                required: ["type", "collected_by"],
               },
             },
           },

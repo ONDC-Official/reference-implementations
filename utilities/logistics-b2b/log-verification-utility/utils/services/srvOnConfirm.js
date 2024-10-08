@@ -3,15 +3,15 @@ const dao = require("../../dao/dao");
 const constants = require("../constants");
 const utils = require("../utils");
 
-const checkConfirm = async (data, msgIdSet) => {
-  const cnfrmObj = {};
-  let confirm = data;
-  const contextTimestamp = confirm.context.timestamp;
-  confirm = confirm.message.order;
-  let orderState = confirm.status;
-  let payments = confirm?.payments;
+const checkOnConfirm = async (data, msgIdSet) => {
+  const onCnfrmObj = {};
+  let on_confirm = data;
+  const contextTimestamp = on_confirm.context.timestamp;
+  on_confirm = on_confirm.message.order;
+  let orderState = on_confirm.status;
+  let payments = on_confirm?.payments;
 
-  let items = confirm.items;
+  let items = on_confirm.items;
   const selectedItems = dao.getValue("onSlctdItemsArray");
 
   try {
@@ -21,7 +21,7 @@ const checkConfirm = async (data, msgIdSet) => {
     itemDiff.forEach((item, i) => {
       if (item?.attributes?.length > 0) {
         let itemkey = `item-${i}-DiffErr`;
-        cnfrmObj[
+        onCnfrmObj[
           itemkey
         ] = `In /items, '${item.attributes}' mismatch from /on_select for item with id ${item.index}`;
       }
@@ -31,7 +31,7 @@ const checkConfirm = async (data, msgIdSet) => {
   }
 
   try {
-    console.log(`Checking payment object in /confirm api`);
+    console.log(`Checking payment object in /on_confirm api`);
     payments.forEach((payment) => {
       let paymentStatus = payment?.status;
       let paymentType = payment?.type;
@@ -51,34 +51,34 @@ const checkConfirm = async (data, msgIdSet) => {
           });
         }
         if (feeType != dao.getValue("buyerFinderFeeType")) {
-          cnfrmObj.feeTypeErr = `Buyer Finder Fee type mismatches from /search`;
+          onCnfrmObj.feeTypeErr = `Buyer Finder Fee type mismatches from /search`;
         }
         if (
           parseFloat(feeAmount) !=
           parseFloat(dao.getValue("buyerFinderFeeAmount"))
         ) {
-          cnfrmObj.feeTypeErr = `Buyer Finder Fee amount mismatches from /search`;
+          onCnfrmObj.feeTypeErr = `Buyer Finder Fee amount mismatches from /search`;
         }
       });
       if (paymentStatus === "PAID" && !params?.transaction_id) {
-        cnfrmObj.pymntErr = `Transaction ID in payments/params is required when the payment status is 'PAID'`;
+        onCnfrmObj.pymntErr = `Transaction ID in payments/params is required when the payment status is 'PAID'`;
       }
       if (paymentStatus === "NOT-PAID" && params?.transaction_id) {
-        cnfrmObj.pymntErr = `Transaction ID in payments/params cannot be provided when the payment status is 'NOT-PAID'`;
+        onCnfrmObj.pymntErr = `Transaction ID in payments/params cannot be provided when the payment status is 'NOT-PAID'`;
       }
     });
 
   } catch (error) {
-    console.log(`!!Error while checking payment object in /confirm api`, error);
+    console.log(`!!Error while checking payment object in /on_confirm api`, error);
   }
 
-  if (confirm?.updated_at > contextTimestamp) {
-    cnfrmObj.updatedAtErr = `order/updated_at cannot be future dated w.r.t context/timestamp`;
+  if (on_confirm?.updated_at > contextTimestamp) {
+    onCnfrmObj.updatedAtErr = `order/updated_at cannot be future dated w.r.t context/timestamp`;
   }
-  if (confirm?.created_at > contextTimestamp) {
-    cnfrmObj.createdAtErr = `order/created_at cannot be future dated w.r.t context/timestamp`;
+  if (on_confirm?.created_at > contextTimestamp) {
+    onCnfrmObj.createdAtErr = `order/created_at cannot be future dated w.r.t context/timestamp`;
   }
 
-  return cnfrmObj;
+  return onCnfrmObj;
 };
-module.exports = checkConfirm;
+module.exports = checkOnConfirm;

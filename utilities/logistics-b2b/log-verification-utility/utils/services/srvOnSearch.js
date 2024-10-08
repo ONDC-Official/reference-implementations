@@ -105,41 +105,12 @@ const checkOnSearch = async (data, msgIdSet) => {
         console.log(error);
       }
 
-      try {
-        console.log("Checking item tags");
-        let items = provider?.items;
-        items.forEach((item) => {
-          let itemTags = item?.tags;
-          if (itemTags) {
-            itemTags.forEach((tag) => {
-              if (tag?.descriptor?.code === "reschedule_terms" && tag?.list) {
-                mandatoryTags = constants.RESCHEDULE_TERMS;
-                let missingTags = utils.findMissingTags(
-                  tag?.list,
-                  "reschedule_terms",
-                  mandatoryTags
-                );
-                if (missingTags.length > 0) {
-                  onSrchObj.mssngRescdlTagErr = `'${missingTags}' code/s required in providers/tags for ${tag?.descriptor?.code}`;
-                }
-              }
-            });
-          } else {
-            onSrchObj.reschdlTrmErr = `reschedule_terms tag is required for an item in items/tags`;
-          }
-        });
-      } catch (error) {
-        console.log(error);
-      }
-
       let locations = provider.locations;
       provider.items.forEach((item, k) => {
         let payment_ids = item.payment_ids;
         let location_ids = item.location_ids;
         let category_ids = item.category_ids;
         let itemTags = item?.tags;
-        let mandatoryAttr = [];
-        let missingAttr = [];
         let customization = false;
 
         itemTags.forEach((tag, i) => {
@@ -154,6 +125,24 @@ const checkOnSearch = async (data, msgIdSet) => {
             });
           }
         });
+
+        // if (!customization && itemTags) {
+        //   itemTags.forEach((tag) => {
+        //     if (tag?.descriptor?.code === "reschedule_terms" && tag?.list) {
+        //       mandatoryTags = constants.RESCHEDULE_TERMS;
+        //       let missingTags = utils.findMissingTags(
+        //         tag?.list,
+        //         "reschedule_terms",
+        //         mandatoryTags
+        //       );
+        //       if (missingTags.length > 0) {
+        //         onSrchObj.mssngRescdlTagErr = `'${missingTags}' code/s required in providers/tags for ${tag?.descriptor?.code}`;
+        //       }
+        //     }
+        //   });
+        // } else if(!customization && !itemTags) {
+        //   onSrchObj.reschdlTrmErr = `reschedule_terms tag is required for a parent item in items/tags`;
+        // }
         try {
           console.log(
             "Comparing fulfillment_ids in /items and /fulfillments in /on_search"
@@ -271,125 +260,6 @@ const checkOnSearch = async (data, msgIdSet) => {
         } catch (error) {
           console.log(error);
         }
-
-        // let itemTagsSet = new Set();
-        // itemTags.forEach((tag, i) => {
-        //   let { descriptor, list } = tag;
-
-        //   if (
-        //     itemTagsSet.has(descriptor?.code) &&
-        //     descriptor?.code !== "price_slab"
-        //   ) {
-        //     let itemKey = `duplicateTag${k}`;
-        //     onSrchObj[
-        //       itemKey
-        //     ] = `${descriptor?.code} is a duplicate tag in /items/tags`;
-        //   } else {
-        //     itemTagsSet.add(descriptor?.code);
-        //   }
-
-        //   if (descriptor?.code === "g2") {
-        //     mandatoryAttr = constants.G2TAGS;
-        //     missingAttr = utils.findMissingTags(
-        //       list,
-        //       descriptor.code,
-        //       mandatoryAttr
-        //     );
-
-        //     if (missingAttr.length > 0) {
-        //       let itemKey = `missingTagErr-${k}-err`;
-        //       onSrchObj[
-        //         itemKey
-        //       ] = `'${missingAttr}' required for 'g2' tag in items/tags`;
-        //     }
-        //   }
-        //   if (descriptor?.code === "origin") {
-        //     list.forEach((tag) => {
-        //       if (tag.descriptor.code === "country") {
-        //         const alpha3Pattern = /^[A-Z]{3}$/;
-        //         console.log("origin", alpha3Pattern.test(tag?.value));
-        //         if (!alpha3Pattern.test(tag?.value)) {
-        //           onSrchObj.originFrmtErr = `Country of origin should be in a valid 'ISO 3166-1 alpha-3' format e.g. IND, SGP`;
-        //         } else {
-        //           if (!constants.VALIDCOUNTRYCODES.includes(tag?.value)) {
-        //             let itemKey = `originFrmtErr1-${k}-err`;
-        //             onSrchObj[
-        //               itemKey
-        //             ] = `'${tag?.value}' is not a valid 'ISO 3166-1 alpha-3' country code`;
-        //           }
-        //         }
-        //       }
-        //     });
-        //   }
-        // });
-        // let missingTags = [];
-
-        // for (let tag of constants.ON_SEEARCH_ITEMTAGS) {
-        //   if (!itemTagsSet.has(tag)) {
-        //     missingTags.push(tag);
-        //   }
-        // }
-
-        // if (missingTags.length > 0) {
-        //   let itemKey = `missingItemTags-${k}-err`;
-        //   onSrchObj[
-        //     itemKey
-        //   ] = `'${missingTags}' tag/s  required in /items/tags`;
-        // }
-
-        //checking offers
-        const offers = provider?.offers;
-
-        // Function to check if the offer contains the mandatory descriptor codes
-        function validateOfferDetails(offer, i) {
-          const offerCode = offer.descriptor.code;
-          if (!constants.allowedOfferCodes.includes(offerCode)) {
-            let itemKey = `offer-${i}-codeErr`;
-            onSrchObj[itemKey] = `Offer ${
-              offer.id
-            } has an invalid descriptor code: ${offerCode}. Allowed codes are: ${constants.allowedOfferCodes.join(
-              ", "
-            )}`;
-          }
-
-          const requiredCodes = constants.mandatoryOfferTags[offerCode];
-
-          // Find the 'offers_details' tag in the offer's tags array
-          const offerDetailsTag = offer.tags.find(
-            (tag) => tag.descriptor.code === "offers_details"
-          );
-
-          if (!offerDetailsTag) {
-            let itemKey = `offer-${i}-tagErr`;
-            onSrchObj[
-              itemKey
-            ] = `Offer ${offer.id} is missing the 'offers_details' tag.`;
-          }
-
-          // Get the list of descriptor codes in the 'offers_details' tag
-          const offerDescriptorCodes = offerDetailsTag.list.map(
-            (item) => item.descriptor.code
-          );
-
-          // Check if all required codes are present
-          const missingCodes = requiredCodes?.filter(
-            (code) => !offerDescriptorCodes.includes(code)
-          );
-
-          if (missingCodes?.length > 0) {
-            let itemKey = `offer-${i}-detailErr`;
-            onSrchObj[itemKey] = `Offer ${
-              offer.id
-            } is missing mandatory descriptor codes: ${missingCodes.join(
-              ", "
-            )}`;
-          }
-        }
-
-        // Loop through all offers and validate
-        offers.forEach((offer, i) => {
-          validateOfferDetails(offer, i);
-        });
       });
     }
   }

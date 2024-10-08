@@ -81,6 +81,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const:"PT30S"
         },
       },
       required: [
@@ -105,61 +106,10 @@ module.exports = {
           type: "object",
           properties: {
             provider: {
-              type: "object",
-              properties: {
-                id: {
-                  type: "string",
-                },
-              },
-              required: ["id"],
-            },
-            locations: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: {
-                    type: "string",
-                  },
-                },
-                required: ["id"],
-              },
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/provider",
             },
             items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: {
-                    type: "string",
-                  },
-                  parent_item_id: {
-                    type: "string",
-                  },
-                  fulfillment_ids: {
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
-                  },
-                  quantity: {
-                    type: "object",
-                    properties: {
-                      selected: {
-                        type: "object",
-                        properties: {
-                          count: {
-                            type: "integer",
-                          },
-                        },
-                        required: ["count"],
-                      },
-                    },
-                    required: ["selected"],
-                  },
-                },
-                required: ["id", "fulfillment_ids", "quantity"],
-              },
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/items",
             },
             billing: {
               type: "object",

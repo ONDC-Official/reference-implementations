@@ -78,6 +78,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const:"PT30S"
         },
       },
       required: [
@@ -634,6 +635,5 @@ module.exports = {
       required: ["order"],
     },
   },
-  isFutureDated: true,
   required: ["context", "message"],
 };

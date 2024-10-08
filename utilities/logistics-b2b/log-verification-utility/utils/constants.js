@@ -352,6 +352,7 @@ module.exports = Object.freeze({
     "Cancelled",
     "Pending",
   ],
+  BREAKUP_TYPE:["item", "customization", "tax","discount","misc"],
   GPS_PATTERN:
     "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
   SERVICEABILITY: ["location", "category", "type", "val", "unit"],
