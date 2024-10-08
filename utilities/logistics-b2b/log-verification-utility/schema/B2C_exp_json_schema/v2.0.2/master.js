@@ -61,6 +61,18 @@ module.exports = {
       items: {
         $ref: "onStatusSchema#",
       },
+    },
+    cancel: {
+      type: "array",
+      items: {
+        $ref: "cancelSchema#",
+      },
+    },
+    on_cancel: {
+      type: "array",
+      items: {
+        $ref: "onCancelSchema#",
+      },
     }
   },
 };

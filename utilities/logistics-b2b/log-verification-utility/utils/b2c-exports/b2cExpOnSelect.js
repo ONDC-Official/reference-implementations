@@ -11,7 +11,7 @@ const checkOnSelect = (data, msgId) => {
         onSelectObj = utility.isCityCodeValidForExport(data, onSelectObj);
         
         // data = data.message.order;
-        dao.setValue("onSlctdItemsArray", data.items);
+        dao.setValue("onSlctdItemsArray", data.message.order.items);
         
         if(error && error.code ==='40002') outOfStock= true;
         

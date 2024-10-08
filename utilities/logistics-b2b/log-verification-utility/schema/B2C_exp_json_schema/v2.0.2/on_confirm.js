@@ -674,7 +674,7 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    enum : constants.B2B_PAYMENT_TYPE,
+                    enum : constants.B2C_EXP_PAYMENT_TYPE,
                     const: { $data: "/select/0/message/order/payments/0/type" },
                   },
                   collected_by: {
@@ -728,7 +728,7 @@ module.exports = {
                         },
                         settlement_type: {
                           type: "string",
-                          enum: ["upi", "neft", "rtgs", "OPGSP"],
+                          enum: constants.SETTLEMENT_TYPE_B2C_EXP,
                           const: {
                             $data:
                               "/confirm/0/message/order/payments/0/@ondc~1org~1settlement_details/0/settlement_type",
@@ -777,6 +777,7 @@ module.exports = {
                           },
                         },
                       },
+                      // for future use cases
                       allOf: [
                         {
                           if: {
@@ -829,6 +830,50 @@ module.exports = {
                   "@ondc/org/settlement_window",
                   "@ondc/org/withholding_amount",
                 ],
+              },
+            },
+            cancellation_terms: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  fulfillment_state: {
+                    type: "object",
+                    properties: {
+                      descriptor: {
+                        type: "object",
+                        properties: {
+                          code: {
+                            type: "string",
+                            enum: [...constants.FULFILLMENT_EXP_STATE, ...constants.FULFILLMENT_STATE],
+                          }
+                        }
+                      }
+                    }
+                  },
+                  reason_required: {
+                    type: "boolean",
+                  },
+                  cancellation_fee: {
+                    tyep: "object",
+                    properties: {
+                      percentage: {
+                        type: "string",
+                      },
+                      amount: {
+                        type: "object",
+                        properties: {
+                          currency: {
+                            type: "string",
+                          },
+                          value: {
+                            type: "string",
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
               },
             },
             tags: {

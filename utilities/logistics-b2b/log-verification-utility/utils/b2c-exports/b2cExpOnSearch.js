@@ -11,6 +11,7 @@ function checkOnSearch (data, msgId) {
         dao.setValue("fulfillmentsArr", fulfillments);
         onSrchObj = repo.setProviderValue(data, onSrchObj);
         onSrchObj = utility.checkParameters(data, onSrchObj);
+        onSrchObj = utility.mandatoryAttributes(data, onSrchObj);
     } catch (error) {
         console.log("Exception occured while processing on_search ", error);
     }

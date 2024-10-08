@@ -343,6 +343,123 @@ function checkParameters(onSearch,  errObj){
   return errObj;
 };
 
+function mandatoryAttributes(data, onSrchObj) {
+  try {
+    domain = data?.context?.domain.split(":")[1];
+    console.log(
+      `Checking for item tags in bpp/providers[0].items.tags in ${domain}`
+    );
+
+    const items = data?.message?.catalog?.provider.items;
+    let errors;
+    switch (domain) {
+      case "RET10":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          groceryJSON,
+          "Grocery"
+        );
+        break;
+      case "RET12":
+        onSrchObj = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          fashion,
+          "Fashion"
+        );
+        break;
+      case "RET13":
+        onSrchObj = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          BPCJSON,
+          "BPC"
+        );
+        break;
+      case "RET14":
+        onSrchObj = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          electronicsData,
+          "Electronics"
+        );
+        break;
+      case "RET15":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          applianceData,
+          "Appliances"
+        );
+        break;
+      case "RET16":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          homeJSON,
+          "Home & Kitchen"
+        );
+        break;
+      case "RET18":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          healthJSON,
+          "Health & Wellness"
+        );
+        break;
+      case "RET1A":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          AutoPartsJSON,
+          "Automotives, Components & Accessories"
+        );
+        break;
+      case "RET1B":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          HardwareJSON,
+          "Hardware and Industrial"
+        );
+        break;
+      case "RET1C":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          ConstructionSuppliesJSON,
+          "Building and construction supplies"
+        );
+        break;
+      case "RET1D":
+        errors = utils.checkMandatoryTags(
+          i,
+          items,
+          onSrchObj,
+          ChemicalJSON,
+          "Chemicals"
+        );
+        break;
+    }
+  } catch (error) {
+    console.log();
+    `!!Errors while checking for items in bpp/providers/items, ${error.stack}`;
+  }
+  return onSrchObj;
+}
+
 // ************************ SELECT PAYLOAD ************************
 
 // comparing provider in action and on_action call 
@@ -1133,6 +1250,7 @@ module.exports = {
     hasNoBuyerTerms,
     checkValidDestination,
     checkParameters,
+    mandatoryAttributes,
     checkProviderForSelect,
     checkItemsAndFulfillmentsForSelect, 
     checkItemFromSelect,

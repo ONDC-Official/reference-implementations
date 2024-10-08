@@ -1,3 +1,5 @@
+const constants = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/updateSchema",
   type: "object",
@@ -182,6 +184,7 @@ module.exports = {
                     },
                     collected_by: {
                       type: "string",
+                      const: ["SOR"],
                     },
                     "@ondc/org/buyer_app_finder_fee_type": {
                       type: "string",
@@ -203,6 +206,7 @@ module.exports = {
                             },
                             settlement_type: {
                               type: "string",
+                              enum: constants.SETTLEMENT_TYPE_B2C_EXP,
                             },
                             upi_address: {
                               type: "string",
@@ -223,6 +227,7 @@ module.exports = {
                               type: "string",
                             },
                           },
+                          // for future cases
                           allOf: [
                             {
                               if: {

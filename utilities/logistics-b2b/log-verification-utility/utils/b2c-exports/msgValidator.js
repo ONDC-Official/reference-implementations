@@ -3,8 +3,8 @@ const checkInit = require("./b2cExpInit");
 const checkSelect = require("./b2cExpSelect");
 const checkOnInit = require("./b2cExpOnInit");
 const checkOnConfirm = require("./b2cExpOnConfirm");
-// const checkCancel = require("./b2cExpCancel");
-// const checkOnCancel = require("./b2cExponCancel");
+const checkCancel = require("./b2cExpCancel");
+const checkOnCancel = require("./b2cExpOnCancel");
 const checkOnSelect = require("./b2cExpOnSelect");
 // const checkOnUpdate = require("./b2cExpOnUpdate");
 // const checkUpdate = require("./b2cExpUpdate");
@@ -41,11 +41,11 @@ const b2cExpVal = (element, action, msgIdSet) => {
     case "on_confirm":
       return checkOnConfirm(element, msgIdSet);
 
-    // case "on_cancel":
-    //   return checkOnCancel(element, msgIdSet);
+    case "on_cancel":
+      return checkOnCancel(element, msgIdSet);
 
-    // case "cancel":
-    //   return checkCancel(element, msgIdSet);
+    case "cancel":
+      return checkCancel(element, msgIdSet);
 
     // case "update":
     //   return checkUpdate(element,msgIdSet);

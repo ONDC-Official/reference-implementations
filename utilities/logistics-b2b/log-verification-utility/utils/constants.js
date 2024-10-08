@@ -65,8 +65,6 @@ module.exports = Object.freeze({
     "on_init",
     "confirm",
     "on_confirm",
-    "status",
-    "on_status",
   ],
   SRV_SORTED_INDEX: [
     "search",
@@ -152,6 +150,7 @@ module.exports = Object.freeze({
   ],
   SHIPMENT_TYPE: ["P2P", "P2H2P"],
   SETTLEMENT_TYPE: ["upi", "neft", "rtgs"],
+  SETTLEMENT_TYPE_B2C_EXP: ["OPGSP"],
   TITLE_TYPE: ["delivery", "rto", "reverseqc", "tax"],
   PCC_CODE: ["1", "2", "3", "4"],
   DCC_CODE: ["1", "2", "3"],
@@ -311,6 +310,7 @@ module.exports = Object.freeze({
   ON_SEARCH_PROVIDERTAGS: ["serviceability", "seller_id", "seller_terms"],
   B2B_PAYMENT_TYPE: ["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
   B2C_EXP_PAYMENT_TYPE:["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
+  B2C_EXP_PAYMENT_TAGS: ["payment_type", "payment_provider"],
   PRECANCEL_BEFORE_RTO: [
     "Pending",
     "Packed",

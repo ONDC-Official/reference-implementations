@@ -317,39 +317,39 @@ module.exports = {
                                 "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
                               errorMessage: "Incorrect gps value",
                             },
-                            address: {
-                              type: "string",
-                            },
-                            city: {
-                              type: "object",
-                              properties: {
-                                name: {
-                                  type: "string",
-                                },
-                              },
-                              required: ["name"],
-                            },
-                            country: {
-                              type: "object",
-                              properties: {
-                                code: {
-                                  type: "string",
-                                },
-                              },
-                              required: ["code"],
-                            },
-                            area_code: {
-                              type: "string",
-                            },
-                            state: {
-                              type: "object",
-                              properties: {
-                                name: {
-                                  type: "string",
-                                },
-                              },
-                              required: ["name"],
-                            },
+                        //     address: {
+                        //       type: "string",
+                        //     },
+                        //     city: {
+                        //       type: "object",
+                        //       properties: {
+                        //         name: {
+                        //           type: "string",
+                        //         },
+                        //       },
+                        //       required: ["name"],
+                        //     },
+                        //     country: {
+                        //       type: "object",
+                        //       properties: {
+                        //         code: {
+                        //           type: "string",
+                        //         },
+                        //       },
+                        //       required: ["code"],
+                        //     },
+                        //     area_code: {
+                        //       type: "string",
+                        //     },
+                        //     state: {
+                        //       type: "object",
+                        //       properties: {
+                        //         name: {
+                        //           type: "string",
+                        //         },
+                        //       },
+                        //       required: ["name"],
+                        //     },
                           },
                         },
                         time: {
@@ -375,13 +375,13 @@ module.exports = {
                               },
                               required: ["start", "end"],
                             },
-                            timestamp: {
-                              type: "string",
-                              pattern:
-                                "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-                              errorMessage:
-                                "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
-                            },
+                            // timestamp: {
+                            //   type: "string",
+                            //   pattern:
+                            //     "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                            //   errorMessage:
+                            //     "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                            // },
                           },
                           required: ["range"],
                         },
@@ -397,18 +397,18 @@ module.exports = {
                             long_desc: {
                               type: "string",
                             },
-                            images: {
-                              type: "array",
-                              items: {
-                                type: "string",
-                              },
-                            },
+                            // images: {
+                            //   type: "array",
+                            //   items: {
+                            //     type: "string",
+                            //   },
+                            // },
                           },
                           required: [
                             "name",
                             "short_desc",
                             "long_desc",
-                            "images",
+                            // "images",
                           ],
                         },
                         contact: {
@@ -566,6 +566,10 @@ module.exports = {
               items: {
                 type: "object",
                 properties: {
+                  id: {
+                    type: "string",
+                    const: { $data: "/on_confirm/0/message/order/payments/0/id" }, // confirm this
+                  },
                   params: {
                     type: "object",
                     properties: {
@@ -590,7 +594,7 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    enum: constants.B2B_PAYMENT_TYPE,
+                    enum: constants.B2C_EXP_PAYMENT_TYPE,
 
                     const: {
                       $data: "/on_confirm/0/message/order/payments/0/type",
@@ -598,11 +602,11 @@ module.exports = {
                   },
                   collected_by: {
                     type: "string",
-                    const: {
-                      $data:
-                        "/on_confirm/0/message/order/payments/0/collected_by",
-                    },
-                    enum: ["SOR"],
+                    // const: {
+                    //   $data:
+                    //     "/on_confirm/0/message/order/payments/0/collected_by",
+                    // },
+                    enum: ["SOR", "buyer"],
                   },
                   "@ondc/org/buyer_app_finder_fee_type": {
                     type: "string",
@@ -653,7 +657,7 @@ module.exports = {
                         },
                         settlement_type: {
                           type: "string",
-                          enum: ["upi", "neft", "rtgs"],
+                          enum: constants.SETTLEMENT_TYPE_B2C_EXP,
                         },
                         beneficiary_name: {
                           type: "string",
@@ -674,6 +678,7 @@ module.exports = {
                           type: "string",
                         },
                       },
+                      // for future cases
                       allOf: [
                         {
                           if: {
@@ -707,6 +712,7 @@ module.exports = {
                     },
                   },
                 },
+                // ??
                 if: { properties: { type: { const: "ON-FULFILLMENT" } } },
                 then: {
                   properties: {
@@ -715,35 +721,110 @@ module.exports = {
                     },
                   },
                 },
-                required: [
-                  "params",
-                  "status",
-                  "type",
-                  "collected_by",
-                  "@ondc/org/buyer_app_finder_fee_type",
-                  "@ondc/org/buyer_app_finder_fee_amount",
-                  "@ondc/org/settlement_basis",
-                  "@ondc/org/settlement_window",
-                  "@ondc/org/withholding_amount",
-                ],
+
+                tags: {
+                  type: "array",
+                  minItems: 1,
+                  items: {
+                    type: "object",
+                    properties: {
+                      descriptor: {
+                        properties: {
+                          code: {
+                            type: "string",
+                            enum: "payment_terms",
+                          },
+                        },
+                      },
+                      list: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            descriptor: {
+                              properties: {
+                                code: {
+                                  type: "string",
+                                  enum: constants.B2C_EXP_PAYMENT_TAGS,
+                                },
+                              },
+                            },
+                            value: {
+                              type: "string",
+                              minLength: 2,
+                            },
+                          },
+                          required: ["descriptor", "value"],
+                        },
+                      },
+                    },
+                    required: ["descriptor", "list"],
+                  },
+                },
+
+                // add tags for payment_type - OPGSP
+                // add tags for payment_provider
+                // required: [
+                //   "id",
+                //   "params",
+                //   "status",
+                //   "type",
+                //   "collected_by",
+                //   "@ondc/org/buyer_app_finder_fee_type",
+                //   "@ondc/org/buyer_app_finder_fee_amount",
+                //   "@ondc/org/settlement_basis",
+                //   "@ondc/org/settlement_window",
+                //   "@ondc/org/withholding_amount",
+                //   "@ondc/org/settlement_details",
+                //   "tags"
+                // ],
+                if: { properties: { collected_by: { const: "SOR" } } },
+                then: {
+                  required: [
+                    "params",
+                    "status",
+                    "type",
+                    "collected_by",
+                    "@ondc/org/buyer_app_finder_fee_type",
+                    "@ondc/org/buyer_app_finder_fee_amount",
+                    "@ondc/org/settlement_basis",
+                    "@ondc/org/settlement_window",
+                    "@ondc/org/withholding_amount",
+                    "@ondc/org/settlement_details",
+                    "tags"
+                  ],
+                },
+                else: {
+                  required: [
+                    "params",
+                    "status",
+                    "type",
+                    "collected_by",
+                    "@ondc/org/buyer_app_finder_fee_type",
+                    "@ondc/org/buyer_app_finder_fee_amount",
+                    "@ondc/org/settlement_basis",
+                    "@ondc/org/settlement_window",
+                    "@ondc/org/withholding_amount",
+                  ],
+                },
               },
             },
 
-            documents: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  url: {
-                    type: "string",
-                  },
-                  label: {
-                    type: "string",
-                  },
-                },
-                required: ["url", "label"],
-              },
-            },
+            // documents: {
+            //   type: "array",
+            //   items: {
+            //     type: "object",
+            //     properties: {
+            //       url: {
+            //         type: "string",
+            //       },
+            //       label: {
+            //         type: "string",
+            //       },
+            //     },
+            //     required: ["url", "label"],
+            //   },
+            // },
             created_at: {
               type: "string",
               format: "date-time",
@@ -757,7 +838,7 @@ module.exports = {
             },
             tags: {
               type: "array",
-              minItems: 3,
+              minItems: 2,
               items: {
                 type: "object",
                 properties: {
@@ -810,6 +891,5 @@ module.exports = {
       },
       required: ["order"],
     },
-  },
-  required: ["context", "message"],
-};
+  }, required: ["context", "message"],
+}

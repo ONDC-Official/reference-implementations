@@ -671,7 +671,7 @@ module.exports = {
                         },
                         settlement_type: {
                           type: "string",
-                          enum: ["upi", "neft", "rtgs", "OPGSP"],
+                          enum: constants.SETTLEMENT_TYPE_B2C_EXP,
                         },
                         beneficiary_name: {
                           type: "string",
@@ -692,6 +692,7 @@ module.exports = {
                           type: "string",
                         },
                       },
+                      // for future cases
                       allOf: [
                         {
                           if: {
