@@ -406,6 +406,7 @@ module.exports = {
                           properties: {
                             code: {
                               type: "string",
+                              enum:["serviceability"]
                             },
                           },
                           required: ["code"],
@@ -420,6 +421,7 @@ module.exports = {
                                 properties: {
                                   code: {
                                     type: "string",
+                                    enum:["location", "category", "type", "val", "unit"]
                                   },
                                 },
                                 required: ["code"],
@@ -430,10 +432,77 @@ module.exports = {
                             },
                             required: ["descriptor", "value"],
                           },
+                          minItems:5,
+                          allOf: [
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "location",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "category",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: { const: "type" },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "val",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "unit",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                       required: ["descriptor", "list"],
                     },
+                    minItems:1
                   },
                   items: {
                     type: "array",
@@ -519,8 +588,6 @@ module.exports = {
                           minProperties: 2,
                           anyOf: [
                             { required: ["currency", "value"] },
-                            { required: ["currency", "offered_value"] },
-                            { required: ["currency", "maximum_value"] },
                             { required: ["currency", "minimum_value"] },
                           ],
                         },
@@ -753,7 +820,12 @@ module.exports = {
                                         properties: {
                                           code: {
                                             type: "string",
-                                            enum: constants.RESCHEDULE_TERMS, // Ensure this constant is defined
+                                            enum: [
+                                              "fulfillment_state",
+                                              "reschedule_eligible",
+                                              "reschedule_fee",
+                                              "reschedule_within",
+                                            ], // Ensure these values are valid
                                           },
                                         },
                                         required: ["code"],
@@ -764,8 +836,61 @@ module.exports = {
                                     },
                                     required: ["descriptor", "value"],
                                   },
+                                  allOf: [
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                const: "fulfillment_state",
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                const: "reschedule_eligible",
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: { const: "reschedule_fee" },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                const: "reschedule_within",
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  ],
                                 },
                               },
+
                               required: ["descriptor", "list"],
                             },
                             minItems: 1,
@@ -788,6 +913,52 @@ module.exports = {
                         ],
                       },
                       else: {
+                        properties: {
+                          tags: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                descriptor: {
+                                  type: "object",
+                                  properties: {
+                                    code: {
+                                      type: "string",
+                                      enum: ["attribute","quantity_selection"], // Enum validation for descriptor code
+                                    },
+                                  },
+                                  required: ["code"],
+                                },
+                                list: {
+                                  type: "array",
+                                  items: {
+                                    type: "object",
+                                    properties: {
+                                      descriptor: {
+                                        type: "object",
+                                        properties: {
+                                          code: {
+                                            type: "string",
+                                            enum: constants.SRV_CUSTOMIZATION_TAGS, // Ensure these values are valid
+                                          },
+                                        },
+                                        required: ["code"],
+                                      },
+                                      value: {
+                                        type: "string",
+                                      },
+                                    },
+                                    required: ["descriptor", "value"],
+                                  },
+                                  minItems:1
+                                },
+                              },
+
+                              required: ["descriptor", "list"],
+                            },
+                            minItems: 1,
+                          },
+                        },
                         required: [
                           "id",
                           "parent_item_id",

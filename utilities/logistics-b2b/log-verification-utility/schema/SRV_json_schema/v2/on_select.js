@@ -555,9 +555,11 @@ module.exports = {
                         if: {
                           properties: {
                             tags: {
+                              type: "array",
                               items: {
                                 properties: {
                                   list: {
+                                    type: "array",
                                     items: {
                                       properties: {
                                         descriptor: {
@@ -586,9 +588,11 @@ module.exports = {
                         if: {
                           properties: {
                             tags: {
+                              type: "array",
                               items: {
                                 properties: {
                                   list: {
+                                    type: "array",
                                     items: {
                                       properties: {
                                         descriptor: {
@@ -617,14 +621,16 @@ module.exports = {
                         if: {
                           properties: {
                             tags: {
+                              type: "array",
                               items: {
                                 properties: {
                                   list: {
+                                    type: "array",
                                     items: {
                                       properties: {
                                         descriptor: {
                                           properties: {
-                                            code: { const: "tax" },
+                                            code: { enum: ["tax","discount","misc" ]},
                                           },
                                         },
                                       },
@@ -688,5 +694,16 @@ module.exports = {
       required: ["code", "message"],
     },
   },
-  required: ["context", "message"],
+
+  if: {
+    properties: {
+      message: {
+        fulfillments: {
+          state: { descriptor: { code: { const: "Non-serviceable" } } },
+        },
+      },
+    },
+  },
+  then: { required: ["context", "message", "error"] },
+  else: { required: ["context", "message"] },
 };

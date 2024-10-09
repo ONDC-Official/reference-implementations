@@ -78,7 +78,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          const:"PT30S"
+          const: "PT30S",
         },
       },
       required: [
@@ -164,11 +164,7 @@ module.exports = {
                     required: ["selected"],
                   },
                 },
-                required: [
-                  "id",
-                  "fulfillment_ids",
-                  "quantity",
-                ],
+                required: ["id", "fulfillment_ids", "quantity"],
               },
             },
             billing: {
@@ -220,7 +216,7 @@ module.exports = {
                 },
               },
 
-              required: ["name", "address", "state", "city","phone"],
+              required: ["name", "address", "state", "city", "phone"],
             },
             fulfillments: {
               type: "array",
@@ -359,12 +355,7 @@ module.exports = {
                       },
                       if: { properties: { type: { const: "end" } } },
                       then: {
-                        required: [
-                          "type",
-                          "location",
-                          "contact",
-                          "time"
-                        ],
+                        required: ["type", "location", "contact", "time"],
                       },
                       else: { required: ["type"] },
                     },
@@ -600,6 +591,7 @@ module.exports = {
                 },
                 required: ["url", "label"],
               },
+              minItems:1
             },
 
             created_at: {
@@ -614,21 +606,48 @@ module.exports = {
               type: "string",
               format: "date-time",
               not: { const: { $data: "1/created_at" } },
-              errorMessage: "should not be same as 'created_at - ${1/created_at}'",
+              errorMessage:
+                "should not be same as 'created_at - ${1/created_at}'",
             },
           },
-          required: [
-            "id",
-            "status",
-            "provider",
-            "items",
-            "billing",
-            "fulfillments",
-            "quote",
-            "payments",
-            "documents",
-            "created_at",
-            "updated_at",
+          allOf: [
+            {
+              if: {
+                properties: {
+                  status: { const: "Completed" },
+                  type: { const: "ON-FULFILLMENT" },
+                },
+              },
+              then: {
+                properties: {
+                  status: { const: "PAID" },
+                },
+              },
+            },
+            {
+              if: {
+                properties: {
+                  status: { const: "Completed" },
+                },
+              },
+              then: {
+                required: ["documents"],
+              },
+            },
+            {
+              required: [
+                "id",
+                "status",
+                "provider",
+                "items",
+                "billing",
+                "fulfillments",
+                "quote",
+                "payments",
+                "created_at",
+                "updated_at",
+              ],
+            },
           ],
         },
       },

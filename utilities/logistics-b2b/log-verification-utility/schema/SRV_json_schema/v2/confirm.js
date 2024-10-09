@@ -75,7 +75,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          const:"PT30S"
+          const: "PT30S",
         },
       },
       required: [
@@ -439,6 +439,7 @@ module.exports = {
               },
               required: ["price", "breakup", "ttl"],
             },
+
             payments: {
               type: "array",
               items: {
@@ -482,7 +483,9 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    const: { $data: "/select/0/message/order/payments/0/type" },
+                    const: {
+                      $data: "/select/0/message/order/payments/0/type",
+                    },
                   },
                   tags: {
                     type: "array",
@@ -532,8 +535,41 @@ module.exports = {
                   "type",
                   "tags",
                 ],
+                allOf: [
+                  {
+                    if: {
+                      properties: {
+                        status: { const: "PAID" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        params: {
+                          required: ["transaction_id"],
+                        },
+                      },
+                    },
+                  },
+                  {
+                    if: {
+                      properties: {
+                        status: { const: "NOT-PAID" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        params: {
+                          not: {
+                            required: ["transaction_id"],
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
             },
+
             created_at: {
               type: "string",
             },

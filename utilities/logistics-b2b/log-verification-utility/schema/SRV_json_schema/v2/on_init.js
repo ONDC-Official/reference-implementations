@@ -81,7 +81,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          const:"PT30S"
+          const: "PT30S",
         },
       },
       required: [
@@ -430,6 +430,7 @@ module.exports = {
                   type: "string",
                 },
               },
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
             cancellation_terms: {
@@ -528,7 +529,6 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    const: { $data: "/select/0/message/order/payments/0/type" },
                   },
                   tags: {
                     type: "array",
@@ -570,6 +570,7 @@ module.exports = {
                     },
                   },
                 },
+
                 required: ["id", "collected_by", "params", "type", "tags"],
               },
             },

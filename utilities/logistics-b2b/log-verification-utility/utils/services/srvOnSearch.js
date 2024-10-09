@@ -126,23 +126,23 @@ const checkOnSearch = async (data, msgIdSet) => {
           }
         });
 
-        // if (!customization && itemTags) {
-        //   itemTags.forEach((tag) => {
-        //     if (tag?.descriptor?.code === "reschedule_terms" && tag?.list) {
-        //       mandatoryTags = constants.RESCHEDULE_TERMS;
-        //       let missingTags = utils.findMissingTags(
-        //         tag?.list,
-        //         "reschedule_terms",
-        //         mandatoryTags
-        //       );
-        //       if (missingTags.length > 0) {
-        //         onSrchObj.mssngRescdlTagErr = `'${missingTags}' code/s required in providers/tags for ${tag?.descriptor?.code}`;
-        //       }
-        //     }
-        //   });
-        // } else if(!customization && !itemTags) {
-        //   onSrchObj.reschdlTrmErr = `reschedule_terms tag is required for a parent item in items/tags`;
-        // }
+        if (!customization && itemTags) {
+          itemTags.forEach((tag) => {
+            if (tag?.descriptor?.code === "reschedule_terms" && tag?.list) {
+              mandatoryTags = constants.RESCHEDULE_TERMS;
+              let missingTags = utils.findMissingTags(
+                tag?.list,
+                "reschedule_terms",
+                mandatoryTags
+              );
+              if (missingTags.length > 0) {
+                onSrchObj.mssngRescdlTagErr = `'${missingTags}' code/s required in providers/tags for ${tag?.descriptor?.code}`;
+              }
+            }
+          });
+        } else if(!customization && !itemTags) {
+          onSrchObj.reschdlTrmErr = `reschedule_terms tag is required for a parent item in items/tags`;
+        }
         try {
           console.log(
             "Comparing fulfillment_ids in /items and /fulfillments in /on_search"

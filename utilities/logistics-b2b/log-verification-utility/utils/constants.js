@@ -337,6 +337,7 @@ module.exports = Object.freeze({
   //services
   SRV_FULFILLMENT_TYPE: ["Home-Service", "Store-Service"],
   SRV_PAYMENT_TYPE: ["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
+  SRV_CUSTOMIZATION_TAGS:["type","dish_type","cuisine"],
   SRV_FULFILLMENT_STATE: [
     "Pending",
     "At-Location",

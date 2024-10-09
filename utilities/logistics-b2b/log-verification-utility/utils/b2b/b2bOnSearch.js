@@ -361,7 +361,7 @@ const checkOnSearch = async (data, msgIdSet) => {
             );
             break;
           case "RET12":
-            onSrchObj = utils.checkMandatoryTags(
+            errors = utils.checkMandatoryTags(
               i,
               items,
               onSrchObj,
@@ -370,7 +370,7 @@ const checkOnSearch = async (data, msgIdSet) => {
             );
             break;
           case "RET13":
-            onSrchObj = utils.checkMandatoryTags(
+            errors = utils.checkMandatoryTags(
               i,
               items,
               onSrchObj,
@@ -379,7 +379,7 @@ const checkOnSearch = async (data, msgIdSet) => {
             );
             break;
           case "RET14":
-            onSrchObj = utils.checkMandatoryTags(
+            errors = utils.checkMandatoryTags(
               i,
               items,
               onSrchObj,
