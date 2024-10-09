@@ -217,6 +217,24 @@ module.exports = {
                         },
                       },
                       required: ["descriptor", "value"],
+                      allOf: [
+                        {
+                          if: {
+                            properties: {
+                              descriptor: {
+                                properties: {
+                                  code: { const: "finder_fee_type" },
+                                },
+                              },
+                            },
+                          },
+                          then: {
+                            properties: {
+                              value: { enum: ["percent","amount"] },
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 },

@@ -32,7 +32,7 @@ const checkConfirm = async (data, msgIdSet) => {
 
   try {
     console.log(`Checking payment object in /confirm api`);
-    payments.forEach((payment) => {
+    payments.forEach((payment, i) => {
       let paymentStatus = payment?.status;
       let paymentType = payment?.type;
       let payment_collected = payment?.collected_by;
@@ -49,25 +49,38 @@ const checkConfirm = async (data, msgIdSet) => {
               feeAmount = val?.value;
             }
           });
-        }
-        if (feeType != dao.getValue("buyerFinderFeeType")) {
-          cnfrmObj.feeTypeErr = `Buyer Finder Fee type mismatches from /search`;
-        }
-        if (
-          parseFloat(feeAmount) !=
-          parseFloat(dao.getValue("buyerFinderFeeAmount"))
-        ) {
-          cnfrmObj.feeTypeErr = `Buyer Finder Fee amount mismatches from /search`;
+
+          if (feeType != dao.getValue("buyerFinderFeeType")) {
+            let itemKey = `feeTypeErr-${i}-err`;
+            cnfrmObj[
+              itemKey
+            ] = `Buyer Finder Fee type mismatches from /search (${payment?.id})`;
+          }
+          if (
+            parseFloat(feeAmount) !=
+            parseFloat(dao.getValue("buyerFinderFeeAmount"))
+          ) {
+            let itemKey = `feeAmntErr-${i}-err`;
+            cnfrmObj[
+              itemKey
+            ] = `Buyer Finder Fee amount mismatches from /search (${payment?.id})`;
+          }
         }
       });
+
       if (paymentStatus === "PAID" && !params?.transaction_id) {
-        cnfrmObj.pymntErr = `Transaction ID in payments/params is required when the payment status is 'PAID'`;
+        let itemKey = `pymnt-${i}-err`;
+        cnfrmObj[
+          itemKey
+        ] = `Transaction ID in payments/params is required when the payment status is 'PAID' (${payment?.id})`;
       }
       if (paymentStatus === "NOT-PAID" && params?.transaction_id) {
-        cnfrmObj.pymntErr = `Transaction ID in payments/params cannot be provided when the payment status is 'NOT-PAID'`;
+        let itemKey = `pymnt-${i}-err`;
+        cnfrmObj[
+          itemKey
+        ] = `Transaction ID in payments/params cannot be provided when the payment status is 'NOT-PAID' (${payment?.id})`;
       }
     });
-
   } catch (error) {
     console.log(`!!Error while checking payment object in /confirm api`, error);
   }
