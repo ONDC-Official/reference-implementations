@@ -61,6 +61,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const:"PT30S"
         },
       },
       required: [
@@ -83,6 +84,7 @@ module.exports = {
       properties: {
         order_id: {
           type: "string",
+          const: { $data: "/on_confirm/0/message/order/id" },
         },
         cancellation_reason_id: {
           type: "string",

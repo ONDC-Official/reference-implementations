@@ -80,6 +80,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const:"PT30S"
         },
       },
       required: [
@@ -136,44 +137,7 @@ module.exports = {
               required: ["id", "locations", "rateable"],
             },
             items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: {
-                    type: "string",
-                  },
-                  parent_item_id: {
-                    type: "string",
-                  },
-                  fulfillment_ids: {
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
-                  },
-                  quantity: {
-                    type: "object",
-                    properties: {
-                      selected: {
-                        type: "object",
-                        properties: {
-                          count: {
-                            type: "integer",
-                          },
-                        },
-                        required: ["count"],
-                      },
-                    },
-                    required: ["selected"],
-                  },
-                },
-                required: [
-                  "id",
-                  "fulfillment_ids",
-                  "quantity",
-                ],
-              },
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/items",
             },
             billing: {
               type: "object",
@@ -386,6 +350,65 @@ module.exports = {
                 ],
               },
             },
+            cancellation_terms: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  fulfillment_state: {
+                    type: "object",
+                    properties: {
+                      descriptor: {
+                        type: "object",
+                        properties: {
+                          code: {
+                            type: "string",
+                          },
+                        },
+                        required: ["code"],
+                      },
+                    },
+                    required: ["descriptor"],
+                  },
+                  cancel_by: {
+                    type: "object",
+                    properties: {
+                      duration: {
+                        type: "string",
+                      },
+                    },
+                    required: ["duration"],
+                  },
+                  cancellation_fee: {
+                    type: "object",
+                    properties: {
+                      amount: {
+                        type: "object",
+                        properties: {
+                          value: {
+                            type: "string",
+                          },
+                        },
+                        required: ["value"],
+                      },
+                      percentage: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  reason_required: {
+                    type: "boolean",
+                  },
+                },
+                required: [
+                  "fulfillment_state",
+                  "cancel_by",
+                  "cancellation_fee",
+                  "reason_required",
+                ],
+              },
+            },
+
             quote: {
               type: "object",
               properties: {
@@ -507,6 +530,7 @@ module.exports = {
                   type: "string",
                 },
               },
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
             payments: {
@@ -649,6 +673,7 @@ module.exports = {
             "provider",
             "items",
             "billing",
+            "cancellation_terms",
             "fulfillments",
             "quote",
             "payments",
@@ -660,6 +685,5 @@ module.exports = {
       required: ["order"],
     },
   },
-  isFutureDated: true,
   required: ["context", "message"],
 };

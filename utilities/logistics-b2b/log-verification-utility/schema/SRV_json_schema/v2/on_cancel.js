@@ -78,6 +78,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const:"PT30S"
         },
       },
       required: [
@@ -512,6 +513,7 @@ module.exports = {
                   type: "string",
                 },
               },
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
             payments: {
