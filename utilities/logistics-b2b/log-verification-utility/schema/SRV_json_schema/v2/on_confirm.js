@@ -530,6 +530,7 @@ module.exports = {
                   type: "string",
                 },
               },
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
             payments: {

@@ -113,8 +113,20 @@ module.exports = {
                   type: "string",
                   const: { $data: "/select/0/message/order/provider/id" },
                 },
+                locations: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "string",
+                      },
+                    },
+                    required: ["id"],
+                  },
+                },
               },
-              required: ["id"],
+              required: ["id", "locations"],
             },
             items: {
               type: "array",
@@ -630,7 +642,9 @@ module.exports = {
                                       properties: {
                                         descriptor: {
                                           properties: {
-                                            code: { enum: ["tax","discount","misc" ]},
+                                            code: {
+                                              enum: ["tax", "discount", "misc"],
+                                            },
                                           },
                                         },
                                       },
@@ -655,6 +669,7 @@ module.exports = {
                 },
                 ttl: { type: "string" },
               },
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
 
