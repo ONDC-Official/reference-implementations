@@ -3,6 +3,70 @@ const groceryObj = {
       mandatory: false,
       value: [],
     },
+    Product_Name: {
+      mandatory: true,
+      value: [],
+    },
+    Product_Quantity: {
+      mandatory: true,
+      value: [],
+    },
+    UOM: {
+      mandatory: true,
+      value: [],
+    },
+    MRP: {
+      mandatory: true,
+      value: [],
+    },
+    Price: {
+      mandatory: true,
+      value: [],
+    },
+    Product_Description: {
+      mandatory: true,
+      value: [],
+    },
+    SKU_Code: {
+      mandatory: true,
+      value: [],
+    },
+    Manufacturer: {
+      mandatory: true,
+      value: [],
+    },
+    Country_Of_Origin: {
+      mandatory: true,
+      value: [],
+    },
+    Customer_Care_Contact: {
+      mandatory: true,
+      value: [],
+    },
+    Time_to_Ship: {
+      mandatory: true,
+      value: [],
+    },
+    Returnable: {
+      mandatory: true,
+      value: [],
+    },
+    Cancellable: {
+      mandatory: true,
+      value: [],
+    },
+    COD_available: {
+      mandatory: true,
+      value: [],
+    },
+    Images: {
+      mandatory: true,
+      value: [],
+    },
+    Net_Quantity: {
+      mandatory: true,
+      value: [],
+    },
   };
   
    const groceryJSON = {
@@ -243,10 +307,30 @@ const groceryObj = {
   
   const AutoPartObj = {
     Brand_Name: {
-      mandatory: false,
+      mandatory: true,
+      value: [],
+    },
+    Product_Name:{
+      mandatory: true,
+      value: [],
+    },
+    Qty:{
+      mandatory: true,
+      value: [],
+    },
+    MRP:{
+      mandatory: true,
       value: [],
     },
     Item_Condition: {
+      mandatory: true,
+      value: [],
+    },
+    Selling_Price:{
+      mandatory: true,
+      value: [],
+    },
+    Short_Product_Description:{
       mandatory: true,
       value: [],
     },
@@ -275,6 +359,26 @@ const groceryObj = {
       value: [],
     },
     type: {
+      mandatory: true,
+      value: [],
+    },
+    Cancellable: {
+      mandatory: true,
+      value: [],
+    },
+    Returnable: {
+      mandatory: true,
+      value: [],
+    },
+    Replaceable: {
+      mandatory: true,
+      value: [],
+    },
+    COD_Available: {
+      mandatory: true,
+      value: [],
+    },
+    Image_1: {
       mandatory: true,
       value: [],
     },
@@ -589,6 +693,66 @@ const groceryObj = {
       mandatory: true,
       value: [],
     },
+    Qty: {
+      mandatory: true,
+      value: [],
+    },
+    MRP: {
+      mandatory: true,
+      value: [],
+    },
+    Selling_Price: {
+      mandatory: true,
+      value: [],
+    },
+    Short_Product_Description: {
+      mandatory: true,
+      value: [],
+    },
+    SKU_Code: {
+      mandatory: true,
+      value: [],
+    },
+    Country_Of_Origin: {
+      mandatory: true,
+      value: [],
+    },
+    Material: {
+      mandatory: true,
+      value: [],
+    },
+    Manufacturer_Name_And_Address: {
+      mandatory: true,
+      value: [],
+    },
+    Care_Instructions: {
+      mandatory: true,
+      value: [],
+    },
+    Cancellable: {
+      mandatory: true,
+      value: [],
+    },
+    Returnable: {
+      mandatory: true,
+      value: [],
+    },
+    Replaceable: {
+      mandatory: true,
+      value: [],
+    },
+    COD_Available: {
+      mandatory: true,
+      value: [],
+    },
+    Image_1: {
+      mandatory: true,
+      value: [],
+    },
+    Image_2: {
+      mandatory: true,
+      value: [],
+    }
   };
   
    const ConstructionSuppliesJSON = {
@@ -1015,6 +1179,26 @@ const groceryObj = {
       mandatory: true,
       value: [],
     },
+    MRP: {
+      mandatory: true,
+      value: [],
+    },
+    Selling_Price : {
+      mandatory: true,
+      value: [],
+    },
+    Product_Description: {
+      mandatory: true,
+      value: [],
+    },
+    SKU_Code: {
+      mandatory: true,
+      value: [],
+    },
+    Country_Of_Origin: {
+      mandatory: true,
+      value: [],
+    },
     Product_Dimensions: {
       mandatory: true,
       value: [],
@@ -1047,10 +1231,46 @@ const groceryObj = {
       mandatory: true,
       value: [],
     },
+    Cancellable: {
+      mandatory: true,
+      value: [],
+    },
+    Returnable: {
+      mandatory: true,
+      value: [],
+    },
+    Replaceable: {
+      mandatory: true,
+      value: [],
+    },
+    COD_Available: {
+      mandatory: true,
+      value: [],
+    },
+    Image_1: {
+      mandatory: true,
+      value: [],
+    },
     Finish: {
       mandatory: true,
       value: [],
     },
+    Rating: {
+      mandatory: true,
+      value: [],
+    },
+    Review: {
+      mandatory: true,
+      value: [],
+    },
+    Size: {
+      mandatory: false,
+      value: [],
+    },
+    Model_Number: {
+      mandatory: true,
+      value: [],
+    }
   };
   
    const HardwareJSON = {

@@ -4,6 +4,7 @@ const path = require("path");
 const constants = require("../constants");
 const dao = require("../../dao/dao");
 const utils = require("../utils");
+const { groceryJSON } = require("./categories/category");
 
 
 // ************************ GENERIC VALIDATIONS ************************
@@ -343,17 +344,15 @@ function checkParameters(onSearch,  errObj){
   return errObj;
 };
 
-function mandatoryAttributes(data, onSrchObj) {
+function mandatoryAttributes(i, domain, items, onSrchObj) {
   try {
-    domain = data?.context?.domain.split(":")[1];
     console.log(
       `Checking for item tags in bpp/providers[0].items.tags in ${domain}`
     );
-
-    const items = data?.message?.catalog?.provider.items;
     let errors;
     switch (domain) {
       case "RET10":
+        console.log("Going to check for RET10 i value - ", onSrchObj, groceryJSON)
         errors = utils.checkMandatoryTags(
           i,
           items,
@@ -363,7 +362,7 @@ function mandatoryAttributes(data, onSrchObj) {
         );
         break;
       case "RET12":
-        onSrchObj = utils.checkMandatoryTags(
+        errors = utils.checkMandatoryTags(
           i,
           items,
           onSrchObj,
@@ -372,7 +371,7 @@ function mandatoryAttributes(data, onSrchObj) {
         );
         break;
       case "RET13":
-        onSrchObj = utils.checkMandatoryTags(
+        errors = utils.checkMandatoryTags(
           i,
           items,
           onSrchObj,
@@ -381,7 +380,7 @@ function mandatoryAttributes(data, onSrchObj) {
         );
         break;
       case "RET14":
-        onSrchObj = utils.checkMandatoryTags(
+        errors = utils.checkMandatoryTags(
           i,
           items,
           onSrchObj,

@@ -439,6 +439,7 @@ const findMissingTags = (list, code, mandatoryAttr) => {
 const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
   console.log(`Checking mandatory attributes for ${categoryName}`);
   items.forEach((item, index) => {
+    console.log("Item in items", item.tags)
     let attributeTag = null;
     let originTag = null;
     for (const tag of item.tags) {

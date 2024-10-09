@@ -11,7 +11,15 @@ function checkOnSearch (data, msgId) {
         dao.setValue("fulfillmentsArr", fulfillments);
         onSrchObj = repo.setProviderValue(data, onSrchObj);
         onSrchObj = utility.checkParameters(data, onSrchObj);
-        onSrchObj = utility.mandatoryAttributes(data, onSrchObj);
+        const provider = data?.message?.catalog?.providers;
+        domain = data?.context?.domain.split(":")[1];
+
+        console.log("provider -- " , provider)
+
+        provider.forEach((element, i) => {
+            console.log("element -- " , element.items)
+            onSrchObj = utility.mandatoryAttributes(i, domain, element.items, onSrchObj);
+        });
     } catch (error) {
         console.log("Exception occured while processing on_search ", error);
     }
