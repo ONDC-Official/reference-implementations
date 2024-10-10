@@ -435,7 +435,7 @@ const findMissingTags = (list, code, mandatoryAttr) => {
   return missingAttr;
 };
 
-const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
+const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => { 
   console.log(`Checking mandatory attributes for ${categoryName}`);
   items.forEach((item, index) => {
     let attributeTag = null;
@@ -534,7 +534,7 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
             }
           }
         }
-      } else {
+      } else {   
         const key = `invalidCategoryId${ctgrID}`;
         errorObj[key] = `Invalid category_id (${ctgrID}) for ${categoryName}`;
       }

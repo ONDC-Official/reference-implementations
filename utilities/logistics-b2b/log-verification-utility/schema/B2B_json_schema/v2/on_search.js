@@ -752,9 +752,11 @@ module.exports = {
                           },
                           minItems: 1,
                         },
+
                         return_terms: {
                           type: "array",
                           items: {
+                            type: "object",
                             properties: {
                               fulfillment_state: {
                                 type: "object",
@@ -801,7 +803,9 @@ module.exports = {
                               },
                             },
                             if: {
-                              return_eligible: { const: false },
+                              properties: {
+                                return_eligible: { const: false },
+                              },
                             },
                             then: {
                               required: [
@@ -967,15 +971,17 @@ module.exports = {
                         },
                         location_ids: {
                           type: "array",
-                          items: {},
+                          items: { type: "string" },
                         },
                         category_ids: {
                           type: "array",
-                          items: {},
+                          items: {
+                            type: "string",
+                          },
                         },
                         item_ids: {
                           type: "array",
-                          items: {},
+                          items: { type: "string" },
                         },
                         time: {
                           type: "object",
