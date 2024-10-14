@@ -435,7 +435,7 @@ const findMissingTags = (list, code, mandatoryAttr) => {
   return missingAttr;
 };
 
-const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
+const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => { 
   console.log(`Checking mandatory attributes for ${categoryName}`);
   items.forEach((item, index) => {
     let attributeTag = null;
@@ -534,7 +534,7 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
             }
           }
         }
-      } else {
+      } else {   
         const key = `invalidCategoryId${ctgrID}`;
         errorObj[key] = `Invalid category_id (${ctgrID}) for ${categoryName}`;
       }
@@ -543,6 +543,20 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
 
   return errorObj;
 };
+
+function isSelectedRangeWithinValidity(validityRange, selectedRange) {
+  const validityStart = new Date(validityRange.start);
+  const validityEnd = new Date(validityRange.end);
+  const selectedStart = new Date(selectedRange.start);
+  const selectedEnd = new Date(selectedRange.end);
+
+  // Check if the selected range is within the validity range
+  if (selectedStart >= validityStart && selectedEnd <= validityEnd) {
+    return true; // Selected range is within the validity range
+  } else {
+    return false; // Selected range is outside the validity range
+  }
+}
 
 module.exports = {
   uuidCheck,
@@ -575,4 +589,5 @@ module.exports = {
   fnb_categories_id,
   findRequiredTags,
   findMissingTags,
+  isSelectedRangeWithinValidity,
 };

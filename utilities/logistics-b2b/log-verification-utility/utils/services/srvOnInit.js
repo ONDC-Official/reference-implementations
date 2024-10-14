@@ -13,7 +13,7 @@ const checkOnInit = async (data, msgIdSet) => {
 
   try {
     console.log(`Checking payment object in /on_init api`);
-    payments.forEach((payment) => {
+    payments.forEach((payment, i) => {
       let tags = payment.tags;
       let payment_collected = payment?.collected_by;
       tags.forEach((tag) => {
@@ -23,8 +23,12 @@ const checkOnInit = async (data, msgIdSet) => {
             tag.list.forEach((val) => {
               if (val?.descriptor?.code === "Counterparty") {
                 let counterparty = val?.value;
+                console.log(payment_collected, counterparty);
                 if (payment_collected === "BAP" && counterparty === "BAP") {
-                  onInit.cntrprty = `Counterparty will be BPP when BAP is collecting the payment`;
+                  let itemKey = `cntrprty-${i}-err`;
+                  onInit[
+                    itemKey
+                  ] = `Counterparty will be BPP when BAP is collecting the payment (${payment?.id})`;
                 }
               }
             });
@@ -39,24 +43,39 @@ const checkOnInit = async (data, msgIdSet) => {
             if (val?.descriptor?.code === "Buyer_Finder_Fee_Amount") {
               feeAmount = val?.value;
             }
+            console.log(val);
           });
-        }
-        if (feeType != dao.getValue("buyerFinderFeeType")) {
-          onInitObj.feeTypeErr = `Buyer Finder Fee type mismatches from /search`;
-        }
-        if (
-          parseFloat(feeAmount) !=
-          parseFloat(dao.getValue("buyerFinderFeeAmount"))
-        ) {
-          onInitObj.feeTypeErr = `Buyer Finder Fee amount mismatches from /search`;
+
+          if (feeType != dao.getValue("buyerFinderFeeType")) {
+            let itemKey = `feeTypeErr-${i}-err`;
+            onInitObj[
+              itemKey
+            ] = `Buyer Finder Fee type mismatches from /search (${payment?.id})`;
+          }
+          console.log(feeAmount, dao.getValue("buyerFinderFeeAmount"));
+          if (
+            parseFloat(feeAmount) !=
+            parseFloat(dao.getValue("buyerFinderFeeAmount"))
+          ) {
+            let itemKey = `feeAmtErr-${i}-err`;
+            onInitObj[
+              itemKey
+            ] = `Buyer Finder Fee amount mismatches from /search (${payment?.id})`;
+          }
         }
       });
 
       if (payment_collected === "BAP" && !settlementDetailsPresent) {
-        onInitObj.sttlmntDtls = `Settlement details should be sent by BPP in payments/tags when BAP is collecting the payment`;
+        let itemKey = `sttlmntDtls-${i}-err`;
+        onInitObj[
+          itemKey
+        ] = `Settlement details should be sent by BPP in payments/tags when BAP is collecting the payment (${payment?.id})`;
       }
       if (!buyerFinderFeePresent) {
-        onInitObj.sttlmntDtls = `Buyer Finder Fee should be sent by BPP in payments/tags`;
+        let itemKey = `bff-${i}-err`;
+        onInitObj[
+          itemKey
+        ] = `Buyer Finder Fee should be sent by BPP in payments/tags (${payment?.id})`;
       }
     });
   } catch (error) {

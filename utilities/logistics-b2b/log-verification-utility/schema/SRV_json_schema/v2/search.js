@@ -40,7 +40,7 @@ module.exports = {
         },
         version: {
           type: "string",
-          const: "2.0.0"
+          const: "2.0.0",
         },
         bap_id: {
           type: "string",
@@ -60,7 +60,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          const: "PT30S"
+          const: "PT30S",
         },
       },
       required: [
@@ -110,7 +110,7 @@ module.exports = {
               properties: {
                 type: {
                   type: "string",
-                  enum: constants.SRV_FULFILLMENT_TYPE
+                  enum: constants.SRV_FULFILLMENT_TYPE,
                 },
                 stops: {
                   type: "array",
@@ -119,7 +119,7 @@ module.exports = {
                     properties: {
                       type: {
                         type: "string",
-                        const: "end"
+                        const: "end",
                       },
                       location: {
                         type: "object",
@@ -127,7 +127,8 @@ module.exports = {
                           gps: {
                             type: "string",
                             pattern: constants.GPS_PATTERN,
-                            errorMessage: "Incorrect gps value (minimum of six decimal places are required)"
+                            errorMessage:
+                              "Incorrect gps value (minimum of six decimal places are required)",
                           },
                           area_code: {
                             type: "string",
@@ -143,20 +144,17 @@ module.exports = {
                             properties: {
                               start: {
                                 type: "string",
-                                format: "date-time"
+                                format: "date-time",
                               },
                               end: {
                                 type: "string",
-                                format: "date-time"
+                                format: "date-time",
                               },
                             },
                             required: ["start", "end"],
                           },
                           days: {
-                            type: "array",
-                            items: {
-                              type: "string",
-                            },
+                            type: "string",
                           },
                         },
                         required: ["range"],
@@ -173,11 +171,11 @@ module.exports = {
               properties: {
                 type: {
                   type: "string",
-                  enum: constants.SRV_PAYMENT_TYPE
+                  enum: constants.SRV_PAYMENT_TYPE,
                 },
                 collected_by: {
                   type: "string",
-                  enum:  constants.PAYMENT_COLLECTEDBY
+                  enum: constants.PAYMENT_COLLECTEDBY,
                 },
               },
               required: ["type", "collected_by"],
@@ -193,7 +191,7 @@ module.exports = {
                     properties: {
                       code: {
                         type: "string",
-                        enum: ["BAP_Terms"]
+                        enum: ["BAP_Terms"],
                       },
                     },
                     required: ["code"],
@@ -209,7 +207,7 @@ module.exports = {
                           properties: {
                             code: {
                               type: "string",
-                              enum:["finder_fee_type","finder_fee_amount"]
+                              enum: ["finder_fee_type", "finder_fee_amount"],
                             },
                           },
                           required: ["code"],
@@ -219,6 +217,24 @@ module.exports = {
                         },
                       },
                       required: ["descriptor", "value"],
+                      allOf: [
+                        {
+                          if: {
+                            properties: {
+                              descriptor: {
+                                properties: {
+                                  code: { const: "finder_fee_type" },
+                                },
+                              },
+                            },
+                          },
+                          then: {
+                            properties: {
+                              value: { enum: ["percent","amount"] },
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 },
@@ -226,7 +242,7 @@ module.exports = {
               },
             },
           },
-          required: [ "fulfillment", "tags"],
+          required: ["fulfillment", "tags"],
         },
       },
       required: ["intent"],

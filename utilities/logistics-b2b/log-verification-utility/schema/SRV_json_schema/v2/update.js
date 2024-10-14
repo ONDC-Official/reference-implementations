@@ -1,3 +1,5 @@
+const constants = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/updateSchema",
   type: "object",
@@ -271,6 +273,7 @@ module.exports = {
                         properties: {
                           code: {
                             type: "string",
+                            enum:constants.SRV_FULFILLMENT_STATE
                           },
                         },
                         required: ["code"],
@@ -280,6 +283,7 @@ module.exports = {
                   },
                   type: {
                     type: "string",
+                    enum:constants.SRV_FULFILLMENT_TYPE
                   },
                   tracking: {
                     type: "boolean",

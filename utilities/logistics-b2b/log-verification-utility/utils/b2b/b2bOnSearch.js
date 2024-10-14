@@ -4,8 +4,9 @@ const constants = require("../constants");
 const utils = require("../utils");
 const { reverseGeoCodingCheck } = require("../reverseGeoCoding");
 const { electronicsData } = require("./categories/electronics");
+const { applianceData } = require("./categories/appliance");
 const {fashion} = require("./categories/fashion")
-const { BPCJSON,ChemicalJSON,healthJSON,ConstructionSuppliesJSON,HardwareJSON,AutoPartsJSON,groceryJSON } = require("./categories/category");
+const { BPCJSON,ChemicalJSON,healthJSON,homeJSON,ConstructionSuppliesJSON,HardwareJSON,AutoPartsJSON,groceryJSON } = require("./categories/category");
 
 const checkOnSearch = async (data, msgIdSet) => {
   const onSrchObj = {};
@@ -361,7 +362,7 @@ const checkOnSearch = async (data, msgIdSet) => {
             );
             break;
           case "RET12":
-            onSrchObj = utils.checkMandatoryTags(
+            errors = utils.checkMandatoryTags(
               i,
               items,
               onSrchObj,
@@ -370,7 +371,7 @@ const checkOnSearch = async (data, msgIdSet) => {
             );
             break;
           case "RET13":
-            onSrchObj = utils.checkMandatoryTags(
+            errors = utils.checkMandatoryTags(
               i,
               items,
               onSrchObj,
@@ -379,7 +380,7 @@ const checkOnSearch = async (data, msgIdSet) => {
             );
             break;
           case "RET14":
-            onSrchObj = utils.checkMandatoryTags(
+            errors = utils.checkMandatoryTags(
               i,
               items,
               onSrchObj,
@@ -387,7 +388,7 @@ const checkOnSearch = async (data, msgIdSet) => {
               "Electronics"
             );
             break;
-          case "RET15":
+          case "RET15":      
             errors = utils.checkMandatoryTags(
               i,
               items,

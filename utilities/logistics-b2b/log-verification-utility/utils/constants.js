@@ -337,6 +337,7 @@ module.exports = Object.freeze({
   //services
   SRV_FULFILLMENT_TYPE: ["Home-Service", "Store-Service"],
   SRV_PAYMENT_TYPE: ["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
+  SRV_CUSTOMIZATION_TAGS:["type","dish_type","cuisine"],
   SRV_FULFILLMENT_STATE: [
     "Pending",
     "At-Location",
@@ -352,6 +353,7 @@ module.exports = Object.freeze({
     "Cancelled",
     "Pending",
   ],
+  BREAKUP_TYPE:["item", "customization", "tax","discount","misc"],
   GPS_PATTERN:
     "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
   SERVICEABILITY: ["location", "category", "type", "val", "unit"],
