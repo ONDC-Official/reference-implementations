@@ -15,6 +15,7 @@ module.exports = Object.freeze({
     logistics: "LOG_SORTED_INDEX",
     b2b: "B2B_SORTED_INDEX",
     logistics_b2b: "LOG_SORTED_INDEX",
+    b2cExport: 'B2C_EXP_SORTED_INDEX'
   }, // must match mergesort.js
   SERVER_LOG_DEST: "/public/server",
   FULL_ACTION_LIST: [
@@ -46,6 +47,16 @@ module.exports = Object.freeze({
     "on_confirm",
   ],
   B2B_SORTED_INDEX: [
+    "search",
+    "on_search",
+    "select",
+    "on_select",
+    "init",
+    "on_init",
+    "confirm",
+    "on_confirm",
+  ],
+  B2C_EXP_SORTED_INDEX: [
     "search",
     "on_search",
     "select",
@@ -113,6 +124,7 @@ module.exports = Object.freeze({
   ],
   PAYMENT_TYPE: ["ON-ORDER", "ON-FULFILLMENT", "POST-FULFILLMENT"],
   PAYMENT_COLLECTEDBY: ["BAP", "BPP", "SOR"],
+  PAYMENT_EXP_COLLECTEDBY: ["SOR"],
   UNITS_WEIGHT: [
     "unit",
     "dozen",
@@ -138,6 +150,7 @@ module.exports = Object.freeze({
   ],
   SHIPMENT_TYPE: ["P2P", "P2H2P"],
   SETTLEMENT_TYPE: ["upi", "neft", "rtgs"],
+  SETTLEMENT_TYPE_B2C_EXP: ["OPGSP"],
   TITLE_TYPE: ["delivery", "rto", "reverseqc", "tax"],
   PCC_CODE: ["1", "2", "3", "4"],
   DCC_CODE: ["1", "2", "3"],
@@ -192,6 +205,10 @@ module.exports = Object.freeze({
     "RTO-Delivered",
     "RTO-Disposed",
     "Cancelled",
+  ],
+  FULFILLMENT_EXP_STATE: [
+    "Domestic-Custom-Cleared",
+    "Pickup-Approved"
   ],
   CURRENCY: ["INR", "AUD", "USD", "SGD"],
   CANCELLATION_TAGS_CODES: [
@@ -295,8 +312,11 @@ module.exports = Object.freeze({
   ],
   BPP_PAYMENT_TAGS: ["signature", "dsa", "ttl"],
   ON_SEEARCH_ITEMTAGS: ["g2", "g3", "origin"],
+  ON_SEEARCH_ITEMTAGS_B2C:["g2","origin"],
   ON_SEARCH_PROVIDERTAGS: ["serviceability", "seller_id", "seller_terms"],
   B2B_PAYMENT_TYPE: ["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
+  B2C_EXP_PAYMENT_TYPE:["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
+  B2C_EXP_PAYMENT_TAGS: ["payment_type", "payment_provider"],
   PRECANCEL_BEFORE_RTO: [
     "Pending",
     "Packed",
