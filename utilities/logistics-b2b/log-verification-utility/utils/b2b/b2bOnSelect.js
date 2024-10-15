@@ -8,6 +8,7 @@ const checkOnSelect = async (data, msgIdSet) => {
   let onSelect = data;
   let error = onSelect.error;
   let citycode = onSelect?.context?.location?.city?.code;
+  const messageId = onSelect?.context?.message_id
   onSelect = onSelect.message.order;
   let quote = onSelect?.quote;
   const items = onSelect.items;
@@ -17,7 +18,7 @@ const checkOnSelect = async (data, msgIdSet) => {
   let deliveryCharge = 0;
   let outOfStock = false;
   dao.setValue("onSlctdItemsArray", items);
-  const selectedItems = dao.getValue("slctdItemsArray");
+  const selectedItems = dao.getValue(`${messageId}-selectedItemsArray`);
 
   if (error && error.code === "40002") outOfStock = true;
   try {
