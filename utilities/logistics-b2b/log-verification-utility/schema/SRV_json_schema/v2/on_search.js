@@ -204,12 +204,7 @@ module.exports = {
                         },
                       },
                     },
-                    required: [
-                      "name",
-                      "code",
-                      "short_desc",
-                      "long_desc"
-                    ],
+                    required: ["name", "code", "short_desc", "long_desc"],
                   },
                   rating: {
                     type: "string",
@@ -411,6 +406,7 @@ module.exports = {
                           properties: {
                             code: {
                               type: "string",
+                              enum:["serviceability"]
                             },
                           },
                           required: ["code"],
@@ -425,6 +421,7 @@ module.exports = {
                                 properties: {
                                   code: {
                                     type: "string",
+                                    enum:["location", "category", "type", "val", "unit"]
                                   },
                                 },
                                 required: ["code"],
@@ -435,10 +432,77 @@ module.exports = {
                             },
                             required: ["descriptor", "value"],
                           },
+                          minItems:5,
+                          allOf: [
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "location",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "category",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: { const: "type" },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "val",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              contains: {
+                                properties: {
+                                  descriptor: {
+                                    properties: {
+                                      code: {
+                                        const: "unit",
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          ],
                         },
                       },
                       required: ["descriptor", "list"],
                     },
+                    minItems:1
                   },
                   items: {
                     type: "array",
@@ -499,7 +563,7 @@ module.exports = {
                             "code",
                             "short_desc",
                             "long_desc",
-                            "images"
+                            "images",
                           ],
                         },
                         price: {
@@ -521,7 +585,11 @@ module.exports = {
                               type: "string",
                             },
                           },
-                          required: ["currency"],
+                          minProperties: 2,
+                          anyOf: [
+                            { required: ["currency", "value"] },
+                            { required: ["currency", "minimum_value"] },
+                          ],
                         },
                         category_ids: {
                           type: "array",
@@ -560,6 +628,7 @@ module.exports = {
                                     properties: {
                                       code: {
                                         type: "string",
+                                        enum: constants.SRV_FULFILLMENT_STATE,
                                       },
                                     },
                                     required: ["code"],
@@ -584,9 +653,49 @@ module.exports = {
                                   },
                                 },
                               },
+                              reason_required: {
+                                type: "boolean",
+                              },
+                              cancel_by: {
+                                type: "object",
+                                properties: {
+                                  duration: {
+                                    type: "string",
+                                    format: "duration",
+                                  },
+                                },
+                              },
                             },
-                            required: ["fulfillment_state", "cancellation_fee"],
+                            required: [
+                              "fulfillment_state",
+                              "cancellation_fee",
+                              "reason_required",
+                              "cancel_by",
+                            ],
                           },
+                          minItems: 1,
+                        },
+                        xinput: {
+                          type: "object",
+                          properties: {
+                            form: {
+                              type: "object",
+                              properties: {
+                                url: {
+                                  type: "string",
+                                  format: "uri",
+                                },
+                                mimetype: {
+                                  type: "string",
+                                },
+                              },
+                              required: ["url", "mimetype"],
+                            },
+                            required: {
+                              type: "boolean",
+                            },
+                          },
+                          required: ["form", "required"],
                         },
                         tags: {
                           type: "array",
@@ -676,8 +785,117 @@ module.exports = {
                           type: "boolean",
                         },
                       },
-                      if: { properties: { parent_item_id: { const: "" } } },
+                      if: {
+                        properties: {
+                          parent_item_id: {
+                            const: "",
+                          },
+                        },
+                      },
                       then: {
+                        properties: {
+                          tags: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                descriptor: {
+                                  type: "object",
+                                  properties: {
+                                    code: {
+                                      type: "string",
+                                      enum: ["reschedule_terms"], // Enum validation for descriptor code
+                                    },
+                                  },
+                                  required: ["code"],
+                                },
+                                list: {
+                                  type: "array",
+                                  minItems: 4, // Ensure the list array has at least 4 items
+                                  items: {
+                                    type: "object",
+                                    properties: {
+                                      descriptor: {
+                                        type: "object",
+                                        properties: {
+                                          code: {
+                                            type: "string",
+                                            enum: [
+                                              "fulfillment_state",
+                                              "reschedule_eligible",
+                                              "reschedule_fee",
+                                              "reschedule_within",
+                                            ], // Ensure these values are valid
+                                          },
+                                        },
+                                        required: ["code"],
+                                      },
+                                      value: {
+                                        type: "string",
+                                      },
+                                    },
+                                    required: ["descriptor", "value"],
+                                  },
+                                  allOf: [
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                const: "fulfillment_state",
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                const: "reschedule_eligible",
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: { const: "reschedule_fee" },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                    {
+                                      contains: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                const: "reschedule_within",
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+
+                              required: ["descriptor", "list"],
+                            },
+                            minItems: 1,
+                          },
+                        },
                         required: [
                           "id",
                           "parent_item_id",
@@ -688,20 +906,66 @@ module.exports = {
                           "location_ids",
                           "payment_ids",
                           "cancellation_terms",
-                          "tags",
+                          "tags", // Include 'tags' in the required list
                           "time",
                           "matched",
                           "recommended",
                         ],
                       },
                       else: {
+                        properties: {
+                          tags: {
+                            type: "array",
+                            items: {
+                              type: "object",
+                              properties: {
+                                descriptor: {
+                                  type: "object",
+                                  properties: {
+                                    code: {
+                                      type: "string",
+                                      enum: ["attribute","quantity_selection"], // Enum validation for descriptor code
+                                    },
+                                  },
+                                  required: ["code"],
+                                },
+                                list: {
+                                  type: "array",
+                                  items: {
+                                    type: "object",
+                                    properties: {
+                                      descriptor: {
+                                        type: "object",
+                                        properties: {
+                                          code: {
+                                            type: "string",
+                                            enum: constants.SRV_CUSTOMIZATION_TAGS, // Ensure these values are valid
+                                          },
+                                        },
+                                        required: ["code"],
+                                      },
+                                      value: {
+                                        type: "string",
+                                      },
+                                    },
+                                    required: ["descriptor", "value"],
+                                  },
+                                  minItems:1
+                                },
+                              },
+
+                              required: ["descriptor", "list"],
+                            },
+                            minItems: 1,
+                          },
+                        },
                         required: [
                           "id",
                           "parent_item_id",
                           "descriptor",
                           "price",
                           "category_ids",
-                          "tags",
+                          "tags", // Here, tags might still be required, but no validation on structure
                         ],
                       },
                     },
@@ -722,6 +986,12 @@ module.exports = {
                             },
                             code: {
                               type: "string",
+                              enum: [
+                                "Disc_Pct",
+                                "Disc_Amt",
+                                "Freebie",
+                                "BuyXGetY",
+                              ],
                             },
                             short_desc: {
                               type: "string",
@@ -742,12 +1012,7 @@ module.exports = {
                               },
                             },
                           },
-                          required: [
-                            "name",
-                            "code",
-                            "short_desc",
-                            "long_desc"
-                          ],
+                          required: ["name", "code", "short_desc", "long_desc"],
                         },
                         location_ids: {
                           type: "array",
@@ -836,6 +1101,160 @@ module.exports = {
                         "item_ids",
                         "time",
                         "tags",
+                      ],
+                      allOf: [
+                        {
+                          if: {
+                            properties: {
+                              descriptor: {
+                                properties: {
+                                  code: { const: "Disc_Pct" },
+                                },
+                              },
+                            },
+                          },
+                          then: {
+                            properties: {
+                              tags: {
+                                items: {
+                                  properties: {
+                                    list: {
+                                      items: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                type: "string",
+                                                enum: [
+                                                  "qualifier_min_value",
+                                                  "max_benefit",
+                                                  "discount_unit",
+                                                  "discount_value",
+                                                ],
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        {
+                          if: {
+                            properties: {
+                              descriptor: {
+                                properties: {
+                                  code: { const: "Disc_Amt" },
+                                },
+                              },
+                            },
+                          },
+                          then: {
+                            properties: {
+                              tags: {
+                                items: {
+                                  properties: {
+                                    list: {
+                                      items: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                type: "string",
+                                                enum: [
+                                                  "qualifier_min_value",
+                                                  "max_benefit",
+                                                  "discount_value",
+                                                ],
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        {
+                          if: {
+                            properties: {
+                              descriptor: {
+                                properties: {
+                                  code: { const: "Freebie" },
+                                },
+                              },
+                            },
+                          },
+                          then: {
+                            properties: {
+                              tags: {
+                                items: {
+                                  properties: {
+                                    list: {
+                                      items: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                type: "string",
+                                                enum: ["qualifier_min_value"],
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        {
+                          if: {
+                            properties: {
+                              descriptor: {
+                                properties: {
+                                  code: { const: "BuyXGetY" },
+                                },
+                              },
+                            },
+                          },
+                          then: {
+                            properties: {
+                              tags: {
+                                items: {
+                                  properties: {
+                                    list: {
+                                      items: {
+                                        properties: {
+                                          descriptor: {
+                                            properties: {
+                                              code: {
+                                                type: "string",
+                                                enum: [
+                                                  "item_required",
+                                                  "item_free",
+                                                ],
+                                              },
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
                       ],
                     },
                   },

@@ -1,6 +1,6 @@
-import { COLOUR } from "./fashionEnum";
+const { COLOUR } = require('./fashionEnum')
 
-export const applianceData = {
+const applianceData = {
   "RET15-1004": {
     brand: { mandatory: true, value: [] },
     model: { mandatory: true, value: [] },
@@ -2277,3 +2277,5 @@ export const applianceData = {
     voltage: { mandatory: false, value: [] },
   },
 };
+
+module.exports={applianceData}

@@ -1,3 +1,5 @@
+const constants = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/onSelectSchema",
   type: "object",
@@ -38,7 +40,7 @@ module.exports = {
         },
         version: {
           type: "string",
-          const: "2.0.0"
+          const: "2.0.0",
         },
         bap_id: {
           type: "string",
@@ -111,29 +113,45 @@ module.exports = {
                   type: "string",
                   const: { $data: "/select/0/message/order/provider/id" },
                 },
+                locations: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "string",
+                      },
+                    },
+                    required: ["id"],
+                  },
+                },
               },
-              required: ["id"],
+              required: ["id", "locations"],
             },
             items: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
+                  id: {
+                    type: "string",
+                  },
+                  parent_item_id: {
+                    type: "string",
+                  },
                   fulfillment_ids: {
                     type: "array",
                     items: {
                       type: "string",
                     },
                   },
-                  id: {
-                    type: "string",
-                    const: { $data: "/select/0/message/order/items/0/id" },
-                  },
-                  parent_item_id: {
-                    type: "string",
-                    const: { $data: "/select/0/message/order/items/0/parent_item_id" },
-                  },
                   location_ids: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
+                  category_ids: {
                     type: "array",
                     items: {
                       type: "string",
@@ -154,56 +172,73 @@ module.exports = {
                     },
                     required: ["selected"],
                   },
-                  time: {
-                    type: "object",
-                    properties: {
-                      label: {
-                        type: "string",
-                      },
-                      range: {
-                        type: "object",
-                        properties: {
-                          start: {
-                            type: "string",
-                          },
-                          end: {
-                            type: "string",
-                          },
-                        },
-                        required: ["start", "end"],
-                      },
-                      schedule: {
-                        type: "object",
-                        properties: {
-                          frequency: {
-                            type: "string",
-                          },
-                          holidays: {
-                            type: "array",
-                            items: {
+                  tags: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        descriptor: {
+                          type: "object",
+                          properties: {
+                            code: {
                               type: "string",
+                              enum: ["attribute"],
                             },
                           },
-                          times: {
-                            type: "array",
-                            items: {
-                              type: "string",
+                          required: ["code"],
+                        },
+                        list: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              descriptor: {
+                                type: "object",
+                                properties: {
+                                  code: {
+                                    type: "string",
+                                  },
+                                },
+                                required: ["code"],
+                              },
+                              value: {
+                                type: "string",
+                              },
                             },
+                            required: ["descriptor", "value"],
                           },
                         },
                       },
+                      required: ["descriptor", "list"],
                     },
-                    required: ["label", "schedule"],
                   },
                 },
-                required: [
-                  "fulfillment_ids",
-                  "id",
-                  "parent_item_id",
-                  "location_ids",
-                ],
+                if: {
+                  not: {
+                    required: ["parent_item_id"],
+                  },
+                },
+                then: {
+                  required: [
+                    "id",
+                    "quantity",
+                    "location_ids",
+                    "fulfillment_ids",
+                  ],
+                },
+                else: {
+                  required: [
+                    "id",
+                    "parent_item_id",
+                    "quantity",
+                    "category_ids",
+                    "tags",
+                    "fulfillment_ids",
+                  ],
+                },
               },
             },
+
             fulfillments: {
               type: "array",
               items: {
@@ -223,7 +258,7 @@ module.exports = {
                         properties: {
                           code: {
                             type: "string",
-                            enum:["Serviceable","Non-serviceable"]
+                            enum: ["Serviceable", "Non-serviceable"],
                           },
                         },
                         required: ["code"],
@@ -256,7 +291,7 @@ module.exports = {
                           properties: {
                             label: {
                               type: "string",
-                              enum: ["confirmed","rejected"]
+                              enum: ["confirmed", "rejected"],
                             },
                             range: {
                               type: "object",
@@ -269,6 +304,9 @@ module.exports = {
                                 },
                               },
                               required: ["start", "end"],
+                            },
+                            days: {
+                              type: "string",
                             },
                           },
                           required: ["label", "range"],
@@ -317,18 +355,138 @@ module.exports = {
                 required: ["id", "state", "stops"],
               },
             },
+            // quote: {
+            //   type: "object",
+            //   properties: {
+            //     price: {
+            //       type: "object",
+            //       properties: {
+            //         currency: {
+            //           type: "string",
+            //         },
+            //         value: {
+            //           type: "string",
+            //         },
+            //       },
+            //       required: ["currency", "value"],
+            //     },
+            //     breakup: {
+            //       type: "array",
+            //       items: {
+            //         type: "object",
+            //         properties: {
+            //           title: {
+            //             type: "string",
+            //           },
+            //           price: {
+            //             type: "object",
+            //             properties: {
+            //               currency: {
+            //                 type: "string",
+            //               },
+            //               value: {
+            //                 type: "string",
+            //               },
+            //             },
+            //             required: ["currency", "value"],
+            //           },
+            //           item: {
+            //             type: "object",
+            //             properties: {
+            //               id: {
+            //                 type: "string",
+            //               },
+            //               quantity: {
+            //                 type: "object",
+            //                 properties: {
+            //                   selected: {
+            //                     type: "object",
+            //                     properties: {
+            //                       count: {
+            //                         type: "integer",
+            //                       },
+            //                     },
+            //                     required: ["count"],
+            //                   },
+            //                 },
+            //               },
+            //               price: {
+            //                 type: "object",
+            //                 properties: {
+            //                   currency: {
+            //                     type: "string",
+            //                   },
+            //                   value: {
+            //                     type: "string",
+            //                   },
+            //                 },
+            //                 required: ["currency", "value"],
+            //               },
+            //             },
+            //             required: ["id"],
+            //           },
+            //           tags: {
+            //             type: "array",
+            //             items: {
+            //               type: "object",
+            //               properties: {
+            //                 descriptor: {
+            //                   type: "object",
+            //                   properties: {
+            //                     code: {
+            //                       type: "string",
+            //                       enum:["title"]
+            //                     },
+            //                   },
+            //                   required: ["code"],
+            //                 },
+            //                 list: {
+            //                   type: "array",
+            //                   items: {
+            //                     type: "object",
+            //                     properties: {
+            //                       descriptor: {
+            //                         type: "object",
+            //                         properties: {
+            //                           code: {
+            //                             type: "string",
+            //                             enum: ["type"],
+            //                           },
+            //                         },
+            //                         required: ["code"],
+            //                       },
+            //                       value: {
+            //                         type: "string",
+            //                         enum: constants.BREAKUP_TYPE,
+            //                       },
+            //                     },
+            //                     required: ["descriptor", "value"],
+            //                   },
+            //                 },
+            //               },
+            //               required: ["descriptor", "list"],
+            //             },
+            //           },
+            //         },
+            //         required: ["title", "price", "item", "tags"],
+            //       },
+            //     },
+            //     ttl: {
+            //       type: "string",
+            //     },
+            //   },
+            //   isQuoteMatching: true,
+            //   required: ["price", "breakup", "ttl"],
+            // },
+
             quote: {
               type: "object",
               properties: {
                 price: {
                   type: "object",
                   properties: {
-                    currency: {
-                      type: "string",
-                    },
-                    value: {
-                      type: "string",
-                    },
+                    currency: { type: "string" },
+                    value: { type: "string" },
                   },
                   required: ["currency", "value"],
                 },
@@ -337,36 +495,26 @@ module.exports = {
                   items: {
                     type: "object",
                     properties: {
-                      title: {
-                        type: "string",
-                      },
+                      title: { type: "string" },
                       price: {
                         type: "object",
                         properties: {
-                          currency: {
-                            type: "string",
-                          },
-                          value: {
-                            type: "string",
-                          },
+                          currency: { type: "string" },
+                          value: { type: "string" },
                         },
                         required: ["currency", "value"],
                       },
                       item: {
                         type: "object",
                         properties: {
-                          id: {
-                            type: "string",
-                          },
+                          id: { type: "string" },
                           quantity: {
                             type: "object",
                             properties: {
                               selected: {
                                 type: "object",
                                 properties: {
-                                  count: {
-                                    type: "integer",
-                                  },
+                                  count: { type: "number" },
                                 },
                                 required: ["count"],
                               },
@@ -375,17 +523,11 @@ module.exports = {
                           price: {
                             type: "object",
                             properties: {
-                              currency: {
-                                type: "string",
-                              },
-                              value: {
-                                type: "string",
-                              },
+                              currency: { type: "string" },
+                              value: { type: "string" },
                             },
-                            required: ["currency", "value"],
                           },
                         },
-                        required: ["id", "quantity", "price"],
                       },
                       tags: {
                         type: "array",
@@ -395,9 +537,7 @@ module.exports = {
                             descriptor: {
                               type: "object",
                               properties: {
-                                code: {
-                                  type: "string",
-                                },
+                                code: { type: "string" },
                               },
                               required: ["code"],
                             },
@@ -409,34 +549,130 @@ module.exports = {
                                   descriptor: {
                                     type: "object",
                                     properties: {
-                                      code: {
-                                        type: "string",
-                                      },
+                                      code: { type: "string" },
                                     },
                                     required: ["code"],
                                   },
-                                  value: {
-                                    type: "string",
-                                  },
+                                  value: { type: "string" },
                                 },
-                                required: ["descriptor", "value"],
                               },
                             },
                           },
-                          required: ["descriptor", "list"],
                         },
                       },
                     },
                     required: ["title", "price", "item", "tags"],
+                    allOf: [
+                      {
+                        if: {
+                          properties: {
+                            tags: {
+                              type: "array",
+                              items: {
+                                properties: {
+                                  list: {
+                                    type: "array",
+                                    items: {
+                                      properties: {
+                                        descriptor: {
+                                          properties: {
+                                            code: { const: "item" },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        then: {
+                          properties: {
+                            item: {
+                              type: "object",
+                              required: ["id", "price"],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        if: {
+                          properties: {
+                            tags: {
+                              type: "array",
+                              items: {
+                                properties: {
+                                  list: {
+                                    type: "array",
+                                    items: {
+                                      properties: {
+                                        descriptor: {
+                                          properties: {
+                                            code: { const: "customization" },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        then: {
+                          properties: {
+                            item: {
+                              type: "object",
+                              required: ["id", "price", "quantity"],
+                            },
+                          },
+                        },
+                      },
+                      {
+                        if: {
+                          properties: {
+                            tags: {
+                              type: "array",
+                              items: {
+                                properties: {
+                                  list: {
+                                    type: "array",
+                                    items: {
+                                      properties: {
+                                        descriptor: {
+                                          properties: {
+                                            code: {
+                                              enum: ["tax", "discount", "misc"],
+                                            },
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        then: {
+                          properties: {
+                            item: {
+                              type: "object",
+                              required: ["id"],
+                            },
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
-                ttl: {
-                  type: "string",
-                },
+                ttl: { type: "string" },
               },
-              isQuoteMatching:true,
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
+
             payments: {
               type: "array",
               items: {
@@ -448,14 +684,14 @@ module.exports = {
                   },
                   collected_by: {
                     type: "string",
-                    enum:["BAP","BPP"]
+                    enum: ["BAP", "BPP"],
                   },
                 },
-                required: ["type","collected_by"],
+                required: ["type", "collected_by"],
               },
             },
           },
-          required: ["provider", "items", "fulfillments", "quote","payments"],
+          required: ["provider", "items", "fulfillments", "quote", "payments"],
         },
       },
       required: ["order"],
@@ -473,5 +709,16 @@ module.exports = {
       required: ["code", "message"],
     },
   },
-  required: ["context", "message"],
+
+  if: {
+    properties: {
+      message: {
+        fulfillments: {
+          state: { descriptor: { code: { const: "Non-serviceable" } } },
+        },
+      },
+    },
+  },
+  then: { required: ["context", "message", "error"] },
+  else: { required: ["context", "message"] },
 };

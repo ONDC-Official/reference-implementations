@@ -6,6 +6,7 @@ const utils = require("../utils.js");
 const checkOnStatus = (data, msgIdSet) => {
   let onStatusObj = {};
   let on_status = data;
+  const contextTimestamp = on_status.context.timestamp;
   let contextTime = on_status.context.timestamp;
   let messageId = on_status.context.message_id;
 
@@ -18,6 +19,12 @@ const checkOnStatus = (data, msgIdSet) => {
   let payments = on_status?.payments;
   let invoice = on_status?.documents;
 
+  if (on_status?.updated_at > contextTimestamp) {
+    onStatusObj.updatedAtErr = `order/updated_at cannot be future dated w.r.t context/timestamp`;
+  }
+  if (on_status?.created_at > contextTimestamp) {
+    onStatusObj.createdAtErr = `order/created_at cannot be future dated w.r.t context/timestamp`;
+  }
   try {
     console.log(`Checking payment object in /on_status`);
     payments.forEach((payment) => {
