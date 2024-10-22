@@ -4,7 +4,7 @@ function checkConfirm(data, msgId) {
     let cnfrmObj = {};
 
     try {  
-        cnfrmObj = utility.isCityCodeValidForExport(data, cnfrmObj);
+        // cnfrmObj = utility.isCityCodeValidForExport(data, cnfrmObj);
         data = data.message.order;
         cnfrmObj = utility.comparingItemsData(data, cnfrmObj);
         cnfrmObj = utility.checkPaymentForConfirm(data, cnfrmObj);

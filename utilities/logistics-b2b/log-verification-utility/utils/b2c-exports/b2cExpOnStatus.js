@@ -4,7 +4,7 @@ function checkOnStatus(data, msgId) {
     let onStatusObj = {};
 
     try {
-        onStatusObj = utility.isCityCodeValidForExport(data, onStatusObj);
+        // onStatusObj = utility.isCityCodeValidForExport(data, onStatusObj);
         data = data.message.order;
         onStatusObj = utility.checkPaymentOfOnStatus(data, onStatusObj);
         onStatusObj = utility.checkTimestampForOnStatus(data, onStatusObj);

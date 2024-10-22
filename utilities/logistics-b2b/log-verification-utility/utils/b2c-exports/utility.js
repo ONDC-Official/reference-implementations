@@ -12,26 +12,26 @@ const { groceryJSON } = require("./categories/category");
 // ************************ SEARCH PAYLOAD ************************
 
 // City code std:999 for international shipments
-function isCityCodeValidForExport(data, errObj) {
-  console.log(errObj);
-    if(data?.context?.location?.city?.code !== "std:999") {
-      errObj.cityCodeErr= "Invalid city code for exports";
-    }
-    console.log(errObj);
+// function isCityCodeValidForExport(data, errObj) {
+//   console.log(errObj);
+//     if(data?.context?.location?.city?.code !== "std:999") {
+//       errObj.cityCodeErr= "Invalid city code for exports";
+//     }
+//     console.log(errObj);
     
-    return errObj;
-};
+//     return errObj;
+// };
 
 // No buyer-ID in message > intent
-function doesNotHaveBuyerIdInTags(data, errObj) {
-    const tags = data?.message?.intent?.tags || [];
-    for (let tag of tags) {
-        if (tag?.descriptor?.code === "buyer_id") {
-          errObj.buyerIDErr = "Intent tag cannot have buyer_id";
-        }
-    }
-    return errObj;
-};
+// function doesNotHaveBuyerIdInTags(data, errObj) {
+//     const tags = data?.message?.intent?.tags || [];
+//     for (let tag of tags) {
+//         if (tag?.descriptor?.code === "buyer_id") {
+//           errObj.buyerIDErr = "Intent tag cannot have buyer_id";
+//         }
+//     }
+//     return errObj;
+// };
 
 // check for context cityCode and fulfillment end location
 function checkValidDestination(data, errObj) {
@@ -512,12 +512,12 @@ function checkProviderForSelect(select, errObj) {
 }
 
 // message > items > tag should not have a code named BUYER_TERMS
-function hasNoBuyerTerms(data, errObj) {
-  if (data.message.order.items.some(item => item.id === "BUYER_TERMS")) {
-    errObj.buyerTermErr = "Items tag should not have a code named 'BUYER_TERMS'.";
-  }
-  return errObj;
-};
+// function hasNoBuyerTerms(data, errObj) {
+//   if (data.message.order.items.some(item => item.id === "BUYER_TERMS")) {
+//     errObj.buyerTermErr = "Items tag should not have a code named 'BUYER_TERMS'.";
+//   }
+//   return errObj;
+// };
 
 
 function checkItemsAndFulfillmentsForSelect(data, errObj) {
@@ -1244,9 +1244,9 @@ function checkTimestampForOnStatus(data, errObj) {
 };
 
 module.exports = {
-    isCityCodeValidForExport,
-    doesNotHaveBuyerIdInTags,
-    hasNoBuyerTerms,
+    // isCityCodeValidForExport,
+    // doesNotHaveBuyerIdInTags,
+    // hasNoBuyerTerms,
     checkValidDestination,
     checkParameters,
     mandatoryAttributes,

@@ -8,7 +8,7 @@ const checkOnSelect = (data, msgId) => {
     try {
         let error = data.error
         let outOfStock = false;
-        onSelectObj = utility.isCityCodeValidForExport(data, onSelectObj);
+        // onSelectObj = utility.isCityCodeValidForExport(data, onSelectObj);
         
         // data = data.message.order;
         dao.setValue("onSlctdItemsArray", data.message.order.items);

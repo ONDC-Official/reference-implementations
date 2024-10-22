@@ -1,8 +1,8 @@
 
-const { isLengthValid } = require("./keywords/init");
-const { isQuoteMatching } = require("./keywords/onInit");
-const { isFutureDated } = require("./keywords/confirm");
-const { isEndTimeGreater } = require("./keywords/search");
+const { isLengthValid } = require("../keywords/init");
+const { isQuoteMatching } = require("../keywords/onInit");
+const { isFutureDated } = require("../keywords/confirm");
+const { isEndTimeGreater } = require("../keywords/search");
 
 const fs = require("fs");
 //const async = require("async");

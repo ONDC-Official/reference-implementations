@@ -9,7 +9,7 @@ function checkStatus(data, msgId) {
         console.log("Exception occured while processing confirm ", error);
     }
     let statusObj = {};
-    statusObj = utility.isCityCodeValidForExport(data, statusObj);
+    // statusObj = utility.isCityCodeValidForExport(data, statusObj);
     return statusObj;
 
 }

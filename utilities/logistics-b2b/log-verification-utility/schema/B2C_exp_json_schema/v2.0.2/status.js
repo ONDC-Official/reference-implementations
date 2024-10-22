@@ -17,6 +17,7 @@ module.exports = {
                 code: {
                   type: "string",
                   const: { $data: "/on_confirm/0/context/location/city/code" },
+                  errorMessage: "Invalid city code for exports",
                 },
               },
               required: ["code"],

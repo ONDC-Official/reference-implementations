@@ -4,7 +4,7 @@ function checkOnInit(data, msgId) {
     let onInitObj = {};
     
     try {
-        onInitObj = utility.isCityCodeValidForExport(data, onInitObj);
+        // onInitObj = utility.isCityCodeValidForExport(data, onInitObj);
         let onInit = data; 
         let citycode = onInit?.context?.location?.city?.code;
         onInit = onInit.message.order;

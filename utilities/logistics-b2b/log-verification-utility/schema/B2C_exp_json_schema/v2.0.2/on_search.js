@@ -22,7 +22,7 @@ module.exports={
                   const: {
                     $data: "/search/0/context/location/city/code"
                   },
-                  
+                  errorMessage: "Invalid city code for exports",
                 },
                 
               },

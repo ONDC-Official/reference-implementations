@@ -9,7 +9,7 @@ function checkOnConfirm(data, msgId) {
             onCnfmObj.errObj=`Error object is missing in case of PO rejection`
         }
     
-        onCnfmObj = utility.isCityCodeValidForExport(data, onCnfmObj);
+        // onCnfmObj = utility.isCityCodeValidForExport(data, onCnfmObj);
         data = data.message.order;
         onCnfmObj = utility.checkFulfillmentForOnConfirm(data, onCnfmObj);
         onCnfmObj = utility.checkPaymentForOnConfirm(data, onCnfmObj);    

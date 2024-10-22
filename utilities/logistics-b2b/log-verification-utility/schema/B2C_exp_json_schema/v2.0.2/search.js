@@ -16,6 +16,8 @@ module.exports = {
               properties: {
                 code: {
                   type: "string",
+                  enum: ["std:999"],
+                  errorMessage: "Invalid city code for exports",
                 },
               },
               required: ["code"],

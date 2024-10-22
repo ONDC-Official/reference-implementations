@@ -5,7 +5,7 @@ const dao = require("../../dao/dao");
 function checkOnSearch (data, msgId) {
     let onSrchObj = {};
     try {
-        onSrchObj = utility.isCityCodeValidForExport(data, onSrchObj);
+        // onSrchObj = utility.isCityCodeValidForExport(data, onSrchObj);
         let onSearch = data.message.catalog;
         const fulfillments = onSearch?.fulfillments;
         dao.setValue("fulfillmentsArr", fulfillments);

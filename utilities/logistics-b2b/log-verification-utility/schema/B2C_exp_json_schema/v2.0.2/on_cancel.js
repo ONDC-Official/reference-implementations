@@ -18,6 +18,7 @@ module.exports = {
                 code: {
                   type: "string",
                   const: { $data: "/search/0/context/location/city/code" },
+                  errorMessage: "Invalid city code for exports",
                 },
               },
               required: ["code"],
@@ -563,6 +564,7 @@ module.exports = {
             },
             payments: {
               type: "array",
+              minItems: 2,
               items: {
                 type: "object",
                 properties: {
@@ -581,9 +583,9 @@ module.exports = {
                       },
                       amount: {
                         type: "string",
-                        const: { $data: "4/quote/price/value" },
+                        const: { $data: "/on_confirm/0/message/order/payments/0/params/amount" },
                         errorMessage:
-                          "should be updated to updated quote price - ${4/quote/price/value}",
+                          "should be updated to updated quote price - ${/on_confirm/0/message/order/payments/0/params/amount}",
                       },
                     },
                     required: ["currency", "amount"],
@@ -875,7 +877,7 @@ module.exports = {
               },
             },
           },
-          additionalProperties: false,
+          // additionalProperties: false,
           required: [
             "id",
             "state",
