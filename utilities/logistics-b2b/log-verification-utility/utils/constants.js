@@ -346,12 +346,12 @@ module.exports = Object.freeze({
     "Cancelled",
   ],
   SRV_ORDER_STATE: [
-    "Created",
-    "Accepted",
-    "In-progress",
-    "Completed",
-    "Cancelled",
-    "Pending",
+    "CANCELLED",
+    "ACCEPTED",
+    "IN-PROGRESS",
+    "COMPLETED",
+    "CANCELLED",
+    "PENDING",
   ],
   BREAKUP_TYPE:["item", "customization", "tax","discount","misc"],
   GPS_PATTERN:
