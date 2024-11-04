@@ -1,4 +1,3 @@
-
 const { isLengthValid } = require("../keywords/init");
 const { isQuoteMatching } = require("../keywords/onInit");
 const { isFutureDated } = require("../keywords/confirm");
@@ -32,6 +31,7 @@ const formatted_error = (errors) => {
 
 const loadSchema = (schemaType, version) => {
   try {
+    console.log(`./${version}/${schemaType}.js`);
     return require(`./${version}/${schemaType}.js`);
   } catch (error) {
     console.log("Error Occurred while importing", error);
@@ -42,6 +42,8 @@ const validate_schema = (data, schema,version) => {
   const searchSchema = loadSchema("search", version);
   const onSearchSchema = loadSchema("on_search", version);
 
+  console.log("onSearchSchema :: ", onSearchSchema);
+
   const selectSchema = loadSchema("select", version);
   const onSelectSchema = loadSchema("on_select", version);
 
@@ -51,14 +53,13 @@ const validate_schema = (data, schema,version) => {
   const confirmSchema = loadSchema("confirm", version);
   const onConfirmSchema = loadSchema("on_confirm", version);
 
-  const updateSchema = loadSchema("update", version);
-  const onUpdateSchema = loadSchema("on_update", version);
-
   const statusSchema = loadSchema("status", version);
   const onStatusSchema = loadSchema("on_status", version);
 
   const cancelSchema = loadSchema("cancel", version);
   const onCancelSchema = loadSchema("on_cancel", version);
+
+  console.log("onCancelSchema :: ", onCancelSchema);
 
   const Ajv = require("ajv");
   const ajv = new Ajv({
@@ -83,8 +84,6 @@ const validate_schema = (data, schema,version) => {
       .addSchema(onInitSchema)
       .addSchema(confirmSchema)
       .addSchema(onConfirmSchema)
-      .addSchema(updateSchema)
-      .addSchema(onUpdateSchema)
       .addSchema(statusSchema)
       .addSchema(onStatusSchema)
       .addSchema(cancelSchema)
@@ -104,6 +103,8 @@ const validate_schema = (data, schema,version) => {
 
     validate = validate.compile(schema);
 
+    console.log("VALIDATE -- ", validate.schema.properties);
+
     const valid = validate(data);
     if (!valid) {
       error_list = validate.errors;
@@ -115,12 +116,14 @@ const validate_schema = (data, schema,version) => {
   return error_list;
 };
 
-const validate_schema_srv_master = (data,version) => {
+const validate_schema_b2c_export = (data,version) => {
+  console.log("version ", version);
+  console.log("data: ", data);
   const masterSchema = loadSchema("master", version);
   error_list = validate_schema(data, masterSchema,version);
   return formatted_error(error_list);
-};
+}
 
 module.exports = {
-  validate_schema_srv_master,
+    validate_schema_b2c_export,
 };
