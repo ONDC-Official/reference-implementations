@@ -1,0 +1,53 @@
+# .NET Core / .NET 5+ / .NET 6+ specific
+
+# User-specific files
+.idea/
+.vscode/
+.vs/
+# User-specific settings for Visual Studio for Mac
+.vscode/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows Installer logs
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]ist/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]ist/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# User-specific files
+.idea/
+.vscode/
+.vs/
+
+# ASP.NET temporary files
+# ASP.NET (5+) builds and temp folders
+bin/
+obj/
+
+# ASP.NET web project configuration
+project.lock.json
+project.fragment.lock.json
+
+# User-specific Visual Studio for Mac files
+.vscode/
+.idea/
+.vs/
