@@ -1,5 +1,8 @@
 # .NET Core / .NET 5+ / .NET 6+ specific
 
+# env
+.env
+
 # User-specific files
 .idea/
 .vscode/

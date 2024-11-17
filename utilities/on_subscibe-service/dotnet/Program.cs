@@ -10,7 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
-
+DotNetEnv.Env.Load();
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -34,6 +34,7 @@ app.MapControllers();
 
 // Define API version 1 routes directly
 app.MapGet("/api/v1/generate-keys", Handlers.GenerateKeysHandler);
+app.MapGet("/ondc-site-verification.html", Handlers.OndcSiteVerificationHandler);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok("Utility is running"))
