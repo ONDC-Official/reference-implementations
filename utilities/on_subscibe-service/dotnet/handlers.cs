@@ -49,6 +49,52 @@ public static class Handlers
         }
     }
 
+    public static IResult OnSubscribeHandler(OnSubscribeResponse response)
+    {
+        try
+        {
+            // Print the incoming challenge
+            Console.WriteLine("Received challenge: " + response.Challenge);
 
+            // Retrieve environment variables
+            var encryptionPrivateKey = Environment.GetEnvironmentVariable("ENCRYPTION_PRIVATE_KEY");
+            var ondcPublicKey = Environment.GetEnvironmentVariable("ONDC_PUBLIC_KEY");
+
+            // Print the keys being used
+            Console.WriteLine("Encryption Private Key: " + encryptionPrivateKey);
+            Console.WriteLine("ONDC Public Key: " + ondcPublicKey);
+
+            // Attempt decryption
+            var (decryptedText, error) = CryptoOperations.Decrypt(
+                encryptionPrivateKey,
+                ondcPublicKey,
+                response.Challenge
+            );
+
+            // Check for decryption errors
+            if (error != null)
+            {
+                Console.WriteLine("Decryption error: " + error.Message);
+                return Results.BadRequest(new { error = error.Message });
+            }
+
+            // Print the decrypted text
+            Console.WriteLine("Decrypted text: " + decryptedText);
+
+            return Results.Ok(new { answer1 = decryptedText });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception during on_subscribe response: " + ex.Message);
+            return Results.Problem($"Error processing subscription: {ex.Message}");
+        }
+    }
 
 }
+
+public class OnSubscribeResponse
+{
+    public string SubscriberId { get; set; }
+    public string Challenge { get; set; }
+}
+

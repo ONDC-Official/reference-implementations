@@ -35,6 +35,7 @@ app.MapControllers();
 // Define API version 1 routes directly
 app.MapGet("/api/v1/generate-keys", Handlers.GenerateKeysHandler);
 app.MapGet("/ondc-site-verification.html", Handlers.OndcSiteVerificationHandler);
+app.MapPost("/api/v1/on_subscribe", Handlers.OnSubscribeHandler);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok("Utility is running"))
