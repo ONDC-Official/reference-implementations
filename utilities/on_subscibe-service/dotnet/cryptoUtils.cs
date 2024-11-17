@@ -9,127 +9,148 @@ using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Crypto.Digests;
 using System.Text.Json;
 
-public class Pkcs8
-{
-    public int Version { get; set; }
-    public AlgorithmIdentifier Algorithm { get; set; }
-    public byte[] PrivateKey { get; set; }
-}
 
-public class PublicKeyInfo
-{
-    public byte[] RawContent { get; set; }
-    public AlgorithmIdentifier Algorithm { get; set; }
-    public BitString PublicKey { get; set; }
-}
 
-public class PkixPublicKey
+namespace CryptoUtils
 {
-    public AlgorithmIdentifier Algorithm { get; set; }
-    public BitString BitString { get; set; }
-}
-
-public class AlgorithmIdentifier
-{
-    public string Algorithm { get; set; }
-}
-
-public class BitString
-{
-    public byte[] Bytes { get; set; }
-    public int BitLength { get; set; }
-}
-
-public class CryptoOperations
-{
- 
-    private static readonly byte[] X25519_OID = new byte[] { 1, 3, 101, 110 };
-    private static readonly string X25519_OID_STRING = "1.3.101.110";
-
-    public static string Base64Encode(byte[] data)
+    public class Pkcs8
     {
-        return Convert.ToBase64String(data);
+        public int Version { get; set; }
+        public AlgorithmIdentifier Algorithm { get; set; }
+        public byte[] PrivateKey { get; set; }
     }
 
-    public static byte[] Base64Decode(string encoded)
+    public class PublicKeyInfo
     {
-        return Convert.FromBase64String(encoded);
+        public byte[] RawContent { get; set; }
+        public AlgorithmIdentifier Algorithm { get; set; }
+        public BitString PublicKey { get; set; }
     }
 
-    private static byte[] MarshalX25519PrivateKey(byte[] key)
+    public class PkixPublicKey
     {
-        var writer = new AsnWriter(AsnEncodingRules.DER);
+        public AlgorithmIdentifier Algorithm { get; set; }
+        public BitString BitString { get; set; }
+    }
 
-        using (writer.PushSequence())
+    public class AlgorithmIdentifier
+    {
+        public string Algorithm { get; set; }
+    }
+
+    public class BitString
+    {
+        public byte[] Bytes { get; set; }
+        public int BitLength { get; set; }
+    }
+
+
+
+    public class CryptoOperations
+    {
+
+        private static readonly byte[] X25519_OID = new byte[] { 1, 3, 101, 110 };
+        private static readonly string X25519_OID_STRING = "1.3.101.110";
+
+        public static string Base64Encode(byte[] data)
         {
-            writer.WriteInteger(2); // Version
+            return Convert.ToBase64String(data);
+        }
 
-            using (writer.PushSequence()) // AlgorithmIdentifier
+        public static byte[] Base64Decode(string encoded)
+        {
+            return Convert.FromBase64String(encoded);
+        }
+        private static byte[] MarshalX25519PrivateKey(byte[] key)
+        {
+            var writer = new AsnWriter(AsnEncodingRules.DER);
+
+            using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(X25519_OID_STRING);
+                writer.WriteInteger(2); // Version
+
+                using (writer.PushSequence()) // AlgorithmIdentifier
+                {
+                    writer.WriteObjectIdentifier(X25519_OID_STRING);
+                }
+
+                writer.WriteOctetString(key);
             }
 
-            writer.WriteOctetString(key);
+            return writer.Encode();
         }
 
-        return writer.Encode();
-    }
-
-    private static byte[] MarshalX25519PublicKey(byte[] key)
-    {
-        var writer = new AsnWriter(AsnEncodingRules.DER);
-
-        using (writer.PushSequence())
+        private static byte[] MarshalX25519PublicKey(byte[] key)
         {
-            using (writer.PushSequence()) // AlgorithmIdentifier
+            var writer = new AsnWriter(AsnEncodingRules.DER);
+
+            using (writer.PushSequence())
             {
-                writer.WriteObjectIdentifier(X25519_OID_STRING);
+                using (writer.PushSequence()) // AlgorithmIdentifier
+                {
+                    writer.WriteObjectIdentifier(X25519_OID_STRING);
+                }
+
+                writer.WriteBitString(key);
             }
 
-            writer.WriteBitString(key);
+            return writer.Encode();
         }
 
-        return writer.Encode();
+        public static byte[] ParseX25519PrivateKey(string key)
+        {
+            try
+            {
+                var decoded = Base64Decode(key);
+                var reader = new AsnReader(decoded, AsnEncodingRules.DER);
+
+                var sequence = reader.ReadSequence();
+
+                var version = sequence.ReadInteger();
+                _ = sequence.ReadSequence(); // Algorithm
+                var privateKey = sequence.ReadOctetString();
+
+                return privateKey;
+            }
+            catch (Exception ex)
+            {
+                throw new CryptographicException("Error parsing X25519 private key", ex);
+            }
+        }
+
+        public static byte[] ParseX25519PublicKey(string key)
+        {
+            try
+            {
+                var decoded = Base64Decode(key);
+                var reader = new AsnReader(decoded, AsnEncodingRules.DER);
+
+                var sequence = reader.ReadSequence();
+                _ = sequence.ReadSequence(); // Algorithm
+                return sequence.ReadBitString(out _);
+            }
+            catch (Exception ex)
+            {
+                throw new CryptographicException("Error parsing X25519 public key", ex);
+            }
+        }
+
+
+        public class Ed25519 : IDisposable
+        {
+            public void GenerateKeyPair(out byte[] publicKey, out byte[] privateKey)
+            {
+                var keyPairGenerator = new Ed25519KeyPairGenerator();
+                keyPairGenerator.Init(new Ed25519KeyGenerationParameters(new SecureRandom()));
+                var keyPair = keyPairGenerator.GenerateKeyPair();
+
+                privateKey = ((Ed25519PrivateKeyParameters)keyPair.Private).GetEncoded();
+                publicKey = ((Ed25519PublicKeyParameters)keyPair.Public).GetEncoded();
+            }
+
+            public void Dispose()
+            {
+                // Cleanup if needed
+            }
+        }
     }
-
-    public static byte[] ParseX25519PrivateKey(string key)
-    {
-        try
-        {
-            var decoded = Base64Decode(key);
-            var reader = new AsnReader(decoded, AsnEncodingRules.DER);
-
-            var sequence = reader.ReadSequence();
-
-            var version = sequence.ReadInteger();
-            _ = sequence.ReadSequence(); // Algorithm
-            var privateKey = sequence.ReadOctetString();
-
-            return privateKey;
-        }
-        catch (Exception ex)
-        {
-            throw new CryptographicException("Error parsing X25519 private key", ex);
-        }
-    }
-
-    public static byte[] ParseX25519PublicKey(string key)
-    {
-        try
-        {
-            var decoded = Base64Decode(key);
-            var reader = new AsnReader(decoded, AsnEncodingRules.DER);
-
-            var sequence = reader.ReadSequence();
-            _ = sequence.ReadSequence(); // Algorithm
-            return sequence.ReadBitString(out _);
-        }
-        catch (Exception ex)
-        {
-            throw new CryptographicException("Error parsing X25519 public key", ex);
-        }
-    }
-    {
-   
-}
-}
