@@ -61,6 +61,29 @@ namespace CryptoUtils
             return Convert.FromBase64String(encoded);
         }
 
+        public static (string publicKey, string privateKey) GenerateEncryptionKeys()
+        {
+            try
+            {
+                var keyPairGenerator = new X25519KeyPairGenerator();
+                keyPairGenerator.Init(new X25519KeyGenerationParameters(new SecureRandom()));
+                var keyPair = keyPairGenerator.GenerateKeyPair();
+
+                var privateKey = ((X25519PrivateKeyParameters)keyPair.Private).GetEncoded();
+                var publicKey = ((X25519PublicKeyParameters)keyPair.Public).GetEncoded();
+
+                var marshaledPrivateKey = MarshalX25519PrivateKey(privateKey);
+                var marshaledPublicKey = MarshalX25519PublicKey(publicKey);
+
+                return (Base64Encode(marshaledPublicKey), Base64Encode(marshaledPrivateKey));
+            }
+            catch (Exception ex)
+            {
+                throw new CryptographicException("Error generating X25519 keys", ex);
+            }
+        }
+
+
         private static byte[] MarshalX25519PrivateKey(byte[] key)
         {
             var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -164,3 +187,4 @@ namespace CryptoUtils
             }
         }
     }
+}
