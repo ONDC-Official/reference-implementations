@@ -247,7 +247,6 @@ public class CryptoOperations
 
             int currentTime = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(currentTime).UtcDateTime;
-            Console.WriteLine(dateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"));
 
             int ttl = 300;
 
@@ -255,11 +254,9 @@ public class CryptoOperations
 
             if (signError != null)
             {
-                Console.WriteLine("Could not compute signature: " + signError.Message);
                 return (authHeader, signError);
             }
 
-            Console.WriteLine("Signature computed successfully: " + signature);
 
             authHeader = string.Format(
                 "Signature keyId=\"{0}|{1}|ed25519\",algorithm=\"ed25519\",created=\"{2}\",expires=\"{3}\",headers=\"(created) (expires) digest\",signature=\"{4}\"",
@@ -300,9 +297,17 @@ public class CryptoOperations
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error during signing process: " + ex.Message);
             return (null, ex);
         }
+    }
+
+    public static byte[] ComputeBlake2bHash(byte[] data)
+    {
+        var digest = new Blake2bDigest(512); // 512-bit hash
+        digest.BlockUpdate(data, 0, data.Length);
+        byte[] result = new byte[digest.GetDigestSize()];
+        digest.DoFinal(result, 0);
+        return result;
     }
 
     private static byte[] ConvertObjectToBytes(object obj)

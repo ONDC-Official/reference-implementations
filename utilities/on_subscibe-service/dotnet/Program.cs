@@ -36,6 +36,7 @@ app.MapControllers();
 app.MapGet("/api/v1/generate-keys", Handlers.GenerateKeysHandler);
 app.MapGet("/ondc-site-verification.html", Handlers.OndcSiteVerificationHandler);
 app.MapPost("/api/v1/on_subscribe", Handlers.OnSubscribeHandler);
+app.MapPost("/api/v1/generate-auth-header", Handlers.GenerateHeaderHandler);
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok("Utility is running"))

@@ -85,11 +85,25 @@ public static class Handlers
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Exception during on_subscribe response: " + ex.Message);
             return Results.Problem($"Error processing subscription: {ex.Message}");
         }
     }
 
+    public static IResult GenerateHeaderHandler(GenerateAuthHeaderRequest request)
+    {
+
+        var (authHeader, error) = CryptoOperations.GenerateAuthorizationHeader(
+                request.Payload,
+                request.SubscriberId,
+                request.UniqueKeyId,
+                request.PrivateKey
+        );
+        if (error != null)
+        {
+            return Results.Problem($"Error generating authorization header: {error.Message}");
+        }
+        return Results.Ok(new{authHeader = authHeader, message = "Remove escape characters before using this header"});
+    }
 }
 
 public class OnSubscribeResponse
@@ -97,4 +111,13 @@ public class OnSubscribeResponse
     public string SubscriberId { get; set; }
     public string Challenge { get; set; }
 }
+
+public class GenerateAuthHeaderRequest
+{
+    public object Payload { get; set; }
+    public string SubscriberId { get; set; }
+    public string UniqueKeyId { get; set; }
+    public string PrivateKey { get; set; }
+}
+
 
