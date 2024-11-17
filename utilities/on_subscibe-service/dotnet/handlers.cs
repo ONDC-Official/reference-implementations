@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using System;
 
 public static class Handlers
 {
@@ -6,8 +7,8 @@ public static class Handlers
     {
         try
         {
-            var (signingPublicKey, signingPrivateKey) = ("key1", "key2");
-            var (encPublicKey, encPrivateKey) = ("key3", "key4");
+            var (signingPublicKey, signingPrivateKey) = CryptoOperations.GenerateSigningKeys();
+            var (encPublicKey, encPrivateKey) = CryptoOperations.GenerateEncryptionKeys();
 
             return Results.Ok(new
             {
