@@ -48,7 +48,6 @@ namespace CryptoUtils
 
     public class CryptoOperations
     {
-
         private static readonly byte[] X25519_OID = new byte[] { 1, 3, 101, 110 };
         private static readonly string X25519_OID_STRING = "1.3.101.110";
 
@@ -61,6 +60,7 @@ namespace CryptoUtils
         {
             return Convert.FromBase64String(encoded);
         }
+
         private static byte[] MarshalX25519PrivateKey(byte[] key)
         {
             var writer = new AsnWriter(AsnEncodingRules.DER);
@@ -132,6 +132,16 @@ namespace CryptoUtils
             catch (Exception ex)
             {
                 throw new CryptographicException("Error parsing X25519 public key", ex);
+            }
+        }
+
+        public static (string publicKey, string privateKey) GenerateSigningKeys()
+        {
+            using (var ed25519 = new Ed25519())
+            {
+                byte[] publicKey, privateKey;
+                ed25519.GenerateKeyPair(out publicKey, out privateKey);
+                return (Base64Encode(publicKey), Base64Encode(privateKey));
             }
         }
 
