@@ -161,6 +161,36 @@ public class CryptoOperations
         }
     }
 
+    public static (string signedData, Exception error) CreateSignedData(string data, string privateKey)
+    {
+        try
+        {
+            // Decode the private key from base64
+            byte[] privateKeyBytes = Convert.FromBase64String(privateKey);
+
+            // Create the signer
+            var signer = new Ed25519Signer();
+            var privateKeyParams = new Ed25519PrivateKeyParameters(privateKeyBytes, 0);
+            signer.Init(true, privateKeyParams);
+
+            // Sign the data
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            signer.BlockUpdate(dataBytes, 0, dataBytes.Length);
+            byte[] signature = signer.GenerateSignature();
+
+            // Convert signature to base64
+            string signatureBase64 = Convert.ToBase64String(signature);
+
+            return (signatureBase64, null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error creating signed data: " + ex.Message);
+            return (null, ex);
+        }
+    }
+
+
     public class Ed25519 : IDisposable
     {
         public void GenerateKeyPair(out byte[] publicKey, out byte[] privateKey)
