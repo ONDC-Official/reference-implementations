@@ -42,9 +42,19 @@ public class BitString
 
 public class CryptoOperations
 {
-
+ 
     private static readonly byte[] X25519_OID = new byte[] { 1, 3, 101, 110 };
     private static readonly string X25519_OID_STRING = "1.3.101.110";
+
+    public static string Base64Encode(byte[] data)
+    {
+        return Convert.ToBase64String(data);
+    }
+
+    public static byte[] Base64Decode(string encoded)
+    {
+        return Convert.FromBase64String(encoded);
+    }
 
     private static byte[] MarshalX25519PrivateKey(byte[] key)
     {
