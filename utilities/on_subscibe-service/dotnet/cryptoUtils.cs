@@ -238,6 +238,80 @@ public class CryptoOperations
             }
         }
     }
+
+    public static (string authHeader, Exception error) GenerateAuthorizationHeader(object payload, string subscriberId, string uniqueKeyId, string privateKey)
+    {
+        string authHeader = string.Empty;
+        try
+        {
+
+            int currentTime = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(currentTime).UtcDateTime;
+            Console.WriteLine(dateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"));
+
+            int ttl = 300;
+
+            var (signature, signError) = SignRequest(privateKey, ConvertObjectToBytes(payload), currentTime, ttl);
+
+            if (signError != null)
+            {
+                Console.WriteLine("Could not compute signature: " + signError.Message);
+                return (authHeader, signError);
+            }
+
+            Console.WriteLine("Signature computed successfully: " + signature);
+
+            authHeader = string.Format(
+                "Signature keyId=\"{0}|{1}|ed25519\",algorithm=\"ed25519\",created=\"{2}\",expires=\"{3}\",headers=\"(created) (expires) digest\",signature=\"{4}\"",
+                subscriberId, uniqueKeyId, currentTime, currentTime + ttl, signature
+            );
+
+            Console.WriteLine("Generated Authorization Header: " + authHeader);
+
+            return (authHeader, null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Exception occurred: " + ex.Message);
+            return (authHeader, ex);
+        }
+    }
+
+    private static (string signature, Exception error) SignRequest(string privateKey, byte[] payload, int currentTime, int ttl)
+    {
+        try
+        {
+            // Correct method call with parentheses and argument
+            byte[] hash = ComputeBlake2bHash(payload);
+            string digest = Convert.ToBase64String(hash);
+
+            string signatureBody = string.Format("(created): {0}\n(expires): {1}\ndigest: BLAKE-512={2}", currentTime, currentTime + ttl, digest);
+
+            byte[] decodedKey = Convert.FromBase64String(privateKey);
+
+            // Sign the data
+            var signer = new Ed25519Signer();
+            var privateKeyParams = new Ed25519PrivateKeyParameters(decodedKey, 0);
+            signer.Init(true, privateKeyParams);
+            signer.BlockUpdate(Encoding.UTF8.GetBytes(signatureBody), 0, signatureBody.Length);
+            byte[] signature = signer.GenerateSignature();
+
+            return (Convert.ToBase64String(signature), null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error during signing process: " + ex.Message);
+            return (null, ex);
+        }
+    }
+
+    private static byte[] ConvertObjectToBytes(object obj)
+    {
+        // Assuming JSON serialization for object conversion
+        var json = System.Text.Json.JsonSerializer.Serialize(obj);
+        return Encoding.UTF8.GetBytes(json);
+    }
+
     public class Ed25519 : IDisposable
     {
         public void GenerateKeyPair(out byte[] publicKey, out byte[] privateKey)
