@@ -190,7 +190,54 @@ public class CryptoOperations
         }
     }
 
+    public static (string decryptedText, Exception error) Decrypt(string privateKey, string publicKey, string cipherText)
+    {
+        try
+        {
+            byte[] decodedPublicKey = ParseX25519PublicKey(publicKey);
+            byte[] decodedPrivateKey = ParseX25519PrivateKey(privateKey);
 
+            var publicKeyParams = new X25519PublicKeyParameters(decodedPublicKey, 0);
+            var privateKeyParams = new X25519PrivateKeyParameters(decodedPrivateKey, 0);
+
+            byte[] secretKey = new byte[32];
+            privateKeyParams.GenerateSecret(publicKeyParams, secretKey, 0);
+
+            byte[] cipherBytes = Base64Decode(cipherText);
+            byte[] plainBytes = AesDecrypt(cipherBytes, secretKey);
+
+            // Find the first occurrence of null character
+            int nullIndex = Array.IndexOf(plainBytes, (byte)0);
+            if (nullIndex != -1)
+            {
+                Array.Resize(ref plainBytes, nullIndex);
+            }
+
+            return (Encoding.UTF8.GetString(plainBytes), null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Decryption failed: {ex.GetType().Name} - {ex.Message}");
+            return (null, ex);
+        }
+    }
+
+    private static byte[] AesDecrypt(byte[] cipherText, byte[] key)
+    {
+        using (var aes = Aes.Create())
+        {
+            aes.Key = key;
+            aes.Mode = CipherMode.ECB;
+            aes.Padding = PaddingMode.PKCS7; // Enable padding
+
+            using (var decryptor = aes.CreateDecryptor())
+            {
+                // Decrypt the cipherText directly
+                byte[] decryptedBytes = decryptor.TransformFinalBlock(cipherText, 0, cipherText.Length);
+                return decryptedBytes; // No need for custom unpadding
+            }
+        }
+    }
     public class Ed25519 : IDisposable
     {
         public void GenerateKeyPair(out byte[] publicKey, out byte[] privateKey)
