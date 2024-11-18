@@ -103,6 +103,34 @@ public static class Handlers
         }
         return Results.Ok(new { authHeader = authHeader, message = "Remove escape characters before using this header" });
     }
+
+    public static IResult VlookupSignatureHandler(SignatureRequest request)
+    {
+        try
+        {
+            // Use the SignRequestForVlookup method from CryptoOperations
+            string signature = CryptoOperations.SignRequestForVlookup(
+                request.PrivateKey,
+                request.SearchParameters.Country,
+                request.SearchParameters.Domain,
+                request.SearchParameters.City,
+                request.SearchParameters.Type,
+                request.SearchParameters.SubscriberId
+            );
+
+            if (string.IsNullOrEmpty(signature))
+            {
+                return Results.Problem("Error signing search parameters.");
+            }
+
+            return Results.Ok(new { signature });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem($"Error processing signature request: {ex.Message}");
+        }
+    }
+
 }
 
 public class OnSubscribeResponse
