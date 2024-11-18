@@ -88,7 +88,6 @@ public static class Handlers
             return Results.Problem($"Error processing subscription: {ex.Message}");
         }
     }
-
     public static IResult GenerateHeaderHandler(GenerateAuthHeaderRequest request)
     {
 
@@ -102,7 +101,7 @@ public static class Handlers
         {
             return Results.Problem($"Error generating authorization header: {error.Message}");
         }
-        return Results.Ok(new{authHeader = authHeader, message = "Remove escape characters before using this header"});
+        return Results.Ok(new { authHeader = authHeader, message = "Remove escape characters before using this header" });
     }
 }
 

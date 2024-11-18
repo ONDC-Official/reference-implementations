@@ -310,6 +310,59 @@ public class CryptoOperations
         return result;
     }
 
+    public static (string signedData, Exception error) CreateSignedData(string data, string privateKey)
+    {
+        try
+        {
+            // Decode the private key from base64
+            byte[] privateKeyBytes = Convert.FromBase64String(privateKey);
+
+            // Create the signer
+            var signer = new Ed25519Signer();
+            var privateKeyParams = new Ed25519PrivateKeyParameters(privateKeyBytes, 0);
+            signer.Init(true, privateKeyParams);
+
+            // Sign the data
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            signer.BlockUpdate(dataBytes, 0, dataBytes.Length);
+            byte[] signature = signer.GenerateSignature();
+
+            // Convert signature to base64
+            string signatureBase64 = Convert.ToBase64String(signature);
+
+            return (signatureBase64, null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error creating signed data: " + ex.Message);
+            return (null, ex);
+        }
+    }
+
+    public static string SignRequestForVlookup(string privateKey, string country, string ondcDomain, string city, string type, string subscriberId)
+    {
+        try
+        {
+            // Create the signature body
+            string signatureBody = $"{country}|{ondcDomain}|{type}|{city}|{subscriberId}";
+
+            var (signedData, error) = CreateSignedData(signatureBody, privateKey);
+
+            if (error != null)
+            {
+                Console.WriteLine("Error creating signed data: " + error.Message);
+                return null;
+            }
+
+            return signedData;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error signing request: " + ex.Message);
+            return null;
+        }
+    }
+    
     private static byte[] ConvertObjectToBytes(object obj)
     {
         // Assuming JSON serialization for object conversion
