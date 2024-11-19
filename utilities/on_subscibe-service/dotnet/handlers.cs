@@ -81,7 +81,7 @@ public static class Handlers
             // Print the decrypted text
             Console.WriteLine("Decrypted text: " + decryptedText);
 
-            return Results.Ok(new { answer1 = decryptedText });
+            return Results.Ok(new { answer = decryptedText });
         }
         catch (Exception ex)
         {
@@ -146,5 +146,21 @@ public class GenerateAuthHeaderRequest
     public string UniqueKeyId { get; set; }
     public string PrivateKey { get; set; }
 }
+
+public class SignatureRequest
+{
+    public string PrivateKey { get; set; }
+    public SearchParameters SearchParameters { get; set; }
+}
+
+public class SearchParameters
+{
+    public string Country { get; set; }
+    public string Domain { get; set; }
+    public string Type { get; set; }
+    public string City { get; set; }
+    public string SubscriberId { get; set; }
+}
+
 
 
