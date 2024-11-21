@@ -24,9 +24,9 @@ public class AppConfig {
         CryptoKeyPair encKeyPair = generateEncDecKey();
 
         Map<String,byte[]> keys = new HashMap<>();
-        keys.put("sign_public_key",signingKeyPair.getPublickKey());
+        keys.put("sign_public_key",signingKeyPair.getPublicKey());
                 keys.put("sign_private_key",signingKeyPair.getPrivateKey());
-                keys.put("enc_public_key", encKeyPair.getPublickKey());
+                keys.put("enc_public_key", encKeyPair.getPublicKey());
                 keys.put("enc_private_key", encKeyPair.getPrivateKey());
         return keys;
     }
