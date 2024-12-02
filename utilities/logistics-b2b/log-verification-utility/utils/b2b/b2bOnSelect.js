@@ -62,7 +62,7 @@ const checkOnSelect = async (data, msgIdSet) => {
 
   try {
     console.log(`Checking quote object in /on_select api`);
-
+if(quote && quote?.breakup){
     quote?.breakup.forEach((breakup, i) => {
       let itemPrice = parseFloat(breakup?.item?.price?.value);
       let available = Number(breakup?.item?.quantity?.available?.count);
@@ -101,11 +101,11 @@ const checkOnSelect = async (data, msgIdSet) => {
         ] = `@ondc/org/item_quantity for item with id ${breakup["@ondc/org/item_id"]} cannot be more than the available count (quantity/avaialble/count) in quote/breakup`;
       }
     });
-
+  }
     items.forEach((item) => {
       let itemId = item?.id;
       let itemQuant = item?.quantity?.selected?.count;
-
+if(quote && quote?.breakup){
       quote?.breakup.forEach((breakup) => {
         const available = parseInt(breakup?.item?.quantity?.available?.count)
 
@@ -134,7 +134,9 @@ const checkOnSelect = async (data, msgIdSet) => {
           }
         }
       });
+    }
     });
+  
     if (!deliveryQuoteItem && ffState === "Serviceable") {
       onSelectObj.deliveryQuoteErr = `Delivery charges should be provided in quote/breakup when fulfillment is 'Serviceable'`;
     }
