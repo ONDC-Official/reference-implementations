@@ -786,11 +786,12 @@ module.exports = {
                         },
                       },
                       if: {
+                        required: ["parent_item_id"],
                         properties: {
                           parent_item_id: {
-                            const: "",
-                          },
-                        },
+                            type: "string"
+                          }
+                        }
                       },
                       then: {
                         properties: {
@@ -987,7 +988,7 @@ module.exports = {
                             code: {
                               type: "string",
                               enum: [
-                                "Disc_Pct",
+                                "Discount_Percent",
                                 "Disc_Amt",
                                 "Freebie",
                                 "BuyXGetY",
