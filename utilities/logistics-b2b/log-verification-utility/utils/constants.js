@@ -14,8 +14,8 @@ module.exports = Object.freeze({
   SUPPORTED_DOMAINS_SORTED_INDEX: {
     logistics: "LOG_SORTED_INDEX",
     b2b: "B2B_SORTED_INDEX",
-    logistics_b2b: "LOG_SORTED_INDEX",
-    b2cExport: 'B2C_EXP_SORTED_INDEX'
+    services: "SRV_SORTED_INDEX",
+    "b2c-exports": 'B2C_EXP_SORTED_INDEX'
   }, // must match mergesort.js
   SERVER_LOG_DEST: "/public/server",
   FULL_ACTION_LIST: [
