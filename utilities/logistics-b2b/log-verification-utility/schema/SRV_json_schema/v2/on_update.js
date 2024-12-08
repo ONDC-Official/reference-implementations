@@ -1,3 +1,5 @@
+const constants = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/onUpdateSchema",
   type: "object",
@@ -111,6 +113,7 @@ module.exports = {
             },
             status: {
               type: "string",
+              enum: constants.SRV_ORDER_STATE
             },
             provider: {
               type: "object",

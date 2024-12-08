@@ -8,6 +8,7 @@ const checkOnSelect = async (data, msgIdSet) => {
   let onSelect = data;
   let error = onSelect.error;
   let citycode = onSelect?.context?.location?.city?.code;
+  const messageId = onSelect?.context?.message_id
   onSelect = onSelect.message.order;
   let quote = onSelect?.quote;
   const items = onSelect.items;
@@ -17,7 +18,7 @@ const checkOnSelect = async (data, msgIdSet) => {
   let deliveryCharge = 0;
   let outOfStock = false;
   dao.setValue("onSlctdItemsArray", items);
-  const selectedItems = dao.getValue("slctdItemsArray");
+  const selectedItems = dao.getValue(`${messageId}-selectedItemsArray`);
 
   if (error && error.code === "40002") outOfStock = true;
   try {
@@ -61,7 +62,7 @@ const checkOnSelect = async (data, msgIdSet) => {
 
   try {
     console.log(`Checking quote object in /on_select api`);
-
+if(quote && quote?.breakup){
     quote?.breakup.forEach((breakup, i) => {
       let itemPrice = parseFloat(breakup?.item?.price?.value);
       let available = Number(breakup?.item?.quantity?.available?.count);
@@ -100,11 +101,11 @@ const checkOnSelect = async (data, msgIdSet) => {
         ] = `@ondc/org/item_quantity for item with id ${breakup["@ondc/org/item_id"]} cannot be more than the available count (quantity/avaialble/count) in quote/breakup`;
       }
     });
-
+  }
     items.forEach((item) => {
       let itemId = item?.id;
       let itemQuant = item?.quantity?.selected?.count;
-
+if(quote && quote?.breakup){
       quote?.breakup.forEach((breakup) => {
         const available = parseInt(breakup?.item?.quantity?.available?.count)
 
@@ -133,7 +134,9 @@ const checkOnSelect = async (data, msgIdSet) => {
           }
         }
       });
+    }
     });
+  
     if (!deliveryQuoteItem && ffState === "Serviceable") {
       onSelectObj.deliveryQuoteErr = `Delivery charges should be provided in quote/breakup when fulfillment is 'Serviceable'`;
     }

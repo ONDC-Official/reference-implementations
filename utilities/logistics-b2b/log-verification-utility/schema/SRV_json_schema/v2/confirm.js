@@ -104,7 +104,7 @@ module.exports = {
             },
             status: {
               type: "string",
-              enum: ["Created"],
+              enum: ["CREATED"],
             },
             provider: {
               $ref: "onSelectSchema#/properties/message/properties/order/properties/provider",
@@ -267,31 +267,19 @@ module.exports = {
                           },
                           required: ["label", "range"],
                         },
-                        customer: {
+                        person: {
                           type: "object",
                           properties: {
-                            person: {
-                              type: "object",
-                              properties: {
-                                name: {
-                                  type: "string",
-                                },
-                              },
-                              required: ["name"],
+                            name: {
+                              type: "string",
                             },
                           },
-                          required: ["person"],
+                          required: ["name"],
                         },
                       },
                       if: { properties: { type: { const: "end" } } },
                       then: {
-                        required: [
-                          "type",
-                          "location",
-                          "contact",
-                          "time",
-                          "customer",
-                        ],
+                        required: ["type", "location", "contact", "time"],
                       },
                       else: { required: ["type"] },
                     },

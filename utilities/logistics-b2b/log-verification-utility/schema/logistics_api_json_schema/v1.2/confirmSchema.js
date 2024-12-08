@@ -1066,6 +1066,7 @@ module.exports = {
                   required: ["id", "weight"],
                 },
               },
+              additionalProperties:false,
               required: ["items", "provider", "order"],
             },
             created_at: {

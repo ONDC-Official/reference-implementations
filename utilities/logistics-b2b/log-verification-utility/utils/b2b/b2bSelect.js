@@ -9,6 +9,7 @@ const checkSelect = async (data, msgIdSet) => {
   let rfq = false;
   if (select?.context?.ttl!=='PT30S') rfq = true;
   let citycode = select?.context?.location?.city?.code;
+  const messageId = select?.context?.message_id
   select = select.message.order;
   let fulfillments = select?.fulfillments;
 
@@ -16,6 +17,7 @@ const checkSelect = async (data, msgIdSet) => {
   let fulfillmentsArr = dao.getValue("fulfillmentsArr");
   let itemsArr = select.items;
   dao.setValue("slctdItemsArray", itemsArr);
+  dao.setValue(`${messageId}-selectedItemsArray`,itemsArr)
 
 
  

@@ -341,7 +341,7 @@ module.exports = {
                             format: "email",
                           },
                         },
-                        required: ["phone", "email"],
+                        required: ["phone"],
                       },
                     },
                     required: ["location", "contact"],

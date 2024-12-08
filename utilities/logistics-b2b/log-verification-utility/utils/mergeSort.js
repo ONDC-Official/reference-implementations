@@ -22,9 +22,6 @@ const constants = require("./constants");
         case "services":
           map = constants.SRV_SORTED_INDEX;
           break;
-        case "logistics_b2b":
-          map = constants.LOG_SORTED_INDEX;
-          break;
         case "b2c-exports":
           map = constants.B2C_EXP_SORTED_INDEX;
           break;
@@ -36,30 +33,43 @@ const constants = require("./constants");
           return acc;
         }
         try {
+          console.log(`Processing file: ${item}`);
+      
           if (item.match(/\.json$/)) {
-            let data = fs.readFileSync(`${directory}/${item}`);
-            data = JSON.parse(data);
+            let data = fs.readFileSync(path.join(directory, item), 'utf8');
+      
+            try {
+              data = JSON.parse(data);
+            } catch (err) {
+              console.error(`Error parsing JSON for file ${item}: ${err.message}`);
+              return acc;
+            }
+      
             const context = data.context;
             if (!context || !context.action) {
-              console.log(
-                `Error in file ${item}: Missing 'context' or 'action' property`
-              );
-              return acc; // Skip this data and continue with the next iteration
+              console.log(`Error in file ${item}: Missing 'context' or 'action'`);
+              return acc;
             }
-            const { action } = data.context;
-  
+      
+            const { action } = context;
+            console.log(`Current action: ${action}`);
+            console.log(`acc before:`, acc);
+      
+            // Ensure action key exists in acc
             if (!acc[action]) {
               acc[action] = [];
             }
-  
+      
             acc[action].push(data);
+            console.log(`acc after:`, acc);
             return acc;
           }
         } catch (error) {
           console.log(`Error in file ${item}`);
           console.trace(error);
         }
-      }, {});
+        return acc; // Ensure acc is always returned
+      }, {}); // Explicitly setting the initial value of acc as an empty object
   
       let oldLogs;
       if(fs.existsSync(destination)){
