@@ -11,7 +11,7 @@ const checkOnStatus = (data, msgIdSet) => {
   
     on_status = on_status.message.order;
     let ffState;
-    let orderState = on_status.state;
+    let orderState = on_status?.status;
     let items = on_status.items;
     let fulfillments = on_status.fulfillments;
     let pickupTime, deliveryTime, RtoPickupTime, RtoDeliveredTime;
@@ -19,7 +19,7 @@ const checkOnStatus = (data, msgIdSet) => {
     let trackingEnabled= false;
   
   
-    if (on_status.state === "Complete" && payments.type === "ON-FULFILLMENT") {
+    if (on_status?.status === "Complete" && payments.type === "ON-FULFILLMENT") {
       if (paymentStatus !== "PAID") {
         onStatusObj.pymntStatusErr = `Payment status should be 'PAID' once the order is complete for payment type 'ON-FULFILLMENT'`;
       }
