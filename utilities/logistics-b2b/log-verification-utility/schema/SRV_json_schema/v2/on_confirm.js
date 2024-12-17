@@ -110,7 +110,7 @@ module.exports = {
             },
             status: {
               type: "string",
-              enum: ["Created", "Accepted", "Cancelled"],
+              enum: ["CREATED", "ACCEPTED", "CANCELLED"],
             },
             provider: {
               type: "object",
