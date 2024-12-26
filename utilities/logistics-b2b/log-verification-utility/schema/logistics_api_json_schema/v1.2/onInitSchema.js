@@ -352,6 +352,7 @@ module.exports = {
             },
             payment: {
               type: "object",
+              additionalProperties: false,
               properties: {
                 type: {
                   type: "string",

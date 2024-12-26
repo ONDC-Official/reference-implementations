@@ -430,6 +430,10 @@ module.exports = {
                         properties: {
                           short_desc: {
                             type: "string",
+                            const: {
+                              $data:
+                              "/confirm/0/message/order/fulfillments/0/start/instructions/short_desc",
+                            },
                           },
                           long_desc: {
                             type: "string",
@@ -437,6 +441,10 @@ module.exports = {
                           code: {
                             type: "string",
                             enum: constants.PCC_CODE,
+                            const: {
+                              $data:
+                              "/confirm/0/message/order/fulfillments/0/start/instructions/code",
+                            },
                           },
                         },
                         required: ["code", "short_desc"],
@@ -620,6 +628,10 @@ module.exports = {
                           code: {
                             type: "string",
                             enum: constants.DCC_CODE,
+                            const: {
+                              $data:
+                              "/confirm/0/message/order/fulfillments/0/start/instructions/code",
+                            },
                           },
                         },
                         required: ["code"],

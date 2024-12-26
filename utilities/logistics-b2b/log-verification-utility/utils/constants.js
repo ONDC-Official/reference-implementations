@@ -207,8 +207,13 @@ module.exports = Object.freeze({
     "Cancelled",
   ],
   FULFILLMENT_EXP_STATE: [
-    "Domestic-Custom-Cleared",
-    "Pickup-Approved"
+    "Custom-cleared-domestic",
+    "Custom-rejected-domestic",
+    "Pickup-approved",
+    "Pickup-rejected",
+    "Reached-destination-country",
+    "Custom-cleared-destination",
+    "Custom-rejected-destination"
   ],
   CURRENCY: ["INR", "AUD", "USD", "SGD"],
   CANCELLATION_TAGS_CODES: [

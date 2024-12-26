@@ -274,12 +274,20 @@ module.exports = {
                               code: {
                                 type: "string",
                                 enum: constants.PCC_CODE,
+                                const: {
+                                  $data:
+                                  "/update/0/message/order/fulfillments/0/start/instructions/code",
+                                },
                               },
                               name: {
                                 type: "string",
                               },
                               short_desc: {
                                 type: "string",
+                                const: {
+                                  $data:
+                                  "/update/0/message/order/fulfillments/0/start/instructions/short_desc",
+                                },
                               },
                               long_desc: {
                                 type: "string",
@@ -334,12 +342,20 @@ module.exports = {
                               code: {
                                 type: "string",
                                 enum: constants.DCC_CODE,
+                                const: {
+                                  $data:
+                                  "/update/0/message/order/fulfillments/0/end/instructions/code",
+                                },
                               },
                               name: {
                                 type: "string",
                               },
                               short_desc: {
                                 type: "string",
+                                const: {
+                                  $data:
+                                  "/update/0/message/order/fulfillments/0/end/instructions/short_desc",
+                                },
                               },
                               long_desc: {
                                 type: "string",
