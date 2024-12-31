@@ -60,10 +60,11 @@ const checkOnCancel = (data, msgIdSet) => {
       (key) => !excludedKeys.includes(key)
     );
 
-    // Check for missing keys in onConfirm
+    // Check for missing keys in onConfirm   
     keys1.forEach((key) => {
       if (!obj2.hasOwnProperty(key)) {
-        onCancelObj[`${path}.${key}`] = `Missing in onCancel: ${key}`;
+        const parentKey = path || "order"; // 'path' keeps track of the hierarchy
+        onCancelObj[`${path}.${key}`] = `Object "${key}" is missing in onCancel under parent "${parentKey}"`;
         return;
       }
       compareObjects(obj1[key], obj2[key], `${path}.${key}`);

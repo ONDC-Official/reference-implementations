@@ -166,11 +166,16 @@ const groceryObj = {
     "RET16-1159": homeObj,
     "Toys and Games": homeObj,
     Stationery: homeObj,
+    "RET16-106E":homeObj,
     "Gift Voucher": {},
   };
   
   const BPCObj = {
     brand: {
+      mandatory: true,
+      value: [],
+    },
+    size: {
       mandatory: true,
       value: [],
     },
@@ -239,6 +244,7 @@ const groceryObj = {
     "RET13-105C": BPCObj,
     "RET13-1062": BPCObj,
     "RET13-1065": BPCObj,
+    "RET13-114F": BPCObj
   };
   
   const AutoPartObj = {
