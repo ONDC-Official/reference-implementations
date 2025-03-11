@@ -345,61 +345,64 @@ module.exports = {
               required: ["name", "address"],
             },
             payments: {
-              type: "object",
-              properties: {
-                collected_by: {
-                  type: "string",
-                },
-                type: {
-                  type: "string",
-                },
-                tags: {
-                  type: "array",
-                  items: [
-                    {
-                      type: "object",
-                      properties: {
-                        descriptor: {
-                          type: "object",
-                          properties: {
-                            code: {
-                              type: "string",
-                              enum: PAYMENT_TERMS,
-                            },
-                          },
-                          required: ["code"],
-                        },
-                        list: {
-                          type: "array",
-                          items: [
-                            {
-                              type: "object",
-                              properties: {
-                                descriptor: {
-                                  type: "object",
-                                  properties: {
-                                    code: {
-                                      type: "string",
-                                      enum: PAYMENT_BPP_TERMS,
-                                    },
-                                  },
-                                  required: ["code"],
-                                },
-                                value: {
-                                  type: "string",
-                                },
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  collected_by: {
+                    type: "string",
+                  },
+                  type: {
+                    type: "string",
+                  },
+                  tags: {
+                    type: "array",
+                    items: [
+                      {
+                        type: "object",
+                        properties: {
+                          descriptor: {
+                            type: "object",
+                            properties: {
+                              code: {
+                                type: "string",
+                                enum: PAYMENT_TERMS,
                               },
-                              required: ["descriptor", "value"],
                             },
-                          ],
+                            required: ["code"],
+                          },
+                          list: {
+                            type: "array",
+                            items: [
+                              {
+                                type: "object",
+                                properties: {
+                                  descriptor: {
+                                    type: "object",
+                                    properties: {
+                                      code: {
+                                        type: "string",
+                                        enum: PAYMENT_BPP_TERMS,
+                                      },
+                                    },
+                                    required: ["code"],
+                                  },
+                                  value: {
+                                    type: "string",
+                                  },
+                                },
+                                required: ["descriptor", "value"],
+                              },
+                            ],
+                          },
                         },
+                        required: ["descriptor", "list"],
                       },
-                      required: ["descriptor", "list"],
-                    },
-                  ],
+                    ],
+                  },
                 },
+                required: ["type"],
               },
-              required: ["type"],
             },
             xinput: {
               type: "object",

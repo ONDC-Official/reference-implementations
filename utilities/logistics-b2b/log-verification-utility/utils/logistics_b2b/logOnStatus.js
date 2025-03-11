@@ -27,6 +27,18 @@ const checkOnStatus = (data, msgIdSet) => {
     }
   }
 
+  const hasInvalidPayment = on_status?.payments?.find(
+    (payment) =>
+      payment?.type === "ON-FULFILLMENT" &&
+      payment?.collected_by === "BPP" &&
+      !payment?.params?.transaction_id
+  );
+
+  if (hasInvalidPayment) {
+    onStatusObj.params_trnsctnIdErr =
+      "Transaction ID is required for payment type 'ON-FULFILLMENT' inside payment params if collector is BPP.";
+  }
+
   let categoryId;
   items.forEach((item) => {
     categoryId = item.category_id;
