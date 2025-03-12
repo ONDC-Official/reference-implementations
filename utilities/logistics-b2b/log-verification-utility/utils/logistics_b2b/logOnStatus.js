@@ -255,36 +255,43 @@ const checkOnStatus = (data, msgIdSet) => {
           });
         }
       } else if (fulfillment.type === "RTO" || fulfillment.type === "Return") {
+        const startStop = fulfillment?.stops?.find(
+          (stop) => stop.type === "start"
+        );
+        const endStops = fulfillment?.stops?.find(
+          (stop) => stop.type === "end"
+        );
+
         if (orderState !== "Cancelled") {
           onStatusObj.ordrStatErr = `Order state should be 'Cancelled' for fulfillment state - ${ffState}`;
         }
-        if (ffState === "RTO-Initiated" && fulfillment.type === "Prepaid") {
-          RtoPickupTime = fulfillment?.start?.time?.timestamp;
-          console.log(RtoPickupTime);
-          if (RtoPickupTime) {
+        if (ffState === "RTO-Initiated") {
+          if (!startStop?.time?.timestamp) {
+            onStatusObj.rtoPickupTimeErr = `RTO Pickup (fulfillments/start/time/timestamp) time is missing for fulfillment state - ${ffState}`;
+          }
+          if (endStops?.time?.timestamp) {
+            onStatusObj.rtoDeliveryTimeErr = `RTO Delivered Timestamp (fulfillments/end/time/timestamp) time is not required in end state because item is not delivered yet for fulfillment state - ${ffState}`;
+          }
+          if (startStop?.time?.timestamp) {
             dao.setValue("RtoPickupTime", RtoPickupTime);
           } else {
             onStatusObj.rtoPickupTimeErr = `RTO Pickup (fulfillments/start/time/timestamp) time is missing for fulfillment state - ${ffState}`;
           }
-          if (_.gt(RtoPickupTime, contextTime)) {
+          if (_.gt(startStop?.time?.timestamp, contextTime)) {
             onStatusObj.rtoPickupErr = `RTO Pickup (fulfillments/start/time/timestamp) time cannot be future dated for fulfillment state - ${ffState}`;
           }
         }
 
         if (ffState === "RTO-Delivered" || ffState === "RTO-Disposed") {
-          RtoDeliveredTime = fulfillment?.end?.time?.timestamp;
+          RtoDeliveredTime = startStop?.time?.timestamp;
+          RtoPickupTime = endStops?.time?.timestamp;
+          if (!RtoPickupTime && ffState === "RTO-Delivered") {
+            onStatusObj.rtoPickupTimeErr = `RTO Pickup timestamp (fulfillments/start/time/timestamp) is missing for fulfillment state - ${ffState}`;
+          }
           if (!RtoDeliveredTime && ffState === "RTO-Delivered")
             onStatusObj.rtoDlvryTimeErr = `RTO Delivery timestamp (fulfillments/end/time/timestamp) is missing for fulfillment state - ${ffState}`;
-          if (
-            fulfillment.start.time.timestamp &&
-            dao.getValue("RtoPickupTime")
-          ) {
-            if (
-              !_.isEqual(
-                fulfillment.start.time.timestamp,
-                dao.getValue("RtoPickupTime")
-              )
-            ) {
+          if (RtoPickupTime && dao.getValue("RtoPickupTime")) {
+            if (!_.isEqual(RtoPickupTime, dao.getValue("RtoPickupTime"))) {
               onStatusObj.rtoPickupErr = `RTO Pickup time (fulfillments/start/time/timestamp) cannot change for fulfillment state - ${ffState}`;
             }
           }
