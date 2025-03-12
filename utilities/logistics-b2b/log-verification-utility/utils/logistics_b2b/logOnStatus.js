@@ -16,6 +16,7 @@ const checkOnStatus = (data, msgIdSet) => {
   let fulfillments = on_status.fulfillments;
   let pickupTime, deliveryTime, RtoPickupTime, RtoDeliveredTime;
   let paymentStatus = on_status?.payments?.status;
+  const quote = on_status?.quote;
   let trackingEnabled = false;
 
   if (on_status?.status === "Complete" && payments.type === "ON-FULFILLMENT") {
@@ -61,6 +62,69 @@ const checkOnStatus = (data, msgIdSet) => {
   } catch (error) {
     console.log(error);
   }
+
+  try {
+    const isRtoFulfillment = fulfillments.find(
+      (fulfillment) => fulfillment.type === "RTO"
+    );
+
+    if (isRtoFulfillment) {
+      const RtoItemId = items?.fulfillment_ids?.find(
+        (item) => item === isRtoFulfillment.id
+      );
+
+      if (!RtoItemId) {
+        onStatusObj.itemIdErr = "RTO Item is missing in the order";
+      }
+
+      const breakupItems = quote?.breakup || [];
+      let RtoQuoteItem = null;
+      let RtoTax = null;
+      let foundDeliveryItem = false;
+      let foundDeliveryTax = false;
+
+      for (const item of breakupItems) {
+        if (item?.item?.id === RtoItemId) {
+          if (item.title === "rto") {
+            RtoQuoteItem = item;
+          }
+          if (item.title === "tax") {
+            RtoTax = item;
+          }
+        }
+
+        if (item?.title === "delivery") {
+          foundDeliveryItem = true;
+        }
+
+        if (item?.title === "tax" && item?.item?.id !== RtoItemId) {
+          foundDeliveryTax = true;
+        }
+      }
+      
+      if (!foundDeliveryItem) {
+        onStatusObj.deliveryItem =
+          "Delivery Quote Item is missing in the breakup array.";
+      }
+
+      if (!foundDeliveryTax) {
+        onStatusObj.deliveryTax =
+          "Delivery Tax is missing in the breakup array.";
+      }
+
+      if (!RtoQuoteItem) {
+        onStatusObj.rtoQuoteItemErr =
+          "RTO Quote Item is missing in the breakup array.";
+      }
+
+      if (!RtoTax) {
+        onStatusObj.rtoTaxErr = "RTO Tax is missing in the breakup array.";
+      }
+    }
+  } catch (error) {
+    console.log("Error processing RTO fulfillment:", error);
+  }
+
   try {
     fulfillments.forEach((fulfillment) => {
       let fulfillmentTags = fulfillment?.tags;
