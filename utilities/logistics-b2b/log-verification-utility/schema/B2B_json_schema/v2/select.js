@@ -57,6 +57,9 @@ module.exports = {
         },
         transaction_id: {
           type: "string",
+          const: { $data: "/select/0/context/transaction_id" },
+          errorMessage:
+            "Transaction ID should be same across the transaction: ${/select/0/context/transaction_id}",
         },
         message_id: {
           type: "string",
@@ -208,7 +211,7 @@ module.exports = {
                               },
                               value: {
                                 type: "string",
-                                "minLength": 1
+                                minLength: 1,
                               },
                             },
                             required: ["descriptor", "value"],
@@ -219,7 +222,7 @@ module.exports = {
                     },
                   },
                 },
-                required: ["id", "location_ids", "quantity", "fulfillment_ids"],
+                required: ["id", "location_ids", "quantity"],
               },
             },
             fulfillments: {
@@ -256,6 +259,14 @@ module.exports = {
                             },
                           },
                           required: ["gps", "area_code"],
+                        },
+                        contact: {
+                          type: "object",
+                          properties: {
+                            phone: {
+                              type: "string",
+                            },
+                          },
                         },
                       },
                       required: ["type", "location"],
@@ -340,7 +351,7 @@ module.exports = {
                               },
                               value: {
                                 type: "string",
-                                "minLength": 1
+                                minLength: 1,
                               },
                             },
                             if: {
@@ -385,7 +396,7 @@ module.exports = {
                 properties: {
                   type: {
                     type: "string",
-                    enum : constants.B2B_PAYMENT_TYPE,
+                    enum: constants.B2B_PAYMENT_TYPE,
                   },
                 },
                 required: ["type"],
@@ -423,7 +434,7 @@ module.exports = {
                         },
                         value: {
                           type: "string",
-                          "minLength": 1
+                          minLength: 1,
                         },
                       },
                       required: ["descriptor", "value"],
@@ -435,7 +446,7 @@ module.exports = {
             },
           },
           additionalProperties: false,
-          required: ["provider", "items", "fulfillments", "payments", "tags"],
+          required: ["provider", "items", "fulfillments", "tags"],
         },
       },
       required: ["order"],

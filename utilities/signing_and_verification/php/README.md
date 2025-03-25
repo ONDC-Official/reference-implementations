@@ -28,10 +28,9 @@ composer install
 ```sh
 SIGNING_PRIV_KEY="your signing private key"
 SIGNING_PUB_KEY="your signing public key"
-COUNTERPARTY_SIGNING_PUB_KEY="the other party's signing public key"
 ENC_PUB_KEY="your encryption/crypto public key"
 ENC_PRIV_KEY="your encryption/crypto private key"
-COUNTERPARTY_PUB_KEY="the other party's encryption/crypto public key"
+COUNTERPARTY_PUB_KEY="the other party's signing public key"
 SUBSCRIBER_ID="your subscriber id"
 UNIQUE_KEY_ID="your ukid"
 AUTH_HEADER="the auth header that is to be verified"
@@ -77,7 +76,7 @@ dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4=
 8. Decrypt Payload
 ```sh
 # ENC_PRIV_KEY, ENC_PUB_KEY should be set
-composer run start -d 'dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4='
+composer run start -- -d 'dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4='
 
 #OUTPUT
 message to encrypt

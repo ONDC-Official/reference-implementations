@@ -75,6 +75,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const: "PT30S",
         },
       },
       required: [
@@ -103,64 +104,13 @@ module.exports = {
             },
             status: {
               type: "string",
-              enum: ["Created"],
+              enum: ["CREATED"],
             },
             provider: {
-              type: "object",
-              properties: {
-                id: {
-                  type: "string",
-                },
-                locations: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id: {
-                        type: "string",
-                      },
-                    },
-                    required: ["id"],
-                  },
-                },
-              },
-              required: ["id", "locations"],
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/provider",
             },
             items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: {
-                    type: "string",
-                  },
-                  parent_item_id: {
-                    type: "string",
-                  },
-                  fulfillment_ids: {
-                    type: "array",
-                    items: {
-                      type: "string",
-                    },
-                  },
-                  quantity: {
-                    type: "object",
-                    properties: {
-                      selected: {
-                        type: "object",
-                        properties: {
-                          count: {
-                            type: "integer",
-                          },
-                        },
-                        required: ["count"],
-                      },
-                    },
-                    required: ["selected"],
-                  },
-                },
-                required: ["id", "fulfillment_ids", "quantity"],
-              },
+              $ref: "onSelectSchema#/properties/message/properties/order/properties/items",
             },
             billing: {
               type: "object",
@@ -317,31 +267,19 @@ module.exports = {
                           },
                           required: ["label", "range"],
                         },
-                        customer: {
+                        person: {
                           type: "object",
                           properties: {
-                            person: {
-                              type: "object",
-                              properties: {
-                                name: {
-                                  type: "string",
-                                },
-                              },
-                              required: ["name"],
+                            name: {
+                              type: "string",
                             },
                           },
-                          required: ["person"],
+                          required: ["name"],
                         },
                       },
                       if: { properties: { type: { const: "end" } } },
                       then: {
-                        required: [
-                          "type",
-                          "location",
-                          "contact",
-                          "time",
-                          "customer",
-                        ],
+                        required: ["type", "location", "contact", "time"],
                       },
                       else: { required: ["type"] },
                     },
@@ -350,6 +288,65 @@ module.exports = {
                 required: ["id", "type", "tracking", "stops"],
               },
             },
+            cancellation_terms: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  fulfillment_state: {
+                    type: "object",
+                    properties: {
+                      descriptor: {
+                        type: "object",
+                        properties: {
+                          code: {
+                            type: "string",
+                          },
+                        },
+                        required: ["code"],
+                      },
+                    },
+                    required: ["descriptor"],
+                  },
+                  cancel_by: {
+                    type: "object",
+                    properties: {
+                      duration: {
+                        type: "string",
+                      },
+                    },
+                    required: ["duration"],
+                  },
+                  cancellation_fee: {
+                    type: "object",
+                    properties: {
+                      amount: {
+                        type: "object",
+                        properties: {
+                          value: {
+                            type: "string",
+                          },
+                        },
+                        required: ["value"],
+                      },
+                      percentage: {
+                        type: "string",
+                      },
+                    },
+                  },
+                  reason_required: {
+                    type: "boolean",
+                  },
+                },
+                required: [
+                  "fulfillment_state",
+                  "cancel_by",
+                  "cancellation_fee",
+                  "reason_required",
+                ],
+              },
+            },
+
             quote: {
               type: "object",
               properties: {
@@ -430,6 +427,7 @@ module.exports = {
               },
               required: ["price", "breakup", "ttl"],
             },
+
             payments: {
               type: "array",
               items: {
@@ -473,7 +471,9 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    const: { $data: "/select/0/message/order/payments/0/type" },
+                    const: {
+                      $data: "/select/0/message/order/payments/0/type",
+                    },
                   },
                   tags: {
                     type: "array",
@@ -523,8 +523,41 @@ module.exports = {
                   "type",
                   "tags",
                 ],
+                allOf: [
+                  {
+                    if: {
+                      properties: {
+                        status: { const: "PAID" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        params: {
+                          required: ["transaction_id"],
+                        },
+                      },
+                    },
+                  },
+                  {
+                    if: {
+                      properties: {
+                        status: { const: "NOT-PAID" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        params: {
+                          not: {
+                            required: ["transaction_id"],
+                          },
+                        },
+                      },
+                    },
+                  },
+                ],
               },
             },
+
             created_at: {
               type: "string",
             },
@@ -563,6 +596,7 @@ module.exports = {
             "items",
             "billing",
             "fulfillments",
+            "cancellation_terms",
             "quote",
             "payments",
             "created_at",
@@ -574,6 +608,5 @@ module.exports = {
       required: ["order"],
     },
   },
-  isFutureDated: true,
   required: ["context", "message"],
 };

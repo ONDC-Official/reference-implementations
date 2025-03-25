@@ -89,7 +89,7 @@ const checkOnStatus = (data, msgIdSet) => {
           }
         }
         if (ffState === "Order-picked-up") {
-          if(!trackingEnabled){
+          if(!trackingEnabled && fulfillment.tracking === true){
             onStatusObj.trackingTagErr=`tracking tag to be provided in fulfillments/tags`
           }
           if (orderState !== "In-progress") {
@@ -150,7 +150,8 @@ const checkOnStatus = (data, msgIdSet) => {
           if (_.gt(deliveryTime, contextTime)) {
             onStatusObj.tmstmpErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be future dated w.r.t context/timestamp for fulfillment state - ${ffState}`;
           }
-          if (_.gte(pickupTime, deliveryTime)) {
+
+          if (_.gte(dao.getValue("pickupTime"), deliveryTime)) {
             onStatusObj.tmstmpErr = `Pickup timestamp (fulfillments/start/time/timestamp) cannot be greater than or equal to  delivery timestamp (fulfillments/end/time/timestamp) for fulfillment state - ${ffState}`;
           }
         }
@@ -204,8 +205,10 @@ const checkOnStatus = (data, msgIdSet) => {
 
         if (ffState === "RTO-Delivered" || ffState === "RTO-Disposed") {
           RtoDeliveredTime = fulfillment?.end?.time?.timestamp;
-          if (!RtoDeliveredTime && ffState === "RTO-Delivered")
-            onStatusObj.rtoDlvryTimeErr = `RTO Delivery timestamp (fulfillments/end/time/timestamp) is missing for fulfillment state - ${ffState}`;
+          console.log(RtoDeliveredTime,"rto delivered");
+          
+          if (!RtoDeliveredTime && (ffState === "RTO-Delivered" ||ffState === "RTO-Disposed"))
+            onStatusObj.rtoDlvryTimeErr = `fulfillments/end/time/timestamp is missing for RTO fulfillment with state - ${ffState}`;
           if (
             fulfillment.start.time.timestamp &&
             dao.getValue("RtoPickupTime")
@@ -220,7 +223,7 @@ const checkOnStatus = (data, msgIdSet) => {
             }
           }
           if (RtoDeliveredTime && _.gt(RtoDeliveredTime, contextTime)) {
-            onStatusObj.rtoDeliveredErr = `RTO Delivery time (fulfillments/end/time/timestamp) cannot be future dated for fulfillment state - ${ffState}`;
+            onStatusObj.rtoDeliveredErr = `RTO Delivery/Disposed time (fulfillments/end/time/timestamp) cannot be future dated for fulfillment state - ${ffState}`;
           }
         }
       }

@@ -11,7 +11,8 @@ const checkSelect = async (data, msgIdSet) => {
   let providersArr = dao.getValue("providersArr");
   let fulfillmentsArr = dao.getValue("fulfillmentsArr");
   let itemsArr = select.items;
-  dao.setValue("slctdItemsArray",itemsArr)
+
+  dao.setValue("slctdItemsArray", itemsArr);
 
   // provider check
   try {
@@ -63,6 +64,24 @@ const checkSelect = async (data, msgIdSet) => {
     console.log(`Comparing item object in /select and /on_search`);
 
     itemsArr?.forEach((item, i) => {
+      let itemTags = item?.tags;
+      let customization = false;
+      console.log("Checking for customization items");
+      if (itemTags) {
+        itemTags.forEach((tag, i) => {
+          let { descriptor, list } = tag;
+          if (descriptor.code === "attribute") {
+            list.forEach((listTag) => {
+              if (
+                listTag.descriptor.code === "type" &&
+                _.toLower(listTag.value) === "customization"
+              )
+                customization = true;
+            });
+          }
+        });
+      }
+
       let itemExists = false;
       onSearchitemsArr?.forEach((element) => {
         if (item.id === element.id) itemExists = true;
@@ -78,9 +97,15 @@ const checkSelect = async (data, msgIdSet) => {
         );
 
         itemObj = itemObj[0];
+        let validityRange;
+        if (!customization) {
+          validityRange = itemObj?.time?.range;
+        }
+
         // dao.setValue("selectedItem", itemObj.id);
-        console.log(itemObj.id);
+
         if (
+          !customization &&
           !_.every(item.fulfillment_ids, (element) =>
             _.includes(itemObj.fulfillment_ids, element)
           )
@@ -91,6 +116,7 @@ const checkSelect = async (data, msgIdSet) => {
           ] = `Fulfillment ids for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
         if (
+          !customization &&
           !_.every(item.location_ids, (element) =>
             _.includes(itemObj.location_ids, element)
           )
@@ -101,17 +127,22 @@ const checkSelect = async (data, msgIdSet) => {
           ] = `Location ids for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
 
-        if (
-            item.parent_item_id!==itemObj.parent_item_id
-          ) {
-            let itemkey = `parentItmIdErr${i}`;
-            selectObj[
-              itemkey
-            ] = `Parent item id ${item.parent_item_id} for item with id '${item.id}' does not match with the catalog provided in /on_search`;
-          }
-  
+        if (customization && item?.parent_item_id !== itemObj?.parent_item_id) {
+          let itemkey = `parentItmIdErr${i}`;
+          selectObj[
+            itemkey
+          ] = `Parent item id ${item?.parent_item_id} for item with id '${item.id}' does not match with the catalog provided in /on_search`;
+        }
+
+        let selectedRange;
         //checking fulfillments
         fulfillments.forEach((fulfillment, i) => {
+          fulfillment?.stops.forEach((stop) => {
+            if (stop?.type === "end") {
+              selectedRange = stop?.time?.range;
+            }
+          });
+
           let bppfulfillment = fulfillmentsArr?.find(
             (element) => element.type === fulfillment.type
           );
@@ -120,7 +151,16 @@ const checkSelect = async (data, msgIdSet) => {
             selectObj[
               itemkey
             ] = `Fulfillment of type '${fulfillment.type}' does not match with the catalog provided in /on_search`;
-          } 
+          }
+
+          //checking selected time range between the validity provided in /on_search
+
+          if (
+            !customization &&
+            !utils.isSelectedRangeWithinValidity(validityRange, selectedRange)
+          ) {
+            selectObj.selectedRangeErr = `Selected range in /fulfillments is not a valid range for item ${item?.id}`;
+          }
         });
       }
     });
@@ -131,4 +171,3 @@ const checkSelect = async (data, msgIdSet) => {
   return selectObj;
 };
 module.exports = checkSelect;
- 

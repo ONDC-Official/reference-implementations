@@ -199,6 +199,8 @@ const timestampCheck = (date) => {
 
 const getVersion = (data, vertical) => {
   if (vertical === "logistics") {
+    if (data?.search && data?.search[0]?.context?.version === "2.0.0")
+      return "v2.0";
     if (data?.search && data?.search[0]?.context?.core_version === "1.1.0")
       return "v1.1";
     else return "v1.2";
@@ -209,6 +211,7 @@ const getVersion = (data, vertical) => {
     else return "v2";
   }
   if (vertical === "services") return "v2";
+  if (vertical === "b2c-exports") return "v2.0.2";
 };
 function compareDates(dateString1, dateString2) {
   const date1 = new Date(dateString1);
@@ -264,9 +267,9 @@ function iso8601DurationToSeconds(duration) {
 }
 
 // Example usages:
-console.log(iso8601DurationToSeconds("P6D")); // 518400 seconds (6 days)
-console.log(iso8601DurationToSeconds("PT30S")); // 30 seconds
-console.log(iso8601DurationToSeconds("PT2H30M")); // 9000 seconds (2 hours 30 minutes)
+// console.log(iso8601DurationToSeconds("P6D")); // 518400 seconds (6 days)
+// console.log(iso8601DurationToSeconds("PT30S")); // 30 seconds
+// console.log(iso8601DurationToSeconds("PT2H30M")); // 9000 seconds (2 hours 30 minutes)
 
 const hasTwoOrLessDecimalPlaces = (inputString) => {
   const parts = inputString.split(".");
@@ -393,22 +396,25 @@ function findDifferencesInArrays(array1, array2) {
 
   // Iterate over each item in the array1 and  check for difference in array 2
   for (let i = 0; i < array1?.length; i++) {
-    for(let j= 0; j< array2.length; j++){
-    const item1 = array1[i];
-    const item2 = array2[j];
-    if (item1.id === item2.id) {
-      if (!_.isEqual(item1, item2)) {
-        const differingAttributes = findDifferentAttributes(item1, item2);
-        differences.push({ index: item1?.id, attributes: differingAttributes });
+    for (let j = 0; j < array2.length; j++) {
+      const item1 = array1[i];
+      const item2 = array2[j];
+      if (item1.id === item2.id) {
+        if (!_.isEqual(item1, item2)) {
+          const differingAttributes = findDifferentAttributes(item1, item2);
+          differences.push({
+            index: item1?.id,
+            attributes: differingAttributes,
+          });
+        }
       }
     }
-  }
     // Check if the properties are equal using lodash's _.isEqual
   }
 
   return differences;
 }
-const findRequiredTags=(list,mandatory)=>{
+const findRequiredTags = (list, mandatory) => {
   let missingTags = [];
 
   for (let id of mandatory) {
@@ -417,7 +423,7 @@ const findRequiredTags=(list,mandatory)=>{
     }
   }
   return missingTags;
-}
+};
 const findMissingTags = (list, code, mandatoryAttr) => {
   const encounteredAttr = [];
   list.map(({ descriptor, value }) => {
@@ -429,9 +435,135 @@ const findMissingTags = (list, code, mandatoryAttr) => {
   );
   return missingAttr;
 };
+
+const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => { 
+  console.log(`Checking mandatory attributes for ${categoryName}`);
+  items.forEach((item, index) => {
+    console.log("Item in items", item.tags)
+    let attributeTag = null;
+    let originTag = null;
+    for (const tag of item.tags) {
+      originTag = tag.descriptor.code === "origin" ? tag : originTag;
+      attributeTag = tag.descriptor.code === "attribute" ? tag : attributeTag;
+    }
+
+    if (!originTag) {
+      console.log(
+        `Origin tag fields are missing for ${categoryName} item[${index}]`
+      );
+      const key = `missingOriginTag[${i}][${index}]`;
+      errorObj[
+        key
+      ] = `Origin tag fields are missing for ${categoryName} item[${index}]`;
+    }
+
+    if (!attributeTag && categoryName !== "Grocery") {
+      console.log(
+        `Attribute tag fields are missing for ${categoryName} item[${index}]`
+      );
+      const key = `missingAttributeTag[${i}][${index}]`;
+      errorObj[
+        key
+      ] = `Attribute tag fields are missing for ${categoryName} item[${index}]`;
+      return;
+    }
+    if (attributeTag) {
+      const tags = attributeTag.list;
+      let ctgrID = item.category_ids;
+      ctgrID = ctgrID[0];
+      if (categoryJSON.hasOwnProperty(ctgrID)) {
+        console.log(
+          `Checking for item tags for ${categoryName} item[${index}]`
+        );
+        const mandatoryTags = categoryJSON[ctgrID];
+        for (const tagName in mandatoryTags) {
+          if (mandatoryTags.hasOwnProperty(tagName)) {
+            const tagInfo = mandatoryTags[tagName];
+            const isTagMandatory = tagInfo.mandatory;
+            if (isTagMandatory) {
+              let tagValue = null;
+              let originalTag = null;
+              const tagFound = tags.some((tag) => {
+                const res =
+                  tag.descriptor.code.toLowerCase() === tagName.toLowerCase();
+                if (res) {
+                  tagValue = tag.value.toLowerCase();
+                  originalTag = tag.value;
+                }
+
+                return res;
+              });
+
+              if (!tagFound) {
+                console.log(
+                  `Mandatory tag field [${tagName.toLowerCase()}] missing for ${categoryName} item[${index}]`
+                );
+                const key = `missingTagsItem[${i}][${index}] : ${tagName}`;
+                errorObj[
+                  key
+                ] = `Mandatory tag field [${tagName.toLowerCase()}] missing for ${categoryName} item[${index}]`;
+              } else {
+                if (tagInfo.value.length > 0) {
+                  let isValidValue = false;
+                  let regexPattern = "";
+
+                  if (Array.isArray(tagInfo.value)) {
+                    isValidValue =
+                      tagInfo.value.includes(originalTag) ||
+                      tagInfo.value.includes(tagValue);
+                  } else if (
+                    typeof tagInfo.value === "string" &&
+                    tagInfo.value.startsWith("/") &&
+                    tagInfo.value.endsWith("/")
+                  ) {
+                    regexPattern = tagInfo.value.slice(1, -1);
+                    const regex = new RegExp(regexPattern);
+                    isValidValue =
+                      regex.test(originalTag) || regex.test(tagValue);
+                  }
+
+                  if (!isValidValue) {
+                    console.log(
+                      `The item value can only be one of the possible values or match the regex pattern.`
+                    );
+                    const key = `InvldValueforItem[${i}][${index}] : ${tagName.toLowerCase()}`;
+                    errorObj[
+                      key
+                    ] = `Invalid item value: [${originalTag}]. It must be one of the allowed values or match the regex pattern [${regexPattern}].`;
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {   
+        const key = `invalidCategoryId${ctgrID}`;
+        errorObj[key] = `Invalid category_id (${ctgrID}) for ${categoryName}`;
+      }
+    }
+  });
+
+  return errorObj;
+};
+
+function isSelectedRangeWithinValidity(validityRange, selectedRange) {
+  const validityStart = new Date(validityRange.start);
+  const validityEnd = new Date(validityRange.end);
+  const selectedStart = new Date(selectedRange.start);
+  const selectedEnd = new Date(selectedRange.end);
+
+  // Check if the selected range is within the validity range
+  if (selectedStart >= validityStart && selectedEnd <= validityEnd) {
+    return true; // Selected range is within the validity range
+  } else {
+    return false; // Selected range is outside the validity range
+  }
+}
+
 module.exports = {
   uuidCheck,
   timestampCheck,
+  checkMandatoryTags,
   rootPath,
   retailAPI,
   retailFulfillmentState,
@@ -459,4 +591,5 @@ module.exports = {
   fnb_categories_id,
   findRequiredTags,
   findMissingTags,
+  isSelectedRangeWithinValidity,
 };

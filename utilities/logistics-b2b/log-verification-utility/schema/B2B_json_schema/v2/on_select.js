@@ -63,18 +63,16 @@ module.exports = {
         },
         message_id: {
           type: "string",
-          allOf: [
+          anyOf: [
             {
               const: { $data: "/select/0/context/message_id" },
               errorMessage:
                 "Message ID for on_action API should be same as action API: ${/select/0/context/message_id}",
             },
             {
-              not: {
-                const: { $data: "1/transaction_id" },
-              },
+              const: { $data: "/select/1/context/message_id" },
               errorMessage:
-                "Message ID should not be equal to transaction_id: ${1/transaction_id}",
+                "Message ID for on_action API should be same as action API: ${/select/1/context/message_id}",
             },
           ],
         },
@@ -476,7 +474,7 @@ module.exports = {
                   },
                   collected_by: {
                     type: "string",
-                    enum: ["BAP", "BPP"],
+                    enum: constants.PAYMENT_COLLECTEDBY,
                   },
                 },
                 required: ["type", "collected_by"],

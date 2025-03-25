@@ -88,6 +88,7 @@ module.exports = {
           properties: {
             id: {
               type: "string",
+              pattern: "^[a-zA-Z0-9-_]{1,32}$",
               allOf: [
                 {
                   not: {
@@ -188,7 +189,13 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: ["id", "category_id", "descriptor","time", "fulfillment_id"],
+                required: [
+                  "id",
+                  "category_id",
+                  "descriptor",
+                  "time",
+                  "fulfillment_id",
+                ],
                 // anyOf: [
                 //   {
                 //     allOf: [
@@ -299,7 +306,7 @@ module.exports = {
             },
             fulfillments: {
               type: "array",
-              minItems:1,
+              minItems: 1,
               items: {
                 type: "object",
                 properties: {
@@ -326,9 +333,15 @@ module.exports = {
                         },
                         required: ["name"],
                       },
-                      duration: {
-                        type: "string",
-                        format: "duration",
+                      time: {
+                        type: "object",
+                        properties: {
+                          duration: {
+                            type: "string",
+                            format: "duration",
+                          },
+                        },
+                        required: ["duration"],
                       },
                       location: {
                         type: "object",
@@ -443,7 +456,7 @@ module.exports = {
                         ],
                       },
                     },
-                    required: ["person", "location", "contact"],
+                    required: ["person", "location", "time", "contact"],
                   },
                   end: {
                     type: "object",
@@ -530,9 +543,13 @@ module.exports = {
                         properties: {
                           short_desc: {
                             type: "string",
-                            not: { const: { $data: "3/start/instructions/short_desc" } },
-                                errorMessage:
-                                  "PCC should not be same as DCC ${3/start/instructions/short_desc}",
+                            not: {
+                              const: {
+                                $data: "3/start/instructions/short_desc",
+                              },
+                            },
+                            errorMessage:
+                              "PCC should not be same as DCC ${3/start/instructions/short_desc}",
                           },
                           long_desc: {
                             type: "string",
@@ -718,14 +735,14 @@ module.exports = {
                   const: {
                     $data: "/init/0/message/order/billing/created_at",
                   },
-                  errorMessage: "mismatches in /billing in /init and /confirm",
+                  errorMessage: "mismatches in /billing from /init",
                 },
                 updated_at: {
                   type: "string",
                   const: {
                     $data: "/init/0/message/order/billing/updated_at",
                   },
-                  errorMessage: "mismatches in /billing in /init and /confirm",
+                  errorMessage: "mismatches in /billing from /init",
                 },
               },
               additionalProperties: false,
@@ -774,6 +791,7 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
+                        enum: constants.SETTLEMENT_COUNTERPARTY,
                       },
                       settlement_type: {
                         type: "string",
@@ -970,13 +988,22 @@ module.exports = {
                   properties: {
                     id: {
                       type: "string",
+                      allOf: [
+                        {
+                          not: {
+                            const: { $data: "4/order/id" },
+                          },
+                          errorMessage:
+                            "Is linked retail order Id same as logistics order Id?",
+                        },
+                      ],
                     },
                     weight: {
                       type: "object",
                       properties: {
                         unit: {
                           type: "string",
-                          enum: constants.UNITS_WEIGHT,
+                          enum: constants.DEAD_wEIGHT,
                         },
                         value: {
                           type: "number",
@@ -1039,6 +1066,7 @@ module.exports = {
                   required: ["id", "weight"],
                 },
               },
+              additionalProperties:false,
               required: ["items", "provider", "order"],
             },
             created_at: {

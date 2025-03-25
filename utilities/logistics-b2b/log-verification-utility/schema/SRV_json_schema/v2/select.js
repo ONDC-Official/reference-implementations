@@ -40,7 +40,7 @@ module.exports = {
         },
         version: {
           type: "string",
-          const: "2.0.0"
+          const: "2.0.0",
         },
         bap_id: {
           type: "string",
@@ -75,7 +75,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
-          const: "PT30S"
+          const: "PT30S",
         },
       },
       required: [
@@ -137,6 +137,12 @@ module.exports = {
                       type: "string",
                     },
                   },
+                  category_ids: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                  },
                   quantity: {
                     type: "object",
                     properties: {
@@ -152,8 +158,64 @@ module.exports = {
                     },
                     required: ["selected"],
                   },
+                  tags: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        descriptor: {
+                          type: "object",
+                          properties: {
+                            code: {
+                              type: "string",
+                              enum: ["attribute"],
+                            },
+                          },
+                          required: ["code"],
+                        },
+                        list: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              descriptor: {
+                                type: "object",
+                                properties: {
+                                  code: {
+                                    type: "string",
+                                  },
+                                },
+                                required: ["code"],
+                              },
+                              value: {
+                                type: "string",
+                              },
+                            },
+                            required: ["descriptor", "value"],
+                          },
+                        },
+                      },
+                      required: ["descriptor", "list"],
+                    },
+                  },
                 },
-                required: ["id", "location_ids"],
+                if: {
+                  not: {
+                    required: ["parent_item_id"],
+                  },
+                },
+                then: {
+                  required: ["id", "quantity", "location_ids"],
+                },
+                else: {
+                  required: [
+                    "id",
+                    "parent_item_id",
+                    "quantity",
+                    "category_ids",
+                    "tags",
+                  ],
+                },
               },
             },
             fulfillments: {
@@ -186,7 +248,7 @@ module.exports = {
                           properties: {
                             label: {
                               type: "string",
-                              const: "selected"
+                              const: "selected",
                             },
                             range: {
                               type: "object",
@@ -207,7 +269,7 @@ module.exports = {
                           required: ["label", "range"],
                         },
                       },
-                      required: ["type", "location","time"],
+                      required: ["type", "location", "time"],
                     },
                   },
                 },
@@ -221,14 +283,14 @@ module.exports = {
                 properties: {
                   type: {
                     type: "string",
-                    enum: constants.SRV_PAYMENT_TYPE
+                    enum: constants.SRV_PAYMENT_TYPE,
                   },
                 },
                 required: ["type"],
               },
             },
           },
-          required: ["provider", "items", "fulfillments", "payments"],
+          required: ["provider", "items", "fulfillments"],
         },
       },
       required: ["order"],

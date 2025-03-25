@@ -139,7 +139,7 @@ module.exports = {
                   },
                 },
               },
-              required: ["type", "stops"],
+              required: ["type"],
             },
             payment: {
               type: "object",
@@ -256,7 +256,7 @@ module.exports = {
             },
           },
           additionalProperties:false,
-          required: ["fulfillment", "payment", "tags"],
+          required: ["tags"],
         },
       },
       required: ["intent"],

@@ -1,3 +1,5 @@
+const constants = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/onUpdateSchema",
   type: "object",
@@ -81,6 +83,7 @@ module.exports = {
         },
         ttl: {
           type: "string",
+          const:"PT30S"
         },
       },
       required: [
@@ -110,6 +113,7 @@ module.exports = {
             },
             status: {
               type: "string",
+              enum: constants.SRV_ORDER_STATE
             },
             provider: {
               type: "object",
@@ -130,7 +134,7 @@ module.exports = {
                   },
                 },
               },
-              required: ["id", "locations"],
+              required: ["id"],
             },
             items: {
               type: "array",
@@ -160,7 +164,6 @@ module.exports = {
                   "id",
                   "parent_item_id",
                   "fulfillment_ids",
-                  "location_ids",
                 ],
               },
             },
@@ -197,9 +200,6 @@ module.exports = {
                     required: [
                       "amount",
                       "currency",
-                      "transaction_id",
-                      "bank_account_number",
-                      "virtual_payment_address",
                     ],
                   },
                   status: {
@@ -313,8 +313,41 @@ module.exports = {
                             gps: {
                               type: "string",
                             },
+                            address: {
+                              type: "string",
+                            },
+                            city: {
+                              type: "object",
+                              properties: {
+                                name: {
+                                  type: "string",
+                                },
+                              },
+                              required: ["name"],
+                            },
+                            country: {
+                              type: "object",
+                              properties: {
+                                code: {
+                                  type: "string",
+                                },
+                              },
+                              required: ["code"],
+                            },
+                            area_code: {
+                              type: "string",
+                            },
+                            state: {
+                              type: "object",
+                              properties: {
+                                name: {
+                                  type: "string",
+                                },
+                              },
+                              required: ["name"],
+                            },
                           },
-                          required: ["id", "descriptor", "gps"],
+                          required: ["gps"],
                         },
                         time: {
                           type: "object",
@@ -490,6 +523,7 @@ module.exports = {
                   type: "string",
                 },
               },
+              isQuoteMatching: true,
               required: ["price", "breakup", "ttl"],
             },
           },

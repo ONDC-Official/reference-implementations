@@ -123,6 +123,7 @@ module.exports = {
                 },
                 required: ["id", "type"],
               },
+              minItems: 1,
             },
             payments: {
               type: "array",
@@ -134,15 +135,16 @@ module.exports = {
                   },
                   type: {
                     type: "string",
-                    enum: constants.B2B_PAYMENT_TYPE
+                    enum: constants.B2B_PAYMENT_TYPE,
                   },
-                  collected_by:{
+                  collected_by: {
                     type: "string",
-                    enum: ["BAP","BPP"]
-                  }
+                    enum: ["BAP", "BPP"],
+                  },
                 },
                 required: ["id", "type"],
               },
+              minItems: 1,
             },
             descriptor: {
               type: "object",
@@ -167,6 +169,7 @@ module.exports = {
                     },
                     required: ["url"],
                   },
+                  minItems: 1,
                 },
               },
               required: ["name", "short_desc", "long_desc", "images"],
@@ -217,6 +220,7 @@ module.exports = {
                           },
                           required: ["url"],
                         },
+                        minItems: 1,
                       },
                     },
                     required: ["name", "code"],
@@ -272,7 +276,7 @@ module.exports = {
                           properties: {
                             code: {
                               type: "string",
-                              enum: constants.VALIDCOUNTRYCODES
+                              enum: constants.VALIDCOUNTRYCODES,
                             },
                           },
                           required: ["code"],
@@ -292,6 +296,7 @@ module.exports = {
                         "area_code",
                       ],
                     },
+                    minItems: 1,
                   },
                   creds: {
                     type: "array",
@@ -389,6 +394,7 @@ module.exports = {
                                 },
                                 required: ["url"],
                               },
+                              minItems: 1,
                             },
                             media: {
                               type: "array",
@@ -529,7 +535,7 @@ module.exports = {
                                   type: "integer",
                                 },
                               },
-                              required: ["measure", "count"],
+                              required: ["count"],
                             },
                             maximum: {
                               type: "object",
@@ -559,7 +565,7 @@ module.exports = {
                                   type: "integer",
                                 },
                               },
-                              required: ["measure", "count"],
+                              required: ["count"],
                             },
                             minimum: {
                               type: "object",
@@ -589,7 +595,7 @@ module.exports = {
                                   type: "integer",
                                 },
                               },
-                              required: ["measure", "count"],
+                              required: ["count"],
                             },
                           },
                           required: ["unitized", "available"],
@@ -599,24 +605,28 @@ module.exports = {
                           items: {
                             type: "string",
                           },
+                          minItems: 1,
                         },
                         fulfillment_ids: {
                           type: "array",
                           items: {
                             type: "string",
                           },
+                          minItems: 1,
                         },
                         location_ids: {
                           type: "array",
                           items: {
                             type: "string",
                           },
+                          minItems: 1,
                         },
                         payment_ids: {
                           type: "array",
                           items: {
                             type: "string",
                           },
+                          minItems: 1,
                         },
                         add_ons: {
                           type: "array",
@@ -698,7 +708,7 @@ module.exports = {
                                     properties: {
                                       code: {
                                         type: "string",
-                                        enum: constants.FULFILLMENT_STATE
+                                        enum: constants.FULFILLMENT_STATE,
                                       },
                                     },
                                     required: ["code"],
@@ -721,7 +731,7 @@ module.exports = {
                                     properties: {
                                       currency: {
                                         type: "string",
-                                        enum: constants.CURRENCY
+                                        enum: constants.CURRENCY,
                                       },
                                       value: {
                                         type: "string",
@@ -740,10 +750,13 @@ module.exports = {
                               "cancellation_fee",
                             ],
                           },
+                          minItems: 1,
                         },
+
                         return_terms: {
                           type: "array",
                           items: {
+                            type: "object",
                             properties: {
                               fulfillment_state: {
                                 type: "object",
@@ -753,7 +766,7 @@ module.exports = {
                                     properties: {
                                       code: {
                                         type: "string",
-                                        enum: constants.FULFILLMENT_STATE
+                                        enum: constants.FULFILLMENT_STATE,
                                       },
                                     },
                                     required: ["code"],
@@ -789,14 +802,30 @@ module.exports = {
                                 type: "string",
                               },
                             },
-                            required: [
-                              "fulfillment_state",
-                              "return_eligible",
-                              "return_time",
-                              "return_location",
-                              "fulfillment_managed_by",
-                            ],
+                            if: {
+                              properties: {
+                                return_eligible: { const: false },
+                              },
+                            },
+                            then: {
+                              required: [
+                                "fulfillment_state",
+                                "return_eligible",
+                                "return_time",
+                                "fulfillment_managed_by",
+                              ],
+                            },
+                            else: {
+                              required: [
+                                "fulfillment_state",
+                                "return_eligible",
+                                "return_time",
+                                "return_location",
+                                "fulfillment_managed_by",
+                              ],
+                            },
                           },
+                          minItems: 1,
                         },
 
                         replacement_terms: {
@@ -810,6 +839,7 @@ module.exports = {
                             },
                             required: ["replace_within"],
                           },
+                          minItems: 1,
                         },
                         time: {
                           type: "object",
@@ -865,7 +895,6 @@ module.exports = {
                                     },
                                     value: {
                                       type: "string",
-                                      minLength: 1,
                                     },
                                   },
                                   required: ["descriptor", "value"],
@@ -894,6 +923,7 @@ module.exports = {
                         "recommended",
                       ],
                     },
+                    minItems: 1,
                   },
                   offers: {
                     type: "array",
@@ -941,15 +971,17 @@ module.exports = {
                         },
                         location_ids: {
                           type: "array",
-                          items: {},
+                          items: { type: "string" },
                         },
                         category_ids: {
                           type: "array",
-                          items: {},
+                          items: {
+                            type: "string",
+                          },
                         },
                         item_ids: {
                           type: "array",
-                          items: {},
+                          items: { type: "string" },
                         },
                         time: {
                           type: "object",
@@ -1003,6 +1035,7 @@ module.exports = {
                       },
                       required: ["contact"],
                     },
+                    minItems: 1,
                   },
                   payments: {
                     type: "array",
@@ -1014,15 +1047,16 @@ module.exports = {
                         },
                         type: {
                           type: "string",
-                          enum: constants.B2B_PAYMENT_TYPE
+                          enum: constants.B2B_PAYMENT_TYPE,
                         },
-                        collected_by:{
+                        collected_by: {
                           type: "string",
-                          enum: ["BAP","BPP"]
-                        }
+                          enum: ["BAP", "BPP"],
+                        },
                       },
                       required: ["id", "type"],
                     },
+                    minItems: 1,
                   },
                 },
                 required: [
@@ -1035,6 +1069,7 @@ module.exports = {
                   "fulfillments",
                 ],
               },
+              minItems: 1,
             },
           },
           additionalProperties: false,

@@ -341,7 +341,7 @@ module.exports = {
                             format: "email",
                           },
                         },
-                        required: ["phone", "email"],
+                        required: ["phone"],
                       },
                     },
                     required: ["location", "contact"],
@@ -352,6 +352,7 @@ module.exports = {
             },
             payment: {
               type: "object",
+              additionalProperties: false,
               properties: {
                 type: {
                   type: "string",
@@ -371,6 +372,7 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
+                        enum: constants.SETTLEMENT_COUNTERPARTY
                       },
                       settlement_type: {
                         type: "string",

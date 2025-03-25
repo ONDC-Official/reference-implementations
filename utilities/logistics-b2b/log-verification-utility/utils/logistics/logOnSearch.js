@@ -8,11 +8,57 @@ const checkOnSearch = async (data, msgIdSet) => {
   const onSrchObj = {};
   let onSearch = data;
   let core_version = onSearch.context.core_version;
-  let timestamp = onSearch.context.timestamp;
+  const timestamp = onSearch.context.timestamp;
+  const contextTimestamp = new Date(timestamp || "");
   let search = dao.getValue("searchObj");
   let validFulfillmentIDs = new Set();
   onSearch = onSearch.message.catalog;
- let avgPickupTime;
+  let avgPickupTime;
+  /**
+   * Extracts the number of days from a duration string in ISO 8601 format.
+   *
+   * @param {string} duration - The duration string to parse (e.g. "P30D").
+   * @returns {number} The number of days extracted from the duration string, or 0 if the string is invalid.
+   */
+  const getDurationInDays = (duration) => {
+    // Regular expression to match the duration string in ISO 8601 format (PXD)
+    const match = duration.match(/^P(\d+)D$/);
+
+    // If the string matches the pattern, return the extracted number of days as an integer
+    return match ? parseInt(match[1], 10) : 0;
+  };
+
+  const formatDate = (date) => {
+    return date.toISOString().split("T")[0];
+  };
+
+  /**
+   * Validates the timestamp of an item in the on_search response.
+   *
+   * @param {object} item - The item to validate.
+   * @returns {boolean} Whether the timestamp is valid.
+   *
+   * The timestamp is considered valid if the duration is not provided or is invalid.
+   * If the duration is valid, the timestamp is considered valid if it is equal to the
+   * current timestamp plus the duration.
+   */
+  const validateTimestamp = (item) => {
+    const duration = item.time?.duration || "";
+    const expectedDays = getDurationInDays(duration);
+
+    if (expectedDays === 0) return true; // No duration or invalid format
+
+    const currentTimestamp = new Date(contextTimestamp);
+    currentTimestamp.setUTCDate(contextTimestamp.getUTCDate() + expectedDays);
+    const expectedDate = formatDate(currentTimestamp);
+
+    const itemTimestamp = new Date(item.time?.timestamp || "");
+    const itemDate = formatDate(itemTimestamp);
+    console.log(itemDate, expectedDate);
+
+    return itemDate === expectedDate;
+  };
+
   try {
     console.log(
       `Checking TAT for category or item in ${constants.LOG_ONSEARCH} api`
@@ -47,7 +93,7 @@ const checkOnSearch = async (data, msgIdSet) => {
           ) {
             onSrchObj.catTAT = `For Next Day Delivery, TAT date should be the next date i.e. ${nextDate}`;
           }
-          provider.items.forEach((item) => {
+          provider.items.forEach((item, i) => {
             const catId = item.category_id;
             const itemTime = item.time;
             const itemTimestamp =
@@ -59,16 +105,28 @@ const checkOnSearch = async (data, msgIdSet) => {
             if (
               (catId == "Same Day Delivery" || catId == "Immediate Delivery") &&
               itemTimestamp &&
-              itemTimestamp != currentDate 
+              itemTimestamp != currentDate
             ) {
               onSrchObj.itemTAT = `For Same Day Delivery/Immediate Delivery, TAT date should be the same date i.e. ${currentDate}`;
             }
             if (
               catId == "Next Day Delivery" &&
               itemTimestamp &&
-              itemTimestamp != nextDate 
+              itemTimestamp != nextDate
             ) {
               onSrchObj.itemTAT = `For Next Day Delivery, TAT date should be the next date i.e. ${nextDate}`;
+            }
+            try {
+              console.log("Validating items timestamp");
+
+              if (!validateTimestamp(item)) {
+                let itemKey = `itemTimestampErr${i}`;
+                onSrchObj[
+                  itemKey
+                ] = `Item timestamp '${item.time.timestamp}' is not as expected for item ${item?.id}, should be relative to context/timestamp`;
+              }
+            } catch (e) {
+              console.log("Error while validating item timestamps", e);
             }
           });
         });
@@ -83,7 +141,35 @@ const checkOnSearch = async (data, msgIdSet) => {
     console.log(
       `Checking forward and backward shipment in ${constants.LOG_ONSEARCH} api`
     );
+    function validateFulfillments(categories, fulfillments) {
+      // Filter all Delivery fulfillments
+      const deliveryFulfillments = fulfillments.filter(
+        (f) => f.type === "Delivery"
+      );
 
+      // Check if there are at least two categories
+      if (categories.length >= 2) {
+        // Ensure there is a Delivery fulfillment for each category
+        if (deliveryFulfillments.length !== categories.length) {
+          onSrchObj.flflmentsErr = `Separate fulfillments should be created for each category as the estimate pickup time could be different`;
+        }
+
+        // Optionally, check that each fulfillment is unique (if needed)
+        const uniqueFulfillments = new Set(
+          deliveryFulfillments.map((f) => f.id)
+        );
+        if (uniqueFulfillments.size !== deliveryFulfillments.length) {
+          onSrchObj.flflmentsErr1 = `Delivery' fulfillments should have unique IDs`;
+        }
+      }
+
+      return;
+    }
+
+    validateFulfillments(
+      onSearch["bpp/providers"][0].categories,
+      onSearch["bpp/providers"][0].fulfillments
+    );
     if (
       onSearch["bpp/fulfillments"] ||
       onSearch["bpp/providers"][0].fulfillments
@@ -106,8 +192,8 @@ const checkOnSearch = async (data, msgIdSet) => {
           fulfillment.type === "Delivery"
         ) {
           hasForwardShipment = true;
-          avgPickupTime= fulfillment?.start?.time?.duration
-          dao.setValue(`${fulfillment?.id}-avgPickupTime`,avgPickupTime)
+          avgPickupTime = fulfillment?.start?.time?.duration;
+          dao.setValue(`${fulfillment?.id}-avgPickupTime`, avgPickupTime);
         } else if (
           fulfillment.type === "RTO" ||
           fulfillment.type === "Reverse QC" ||
