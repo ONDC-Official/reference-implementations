@@ -76,7 +76,7 @@ dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4=
 8. Decrypt Payload
 ```sh
 # ENC_PRIV_KEY, ENC_PUB_KEY should be set
-composer run start -d 'dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4='
+composer run start -- -d 'dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4='
 
 #OUTPUT
 message to encrypt
