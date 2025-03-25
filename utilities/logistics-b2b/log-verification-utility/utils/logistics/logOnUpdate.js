@@ -5,6 +5,8 @@ const utils = require("../utils.js");
 
 const checkOnUpdate = (data, msgIdSet) => {
   let onUpdtObj = {};
+  let item_descriptor_code = dao.getValue("item_descriptor_code");
+  const shipping_label = dao.getValue("shipping_label");
   let on_update = data;
   let contextTimestamp = on_update?.context?.timestamp;
   let rts = dao.getValue("rts");
@@ -21,7 +23,7 @@ const checkOnUpdate = (data, msgIdSet) => {
 
   if (locationsPresent) {
     if (!_.isEqual(on_update?.provider?.locations, locationsPresent)) {
-      onUpdtObj.locationsErr = `order/provider/locations mismatch between /confirm and /on_update`
+      onUpdtObj.locationsErr = `order/provider/locations mismatch between /confirm and /on_update`;
     }
   }
   try {
@@ -29,12 +31,21 @@ const checkOnUpdate = (data, msgIdSet) => {
       `Checking if start and end time range required in /on_update api`
     );
     fulfillments.forEach((fulfillment) => {
-      const ffState = fulfillment?.state?.descriptor?.code
-      let avgPickupTime= fulfillment?.start?.time?.duration;
-      console.log(avgPickupTime,dao.getValue(`${fulfillment?.id}-avgPickupTime`));
-          if(avgPickupTime && dao.getValue(`${fulfillment?.id}-avgPickupTime`) && avgPickupTime!==dao.getValue(`${fulfillment?.id}-avgPickupTime`)){
-            onUpdtObj.avgPckupErr=`Average Pickup Time ${avgPickupTime} (fulfillments/start/time/duration) mismatches from the one provided in /on_search (${dao.getValue(`${fulfillment?.id}-avgPickupTime`)})`
-          }
+      const ffState = fulfillment?.state?.descriptor?.code;
+      let avgPickupTime = fulfillment?.start?.time?.duration;
+      console.log(
+        avgPickupTime,
+        dao.getValue(`${fulfillment?.id}-avgPickupTime`)
+      );
+      if (
+        avgPickupTime &&
+        dao.getValue(`${fulfillment?.id}-avgPickupTime`) &&
+        avgPickupTime !== dao.getValue(`${fulfillment?.id}-avgPickupTime`)
+      ) {
+        onUpdtObj.avgPckupErr = `Average Pickup Time ${avgPickupTime} (fulfillments/start/time/duration) mismatches from the one provided in /on_search (${dao.getValue(
+          `${fulfillment?.id}-avgPickupTime`
+        )})`;
+      }
       if (fulfillment["@ondc/org/awb_no"]) {
         awbNo = true;
       }
@@ -49,16 +60,31 @@ const checkOnUpdate = (data, msgIdSet) => {
       if (rts === "yes" && !fulfillment?.start?.time?.range) {
         onUpdtObj.strtRangeErr = `start/time/range is required in /fulfillments when ready_to_ship = yes in /update`;
       }
-      if (fulfillment?.start?.time?.timestamp || fulfillment?.end?.time?.timestamp) {
+      if (
+        fulfillment?.start?.time?.timestamp ||
+        fulfillment?.end?.time?.timestamp
+      ) {
         onUpdtObj.tmpstmpErr = `start/time/timestamp or end/time/timestamp cannot be provided in /fulfillments when fulfillment state is ${ffState}`;
       }
       if (rts === "yes" && !fulfillment?.end?.time?.range) {
         onUpdtObj.endRangeErr = `end/time/range is required in /fulfillments when ready_to_ship = yes in /update`;
       }
 
-      if (p2h2p && !fulfillment?.start?.instructions?.images) {
-        onUpdtObj.shipLblErr = `Shipping label (/start/instructions/images) is required for P2H2P shipments`;
+      if (
+        fulfillment?.type === "Delivery" &&
+        item_descriptor_code === "P2H2P" &&
+        !shipping_label &&
+        (!fulfillment?.start?.instructions?.images ||
+          (Array.isArray(fulfillment.start.instructions.images) &&
+            (fulfillment.start.instructions.images.length === 0 ||
+              fulfillment.start.instructions.images.includes(""))))
+      ) {
+        onUpdtObj.shipLblErr = `Shipping label (/start/instructions/images) is required for P2H2P shipments.`;
       }
+
+      // if (p2h2p && !fulfillment?.start?.instructions?.images) {
+      //   onUpdtObj.shipLblErr = `Shipping label (/start/instructions/images) is required for P2H2P shipments`;
+      // }
     });
   } catch (error) {
     console.log(`!!Error while checking fulfillments in /on_update api`, error);

@@ -77,6 +77,10 @@ const checkOnCancel = (data, msgIdSet) => {
             }
           }
 
+          if (fulfillment.end.time.timestamp) {
+            onStatusObj.delvryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
+          }
+
           if (
             fulfillment?.start?.time?.timestamp &&
             dao.getValue("pickupTime")
@@ -105,8 +109,6 @@ const checkOnCancel = (data, msgIdSet) => {
             if (!fulTags) {
               onCancelObj.msngflfllmntTags = `fulfillments/tags are required in case of RTO (rto_event, precancel_state)`;
             } else {
-             
-
               fulTags.forEach((tag) => {
                 if (tag.code === "rto_event") {
                   const lists = tag.list;
@@ -187,14 +189,14 @@ const checkOnCancel = (data, msgIdSet) => {
             }
           }
         });
-        const REQUIRED_TAGS = ["rto_event", "precancel_state"]
-        missingTags = utils.findRequiredTags(
-          fulfillmentTagSet,
-          REQUIRED_TAGS
-        );
+        const REQUIRED_TAGS = ["rto_event", "precancel_state"];
+        missingTags = utils.findRequiredTags(fulfillmentTagSet, REQUIRED_TAGS);
 
-        if(missingTags.includes("rto_event") && constants.PRECANCEL_BEFORE_RTO.includes(preCnclState)){
-          missingTags= missingTags.filter(item => item!=='rto_event')
+        if (
+          missingTags.includes("rto_event") &&
+          constants.PRECANCEL_BEFORE_RTO.includes(preCnclState)
+        ) {
+          missingTags = missingTags.filter((item) => item !== "rto_event");
         }
         if (missingTags.length > 0) {
           let itemKey = `missingFlmntTags-${i}-err`;
