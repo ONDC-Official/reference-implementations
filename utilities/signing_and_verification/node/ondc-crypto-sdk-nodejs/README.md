@@ -1,5 +1,12 @@
 A signing and verification utility that is necessary for creation and verification of authentication signature between network participants of ONDC.
 
+
+## NPM Package
+
+You may use this utility which is release as a package on NPM
+
+`https://www.npmjs.com/package/ondc-crypto-sdk-nodejs/v/2.1.1`
+
 ## Signing Authorisation Header
 
 For signing the verification header, you can use the `createAuthorizationHeader` method.
