@@ -29,10 +29,22 @@ const checkOnCancel = (data, msgIdSet) => {
 
   try {
     if (fulfillments?.length > 1) {
+      let rtoFulfillment_id = "";
       console.log(
         `Checking for a valid 'Cancelled' fulfillment state for type 'Delivery' in case of RTO`
       );
       fulfillments.forEach((fulfillment) => {
+        if (fulfillment.type === "RTO") {
+          rtoFulfillment_id = fulfillment?.id;
+          const RtoItemId = items?.find(
+            (item) => item.fulfillment_id === rtoFulfillment_id
+          );
+
+          if (!RtoItemId) {
+            onCancelObj.itemIdErr = "RTO Item is missing in the order";
+          }
+        }
+
         ffState = fulfillment?.state?.descriptor?.code;
         if (
           (fulfillment.type === "Prepaid" || fulfillment.type === "Delivery") &&
