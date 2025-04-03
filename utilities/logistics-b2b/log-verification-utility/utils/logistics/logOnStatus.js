@@ -57,34 +57,37 @@ const checkOnStatus = (data, msgIdSet) => {
 
     if (isRtoFulfillment) {
       const RtoItemId = items?.find(
-        (item) => item.id === isRtoFulfillment.id
+        (item) => item.fulfillment_id === isRtoFulfillment.id
       );
 
       if (!RtoItemId) {
         onStatusObj.itemIdErr = "RTO Item is missing in the order";
       }
 
-      const breakupItems = quote?.breakup || [];
+      const breakupItems = on_status?.quote?.breakup || [];
       let RtoQuoteItem = null;
       let RtoTax = null;
       let foundDeliveryItem = false;
       let foundDeliveryTax = false;
 
       for (const item of breakupItems) {
-        if (item?.item?.id === RtoItemId) {
-          if (item.title === "rto") {
+        if (item["@ondc/org/item_id"] === RtoItemId?.id) {
+          if (item["@ondc/org/title_type"] === "rto") {
             RtoQuoteItem = item;
           }
-          if (item.title === "tax") {
+          if (item["@ondc/org/title_type"] === "tax") {
             RtoTax = item;
           }
         }
 
-        if (item?.title === "delivery") {
+        if (item["@ondc/org/title_type"] === "delivery") {
           foundDeliveryItem = true;
         }
 
-        if (item?.title === "tax" && item?.item?.id !== RtoItemId) {
+        if (
+          item["@ondc/org/title_type"] === "tax" &&
+          item["@ondc/org/item_id"] !== RtoItemId?.id
+        ) {
           foundDeliveryTax = true;
         }
       }
@@ -227,7 +230,7 @@ const checkOnStatus = (data, msgIdSet) => {
             }
           }
 
-          if(fulfillment.end.time.timestamp) {
+          if (fulfillment.end.time.timestamp) {
             onStatusObj.delvryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
           }
 

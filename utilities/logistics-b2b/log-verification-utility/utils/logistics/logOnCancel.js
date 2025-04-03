@@ -18,6 +18,7 @@ const checkOnCancel = (data, msgIdSet) => {
   let items = on_cancel.items;
   let fulfillments = on_cancel.fulfillments;
   let RtoPickupTime;
+  RtoDeliveryTime = "";
   let missingTags = [];
   let rtoID, reasonId, preCnclState;
   const created_at = on_cancel.created_at;
@@ -29,10 +30,23 @@ const checkOnCancel = (data, msgIdSet) => {
 
   try {
     if (fulfillments?.length > 1) {
+      let rtoFulfillment_id = "";
+      let RtoItemId = {};
       console.log(
         `Checking for a valid 'Cancelled' fulfillment state for type 'Delivery' in case of RTO`
       );
       fulfillments.forEach((fulfillment) => {
+        if (fulfillment.type === "RTO") {
+          rtoFulfillment_id = fulfillment?.id;
+          RtoItemId = items?.find(
+            (item) => item.fulfillment_id === rtoFulfillment_id
+          );
+
+          if (!RtoItemId) {
+            onCancelObj.itemIdErr = "RTO Item is missing in the order";
+          }
+        }
+
         ffState = fulfillment?.state?.descriptor?.code;
         if (
           (fulfillment.type === "Prepaid" || fulfillment.type === "Delivery") &&
@@ -41,6 +55,53 @@ const checkOnCancel = (data, msgIdSet) => {
           onCancelObj.flflmntstErr = `In case of RTO, fulfillment with type '${fulfillment.type}' needs to be 'Cancelled'`;
         }
       });
+
+      const breakupItems = on_cancel?.quote?.breakup || [];
+      let RtoQuoteItem = null;
+      let RtoTax = null;
+      let foundDeliveryItem = false;
+      let foundDeliveryTax = false;
+
+      for (const item of breakupItems) {
+        if (item["@ondc/org/item_id"] === RtoItemId?.id) {
+          if (item["@ondc/org/title_type"] === "rto") {
+            RtoQuoteItem = item;
+          }
+          if (item["@ondc/org/title_type"] === "tax") {
+            RtoTax = item;
+          }
+        }
+
+        if (item["@ondc/org/title_type"] === "delivery") {
+          foundDeliveryItem = true;
+        }
+
+        if (
+          item["@ondc/org/title_type"] === "tax" &&
+          item["@ondc/org/item_id"] !== RtoItemId?.id
+        ) {
+          foundDeliveryTax = true;
+        }
+      }
+
+      if (!foundDeliveryItem) {
+        onCancelObj.deliveryItem =
+          "Delivery Quote Item is missing in the breakup array.";
+      }
+
+      if (!foundDeliveryTax) {
+        onCancelObj.deliveryTax =
+          "Delivery Tax is missing in the breakup array.";
+      }
+
+      if (!RtoQuoteItem) {
+        onCancelObj.rtoQuoteItemErr =
+          "RTO Quote Item is missing in the breakup array.";
+      }
+
+      if (!RtoTax) {
+        onCancelObj.rtoTaxErr = "RTO Tax is missing in the breakup array.";
+      }
     }
   } catch (error) {
     console.log(error);
@@ -78,7 +139,7 @@ const checkOnCancel = (data, msgIdSet) => {
           }
 
           if (fulfillment.end.time.timestamp) {
-            onStatusObj.delvryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
+            onCancelObj.delvryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
           }
 
           if (
@@ -154,12 +215,15 @@ const checkOnCancel = (data, msgIdSet) => {
         }
         if (ffState === "RTO-Initiated") {
           RtoPickupTime = fulfillment?.start?.time?.timestamp;
+          RtoDeliveryTime = fulfillment?.end?.time?.timestamp;
           console.log(RtoPickupTime);
           if (RtoPickupTime) {
             dao.setValue("RtoPickupTime", RtoPickupTime);
           } else {
             onCancelObj.rtoPickupTimeErr = `RTO Pickup (fulfillments/start/time/timestamp) time is missing for fulfillment state - ${ffState}`;
           }
+          if (RtoDeliveryTime)
+            onCancelObj.rtoDeliveryTimeErr = `RTO Delivery (fulfillments/end/time/timestamp) time is not required for fulfillment state - ${ffState}`;
           if (_.gt(RtoPickupTime, contextTime)) {
             onCancelObj.rtoPickupErr = `RTO Pickup (fulfillments/start/time/timestamp) time cannot be future dated for fulfillment state - ${ffState}`;
           }
