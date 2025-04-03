@@ -57,7 +57,7 @@ const checkOnStatus = (data, msgIdSet) => {
 
     if (isRtoFulfillment) {
       const RtoItemId = items?.find(
-        (item) => item.id === isRtoFulfillment.id
+        (item) => item.fulfillment_id === isRtoFulfillment.id
       );
 
       if (!RtoItemId) {
