@@ -203,6 +203,8 @@ const getVersion = (data, vertical) => {
       return "v2.0";
     if (data?.search && data?.search[0]?.context?.core_version === "1.1.0")
       return "v1.1";
+    if (data?.search && data?.search[0]?.context?.core_version === "1.2.5")
+      return "v1.2.5";
     else return "v1.2";
   }
   if (vertical === "b2b") {
@@ -436,10 +438,10 @@ const findMissingTags = (list, code, mandatoryAttr) => {
   return missingAttr;
 };
 
-const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => { 
+const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
   console.log(`Checking mandatory attributes for ${categoryName}`);
   items.forEach((item, index) => {
-    console.log("Item in items", item.tags)
+    console.log("Item in items", item.tags);
     let attributeTag = null;
     let originTag = null;
     for (const tag of item.tags) {
@@ -536,7 +538,7 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
             }
           }
         }
-      } else {   
+      } else {
         const key = `invalidCategoryId${ctgrID}`;
         errorObj[key] = `Invalid category_id (${ctgrID}) for ${categoryName}`;
       }
