@@ -26,6 +26,9 @@ module.exports = {
         },
         city: {
           type: "string",
+          const: {
+            $data: "/confirm/0/context/city",
+          },
         },
         action: {
           type: "string",
@@ -37,12 +40,35 @@ module.exports = {
         },
         bap_id: {
           type: "string",
+          const: { $data: "/on_search/0/context/bap_id" },
+          errorMessage:
+            "bap_id must match the value from on_search: ${/on_search/0/context/bap_id}",
         },
         bap_uri: {
           type: "string",
+          const: { $data: "/on_search/0/context/bap_uri" },
+          errorMessage:
+            "bap_uri must match the value from on_search: ${/on_search/0/context/bap_uri}",
+        },
+        bpp_id: {
+          type: "string",
+          const: { $data: "/on_search/0/context/bpp_id" },
+          errorMessage:
+            "bpp_id must match the value from on_search: ${/on_search/0/context/bpp_id}",
+        },
+        bpp_uri: {
+          type: "string",
+          const: { $data: "/on_search/0/context/bpp_uri" },
+          errorMessage:
+            "bpp_uri must match the value from on_search: ${/on_search/0/context/bpp_uri}",
         },
         transaction_id: {
           type: "string",
+          const: {
+            $data: "/search/0/context/transaction_id",
+          },
+          errorMessage:
+            "Transaction ID should be same across the transaction: ${/search/0/context/transaction_id}",
         },
         message_id: {
           type: "string",
@@ -73,6 +99,8 @@ module.exports = {
         "core_version",
         "bap_id",
         "bap_uri",
+        "bpp_uri",
+        "bpp_id",
         "transaction_id",
         "message_id",
         "timestamp",
