@@ -67,7 +67,6 @@ module.exports = {
         "transaction_id",
         "message_id",
         "timestamp",
-        "ttl",
       ],
     },
     message: {
@@ -561,8 +560,7 @@ module.exports = {
                             type: "object",
                             properties: {
                               code: {
-                                type: "string",
-                                enum: constants.CANCELLATION_TAGS_LIST,
+                                type: "string"
                               },
                               value: {
                                 type: "string",

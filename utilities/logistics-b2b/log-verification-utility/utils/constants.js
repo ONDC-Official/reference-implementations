@@ -15,7 +15,7 @@ module.exports = Object.freeze({
     logistics: "LOG_SORTED_INDEX",
     b2b: "B2B_SORTED_INDEX",
     services: "SRV_SORTED_INDEX",
-    "b2c-exports": 'B2C_EXP_SORTED_INDEX'
+    "b2c-exports": "B2C_EXP_SORTED_INDEX",
   }, // must match mergesort.js
   SERVER_LOG_DEST: "/public/server",
   FULL_ACTION_LIST: [
@@ -213,14 +213,19 @@ module.exports = Object.freeze({
     "Pickup-rejected",
     "Reached-destination-country",
     "Custom-cleared-destination",
-    "Custom-rejected-destination"
+    "Custom-rejected-destination",
   ],
   CURRENCY: ["INR", "AUD", "USD", "SGD"],
   CANCELLATION_TAGS_CODES: [
     "state",
     "rto_action",
     "rto_event",
+    "igm_request",
     "precancel_state",
+    "linked_provider",
+    "linked_order",
+    "linked_order_item",
+    "shipping_label",
   ],
   RTO_EVENT_TAGS: [
     "retry_count",
@@ -317,10 +322,14 @@ module.exports = Object.freeze({
   ],
   BPP_PAYMENT_TAGS: ["signature", "dsa", "ttl"],
   ON_SEEARCH_ITEMTAGS: ["g2", "g3", "origin"],
-  ON_SEEARCH_ITEMTAGS_B2C:["g2","origin"],
+  ON_SEEARCH_ITEMTAGS_B2C: ["g2", "origin"],
   ON_SEARCH_PROVIDERTAGS: ["serviceability", "seller_id", "seller_terms"],
   B2B_PAYMENT_TYPE: ["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
-  B2C_EXP_PAYMENT_TYPE:["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
+  B2C_EXP_PAYMENT_TYPE: [
+    "PRE-FULFILLMENT",
+    "ON-FULFILLMENT",
+    "POST-FULFILLMENT",
+  ],
   B2C_EXP_PAYMENT_TAGS: ["payment_type", "payment_provider"],
   PRECANCEL_BEFORE_RTO: [
     "Pending",
@@ -362,7 +371,7 @@ module.exports = Object.freeze({
   //services
   SRV_FULFILLMENT_TYPE: ["Home-Service", "Store-Service"],
   SRV_PAYMENT_TYPE: ["PRE-FULFILLMENT", "ON-FULFILLMENT", "POST-FULFILLMENT"],
-  SRV_CUSTOMIZATION_TAGS:["type","dish_type","cuisine"],
+  SRV_CUSTOMIZATION_TAGS: ["type", "dish_type", "cuisine"],
   SRV_FULFILLMENT_STATE: [
     "Pending",
     "At-Location",
@@ -378,7 +387,7 @@ module.exports = Object.freeze({
     "CANCELLED",
     "PENDING",
   ],
-  BREAKUP_TYPE:["item", "customization", "tax","discount","misc"],
+  BREAKUP_TYPE: ["item", "customization", "tax", "discount", "misc"],
   GPS_PATTERN:
     "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
   SERVICEABILITY: ["location", "category", "type", "val", "unit"],

@@ -76,7 +76,6 @@ module.exports = {
         "transaction_id",
         "message_id",
         "timestamp",
-        "ttl",
       ],
     },
     message: {
