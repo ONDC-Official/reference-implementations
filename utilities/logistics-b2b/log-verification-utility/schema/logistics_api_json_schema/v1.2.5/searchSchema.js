@@ -165,7 +165,7 @@ module.exports = {
                           required: ["area_code"],
                         },
                       },
-                      required: ["id", "gps", "address"],
+                      required: ["gps", "address"],
                     },
                     authorization: {
                       type: "object",
@@ -234,6 +234,7 @@ module.exports = {
                     properties: {
                       code: {
                         type: "string",
+                        enum: ["linked_provider", "linked_order"],
                       },
                       list: {
                         type: "array",
@@ -244,18 +245,52 @@ module.exports = {
                               type: "string",
                             },
                             value: {
-                              type: "string",
+                              type: ["string", "number"],
                             },
                           },
                           required: ["code", "value"],
+                          additionalProperties: false,
                         },
                       },
                     },
                     required: ["code", "list"],
+                    additionalProperties: false,
+                    if: {
+                      properties: {
+                        code: { const: "linked_order" },
+                      },
+                    },
+                    then: {
+                      properties: {
+                        list: {
+                          contains: {
+                            properties: {
+                              code: { const: "category" },
+                              value: {
+                                type: "string",
+                                enum: [
+                                  "F&B",
+                                  "Grocery",
+                                  "Fashion",
+                                  "BPC",
+                                  "Electronics",
+                                  "Appliances",
+                                  "Home & Kitchen",
+                                  "Health & Wellness",
+                                  "Pharma",
+                                  "Auto components",
+                                  "C2C parcels",
+                                ],
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
-              required: ["type", "start", "end", "tags"],
+              required: ["type", "start", "end"],
             },
             payment: {
               type: "object",
@@ -292,6 +327,93 @@ module.exports = {
                 },
               ],
             },
+            "@ondc/org/payload_details": {
+              type: "object",
+              properties: {
+                weight: {
+                  type: "object",
+                  properties: {
+                    unit: {
+                      type: "string",
+                      enum: constants.UNITS_WEIGHT,
+                    },
+                    value: {
+                      type: "number",
+                      minimum: 0,
+                    },
+                  },
+                  required: ["unit", "value"],
+                },
+                dimensions: {
+                  type: "object",
+                  properties: {
+                    length: {
+                      type: "object",
+                      properties: {
+                        unit: {
+                          type: "string",
+                          enum: constants.UNITS_DIMENSIONS,
+                        },
+                        value: {
+                          type: "number",
+                          minimum: 0,
+                        },
+                      },
+                      required: ["unit", "value"],
+                    },
+                    breadth: {
+                      type: "object",
+                      properties: {
+                        unit: {
+                          type: "string",
+                          enum: constants.UNITS_DIMENSIONS,
+                        },
+                        value: {
+                          type: "number",
+                          minimum: 0,
+                        },
+                      },
+                      required: ["unit", "value"],
+                    },
+                    height: {
+                      type: "object",
+                      properties: {
+                        unit: {
+                          type: "string",
+                          enum: constants.UNITS_DIMENSIONS,
+                        },
+                        value: {
+                          type: "number",
+                          minimum: 0,
+                        },
+                      },
+                      required: ["unit", "value"],
+                    },
+                  },
+                  required: ["length", "breadth", "height"],
+                },
+                category: {
+                  type: "string",
+                  enum: constants.CATEGORIES,
+                },
+                dangerous_goods: {
+                  type: "boolean",
+                },
+                value: {
+                  type: "object",
+                  properties: {
+                    currency: {
+                      type: "string",
+                    },
+                    value: {
+                      type: "string",
+                    },
+                  },
+                  required: ["currency", "value"],
+                },
+              },
+              required: ["weight", "category", "value"],
+            },
             tags: {
               type: "array",
               items: {
@@ -299,6 +421,7 @@ module.exports = {
                 properties: {
                   code: {
                     type: "string",
+                    const: "lbnp_features",
                   },
                   list: {
                     type: "array",
@@ -307,20 +430,66 @@ module.exports = {
                       properties: {
                         code: {
                           type: "string",
+                          enum: [
+                            "00B",
+                            "00E",
+                            "01D",
+                            "005",
+                            "009",
+                            "00C",
+                            "000",
+                            "001",
+                            "002",
+                            "003",
+                            "004",
+                            "006",
+                            "007",
+                            "008",
+                            "00A",
+                            "00D",
+                            "00F",
+                            "010",
+                            "011",
+                            "012",
+                            "013",
+                            "014",
+                            "015",
+                            "016",
+                            "017",
+                            "018",
+                            "019",
+                            "01A",
+                            "01B",
+                            "01C",
+                            "01E",
+                            "01F",
+                            "020",
+                            "021",
+                          ],
                         },
                         value: {
                           type: "string",
+                          enum: ["yes", "no"],
                         },
                       },
                       required: ["code", "value"],
+                      additionalProperties: false,
                     },
+                    minItems: 1,
                   },
                 },
                 required: ["code", "list"],
+                additionalProperties: false,
               },
             },
           },
-          required: ["category", "fulfillment", "payment", "provider", "tags"],
+          required: [
+            "category",
+            "fulfillment",
+            "payment",
+            "provider",
+            "@ondc/org/payload_details",
+          ],
         },
       },
       required: ["intent"],

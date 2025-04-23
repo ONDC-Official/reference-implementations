@@ -172,6 +172,8 @@ module.exports = {
                               $data:
                                 "/search/0/message/intent/fulfillment/start/location/gps",
                             },
+                            errorMessage:
+                              "does not match start location in search",
                           },
                           address: {
                             type: "object",
@@ -195,7 +197,7 @@ module.exports = {
                             ],
                           },
                         },
-                        required: ["id", "gps", "address"],
+                        required: ["gps", "address"],
                       },
                       contact: {
                         type: "object",
@@ -220,6 +222,8 @@ module.exports = {
                               $data:
                                 "/search/0/message/intent/fulfillment/end/location/gps",
                             },
+                            errorMessage:
+                              "does not match end location in search",
                           },
                           address: {
                             type: "object",
@@ -278,7 +282,7 @@ module.exports = {
                     },
                   },
                 },
-                required: ["id", "type", "start", "end", "tags"],
+                required: ["id", "type", "start", "end"],
               },
             },
             quote: {
@@ -287,11 +291,14 @@ module.exports = {
                 price: {
                   type: "object",
                   properties: {
-                    currency: { type: "string" },
+                    currency: {
+                      type: "string",
+                    },
                     value: {
                       type: "string",
                       pattern: "^[0-9]+(\\.[0-9]{1,2})?$",
-                      errorMessage: "Value can be max 2 decimal places",
+                      errorMessage:
+                        "precision for all prices in quote can be maximum of 2 decimal digits",
                     },
                   },
                   required: ["currency", "value"],
@@ -301,7 +308,9 @@ module.exports = {
                   items: {
                     type: "object",
                     properties: {
-                      "@ondc/org/item_id": { type: "string" },
+                      "@ondc/org/item_id": {
+                        type: "string",
+                      },
                       "@ondc/org/title_type": {
                         type: "string",
                         enum: constants.TITLE_TYPE,
@@ -309,11 +318,14 @@ module.exports = {
                       price: {
                         type: "object",
                         properties: {
-                          currency: { type: "string" },
+                          currency: {
+                            type: "string",
+                          },
                           value: {
                             type: "string",
                             pattern: "^[0-9]+(\\.[0-9]{1,2})?$",
-                            errorMessage: "Value can be max 2 decimal places",
+                            errorMessage:
+                              "precision for all prices in quote can be maximum of 2 decimal digits",
                           },
                         },
                         required: ["currency", "value"],
@@ -430,7 +442,14 @@ module.exports = {
               },
             },
           },
-          required: ["provider", "items", "fulfillments", "quote", "payment"],
+          required: [
+            "provider",
+            "items",
+            "fulfillments",
+            "quote",
+            "payment",
+            "tags",
+          ],
         },
       },
       required: ["order"],
