@@ -52,7 +52,6 @@ const checkOnConfirm = (data, msgIdSet) => {
       if (
         !_.isEqual(JSON.stringify(fulfillment_tags), confirm_fulfillment_tags)
       ) {
-        console.log("ENTER");
         onCnfrmObj.fulfillmentTagsErr = `fulfillments/tags mismatch between /confirm and /on_confirm`;
       }
 
