@@ -6,6 +6,9 @@ const utils = require("../../utils.js");
 const checkConfirm = (data, msgIdSet) => {
   let cnfrmObj = {};
   let confirm = data;
+  const initLinkedProviderTags = JSON.stringify(
+    dao.getValue("init_linked_provider")
+  );
   const contextTimestamp = confirm.context.timestamp;
   dao.setValue("cnfrmTimestamp", contextTimestamp);
   let version = confirm.context.core_version;
@@ -98,7 +101,27 @@ const checkConfirm = (data, msgIdSet) => {
     reqFulTags = ["rto_action", "state"];
     //checking tags
     if (fulfillmentTags) {
+      let linked_provider = {};
+      dao.setValue("confirm_fulfillment_tags", JSON.stringify(fulfillmentTags));
       fulfillmentTags.forEach((tag) => {
+        // dao.setValue(`confirm_${tag?.code}`, tag)
+        if (tag?.code === "linked_provider") {
+          const filtereed_provider = tag?.list?.filter(
+            (item) => item.code !== "address"
+          );
+
+          linked_provider = {
+            code: "linked_provider",
+            list: filtereed_provider,
+          };
+        }
+
+        if (
+          !_.isEqual(JSON.stringify(linked_provider), initLinkedProviderTags)
+        ) {
+          cnfrmObj.linkedPrvdrErr = `linked_provider tag in /confirm does not match with the one provided in /init`;
+        }
+
         let { code, list } = tag;
         fulfillmentTagSet.add(code);
       });

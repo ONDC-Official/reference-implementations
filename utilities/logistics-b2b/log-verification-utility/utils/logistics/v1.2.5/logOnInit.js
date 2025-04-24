@@ -3,8 +3,13 @@ const _ = require("lodash");
 const dao = require("../../../dao/dao");
 const constants = require("../../constants");
 const utils = require("../../utils");
+const init = require("../../../schema/keywords/init");
 
 const checkOnInit = (data, msgIdSet) => {
+  const initCategoryId = JSON.stringify(dao.getValue("init_item_category_id"));
+  const initLinkedProviderTags = JSON.stringify(
+    dao.getValue("init_linked_provider")
+  );
   let on_init = data;
   const onInitObj = {};
 
@@ -84,6 +89,30 @@ const checkOnInit = (data, msgIdSet) => {
   }
 
   try {
+    let riderCheck = false;
+    on_init?.fulfillments?.forEach((fulfillment) => {
+      fulfillment?.tags?.forEach((item) => {
+        if (item?.code === "linked_provider") {
+          if (!_.isEqual(JSON.stringify(item), initLinkedProviderTags)) {
+            onInitObj.linkedPrvdrErr = `linked_provider tag in /on_init does not match with the one provided in /init`;
+          }
+        }
+
+        if (item?.code === "rider_check") riderCheck = true;
+      });
+    });
+
+    if (JSON.parse(initCategoryId) === "Immediate Delivery" && !riderCheck) {
+      onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
+    }
+  } catch (error) {
+    console.log(
+      `!!Error while checking fulfillment array in /${constants.LOG_ONINIT}`,
+      error
+    );
+  }
+
+  try {
     console.log("Checking order tags in /on_init");
     if (orderTags) {
       orderTags.forEach((tag) => {
@@ -95,7 +124,6 @@ const checkOnInit = (data, msgIdSet) => {
     dao.setValue("bppTerms", bppTerms);
   } catch (error) {
     console.log(error);
-    
   }
 
   return onInitObj;

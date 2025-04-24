@@ -4,9 +4,9 @@ const constants = require("../../constants");
 const utils = require("../../utils");
 
 const checkInit = (data, msgIdSet) => {
-  const billing = data.message.order.billing
-  const billingAdd= billing.address
-  const contextTimestamp = data?.context.timestamp
+  const billing = data.message.order.billing;
+  const billingAdd = billing.address;
+  const contextTimestamp = data?.context.timestamp;
   const initObj = {};
   let init = data;
   let p2h2p = false;
@@ -24,14 +24,15 @@ const checkInit = (data, msgIdSet) => {
     if (init.provider) {
       onSearchitemsArr = dao.getValue(`${init.provider.id}itemsArr`);
       let providerObj = providersArr?.filter(
-        (prov) => prov.id === init.provider.id
+        (prov) => prov.id === init?.provider?.id
       );
       if (!providerObj || providerObj?.length < 1) {
         initObj.prvdrErr = `Provider with id '${init.provider.id}' does not exist in the catalog provided in /on_search`;
       } else {
         if (
-          (!init?.provider?.locations || init?.provider?.locations?.length < 1) &&
-          providerObj[0]?.locations?.length>1
+          (!init?.provider?.locations ||
+            init?.provider?.locations?.length < 1) &&
+          providerObj[0]?.locations?.length > 1
         ) {
           initObj.provLocErr = `Provider location is mandatory if provided in the catalog in /on_search`;
         } else if (init?.provider?.locations) {
@@ -43,7 +44,7 @@ const checkInit = (data, msgIdSet) => {
 
               if (location.id === element.id) providerLocExists = true;
             });
-           
+
             if (!providerLocExists) {
               let itemkey = `providerLocErr${i}`;
               initObj[
@@ -77,6 +78,10 @@ const checkInit = (data, msgIdSet) => {
     let itemExists = false;
 
     itemsArr?.forEach((item, i) => {
+      dao.setValue(
+        "init_item_category_id",
+        item?.category_id ?? ""
+      );
       if (item.descriptor.code === "P2H2P") {
         p2h2p = true;
       }
@@ -90,9 +95,9 @@ const checkInit = (data, msgIdSet) => {
         let itemObj = onSearchitemsArr.filter(
           (element) => element.id === item.id
         );
-       
+
         itemObj = itemObj[0];
-        dao.setValue("selectedItem",itemObj.id)
+        dao.setValue("selectedItem", itemObj.id);
         console.log(itemObj.id);
         if (item.category_id != itemObj.category_id) {
           let itemkey = `catIdErr${i}`;
@@ -107,6 +112,10 @@ const checkInit = (data, msgIdSet) => {
           ] = `Descriptor code '${item.descriptor.code}' for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
         fulfillmentsArr.forEach((fulfillment, i) => {
+          fulfillment?.tags?.map((item) => {
+            if (item.code === "linked_provider")
+              dao.setValue("init_linked_provider", item);
+          });
           if (fulfillment.id !== itemObj.fulfillment_id) {
             let itemkey = `flfillmentErr${i}`;
             initObj[

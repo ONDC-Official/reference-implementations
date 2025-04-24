@@ -9,6 +9,7 @@ const checkOnConfirm = (data, msgIdSet) => {
   let on_confirm = data;
   const onCnfrmObj = {};
   const contextTimestamp = on_confirm.context.timestamp;
+  const confirm_fulfillment_tags = dao.getValue("confirm_fulfillment_tags");
   on_confirm = on_confirm.message.order;
   let items = on_confirm.items;
   let fulfillments = on_confirm.fulfillments;
@@ -41,6 +42,20 @@ const checkOnConfirm = (data, msgIdSet) => {
   try {
     console.log(`checking start and end time range in fulfillments`);
     fulfillments.forEach((fulfillment) => {
+      let fulfillment_tags = [];
+      let extra_tag = [];
+      fulfillment.tags.forEach((tag) => {
+        if (tag?.code === "shipping_label" || tag?.code === "weather_check") {
+          extra_tag.push(tag);
+        } else fulfillment_tags.push(tag);
+      });
+      if (
+        !_.isEqual(JSON.stringify(fulfillment_tags), confirm_fulfillment_tags)
+      ) {
+        console.log("ENTER");
+        onCnfrmObj.fulfillmentTagsErr = `fulfillments/tags mismatch between /confirm and /on_confirm`;
+      }
+
       let ffState = fulfillment?.state?.descriptor?.code;
       let avgPickupTime = fulfillment?.start?.time?.duration;
       console.log(

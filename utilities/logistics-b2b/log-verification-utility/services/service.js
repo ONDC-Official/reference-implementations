@@ -12,7 +12,7 @@ const checkMessage = async (domain, element, action, msgIdSet) => {
     case "logistics":
       if (element?.context?.version === "2.0.0")
         return logisticsB2BVal(element, action, msgIdSet);
-      if(element?.context?.version === "1.2.5")
+      if(element?.context?.core_version === "1.2.5")
         return logisticsVal_1_2_5(element, action, msgIdSet);
       else return logisticsVal(element, action, msgIdSet);
     case "b2b":
