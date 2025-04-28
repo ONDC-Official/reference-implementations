@@ -204,7 +204,6 @@ module.exports = {
                   properties: {
                     currency: {
                       type: "string",
-                      const: "INR",
                     },
                     value: {
                       type: "string",
@@ -230,7 +229,6 @@ module.exports = {
                         properties: {
                           currency: {
                             type: "string",
-                            const: "INR",
                           },
                           value: {
                             type: "string",
@@ -375,7 +373,7 @@ module.exports = {
                       authorization: {
                         type: "object",
                         properties: {
-                          type: { type: "string", const: "OTP" },
+                          type: { type: "string"},
                           token: { type: "string" },
                           valid_from: { type: "string", format: "date-time" },
                           valid_to: { type: "string", format: "date-time" },
@@ -387,7 +385,6 @@ module.exports = {
                         if: {
                           properties: {
                             type: {
-                              const: "Delivery",
                               $data: "2/type", // Reference to fulfillment type from parent
                             },
                           },
@@ -444,7 +441,6 @@ module.exports = {
                         if: {
                           properties: {
                             type: {
-                              const: "RTO",
                               $data: "2/type", // Reference to fulfillment type from parent
                             },
                           },
@@ -541,7 +537,7 @@ module.exports = {
                       authorization: {
                         type: "object",
                         properties: {
-                          type: { type: "string", const: "OTP" },
+                          type: { type: "string",  },
                           token: { type: "string" },
                           valid_from: { type: "string", format: "date-time" },
                           valid_to: { type: "string", format: "date-time" },
@@ -817,7 +813,6 @@ module.exports = {
                         properties: {
                           currency: {
                             type: "string",
-                            const: "INR",
                           },
                           value: {
                             type: "string",

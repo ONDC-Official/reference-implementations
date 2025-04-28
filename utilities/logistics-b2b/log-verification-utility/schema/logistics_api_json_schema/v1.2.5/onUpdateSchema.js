@@ -606,22 +606,6 @@ module.exports = {
                   "vehicle",
                   "tags",
                 ],
-                if: {
-                  properties: {
-                    context: {
-                      properties: {
-                        domain: {
-                          const: "ONDC:LOG11",
-                        },
-                      },
-                      required: ["domain"],
-                    },
-                  },
-                  required: ["context"],
-                },
-                then: {
-                  required: ["@ondc/org/awb_no"],
-                },
               },
             },
             billing: {

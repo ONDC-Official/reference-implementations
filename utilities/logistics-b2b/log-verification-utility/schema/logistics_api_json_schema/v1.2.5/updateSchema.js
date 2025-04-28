@@ -133,7 +133,6 @@ module.exports = {
                 required: [
                   "id",
                   "type",
-                  "@ondc/org/awb_no",
                   "start",
                   "end",
                   "tags",

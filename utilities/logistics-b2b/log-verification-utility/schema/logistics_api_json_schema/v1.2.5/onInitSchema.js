@@ -128,7 +128,7 @@ module.exports = {
                   },
                 },
               },
-              required: ["id", "locations"],
+              required: ["id"],
             },
             items: {
               type: "array",

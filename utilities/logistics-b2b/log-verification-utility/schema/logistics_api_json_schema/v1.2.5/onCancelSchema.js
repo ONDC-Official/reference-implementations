@@ -672,7 +672,6 @@ module.exports = {
                 "@ondc/org/settlement_window": {
                   type: "string",
                 },
-
                 type: {
                   type: "string",
                   const: {

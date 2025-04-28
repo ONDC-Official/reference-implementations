@@ -9,7 +9,7 @@ module.exports = {
         domain: {
           type: "string",
           enum: ["ONDC:LOG10", "ONDC:LOG11"],
-          const: { $data: "/confirm/0/context/domain" },
+          const: { $data: "/on_confirm/0/context/domain" },
         },
         country: {
           type: "string",
