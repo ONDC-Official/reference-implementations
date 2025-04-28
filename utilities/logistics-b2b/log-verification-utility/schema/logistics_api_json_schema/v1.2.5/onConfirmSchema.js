@@ -10,6 +10,7 @@ module.exports = {
         domain: {
           type: "string",
           enum: ["ONDC:LOG10", "ONDC:LOG11"],
+          const: { $data: "/confirm/0/context/domain" },
         },
         country: {
           type: "string",
@@ -239,7 +240,7 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: ["id", "category_id", "descriptor", "fulfillment_id"],
+                required: ["id", "category_id", "fulfillment_id"],
               },
             },
             quote: {
@@ -645,7 +646,7 @@ module.exports = {
                             enum: constants.DCC_CODE,
                             const: {
                               $data:
-                                "/confirm/0/message/order/fulfillments/0/start/instructions/code",
+                                "/confirm/0/message/order/fulfillments/0/end/instructions/code",
                             },
                           },
                         },

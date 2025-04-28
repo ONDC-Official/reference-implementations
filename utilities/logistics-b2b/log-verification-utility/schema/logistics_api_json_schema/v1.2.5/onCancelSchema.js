@@ -11,6 +11,7 @@ module.exports = {
         domain: {
           type: "string",
           enum: ["ONDC:LOG10", "ONDC:LOG11"],
+          const: { $data: "/cancel/0/context/domain" },
         },
         country: {
           type: "string",
@@ -202,7 +203,6 @@ module.exports = {
                         },
                       },
                     },
-                    required: ["code"],
                   },
                   time: {
                     type: "object",
@@ -220,7 +220,7 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: ["id", "category_id", "descriptor", "fulfillment_id"],
+                required: ["id", "category_id", "fulfillment_id"],
               },
             },
             quote: {

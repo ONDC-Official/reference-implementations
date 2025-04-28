@@ -19,6 +19,7 @@ module.exports = {
       properties: {
         domain: {
           type: "string",
+          const: { $data: "/update/0/context/domain" },
           enum: ["ONDC:LOG10", "ONDC:LOG11"],
         },
         country: {
@@ -114,19 +115,16 @@ module.exports = {
           properties: {
             id: {
               type: "string",
-              const: "O2",
             },
             state: {
               type: "string",
               enum: ORDER_STATE,
-              const: "In-progress",
             },
             provider: {
               type: "object",
               properties: {
                 id: {
                   type: "string",
-                  const: "P1",
                 },
                 locations: {
                   type: "array",
@@ -135,14 +133,13 @@ module.exports = {
                     properties: {
                       id: {
                         type: "string",
-                        const: "L1",
                       },
                     },
                     required: ["id"],
                   },
                 },
               },
-              required: ["id", "locations"],
+              required: ["id"],
             },
             items: {
               type: "array",
@@ -151,22 +148,18 @@ module.exports = {
                 properties: {
                   id: {
                     type: "string",
-                    const: "I1",
                   },
                   fulfillment_id: {
                     type: "string",
-                    const: "1",
                   },
                   category_id: {
                     type: "string",
-                    const: "Same Day Delivery",
                   },
                   descriptor: {
                     type: "object",
                     properties: {
                       code: {
                         type: "string",
-                        const: "P2P",
                       },
                     },
                     required: ["code"],
@@ -176,27 +169,18 @@ module.exports = {
                     properties: {
                       label: {
                         type: "string",
-                        const: "TAT",
                       },
                       duration: {
                         type: "string",
-                        const: "PT45M",
                       },
                       timestamp: {
                         type: "string",
-                        const: "2024-11-20",
                       },
                     },
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: [
-                  "id",
-                  "fulfillment_id",
-                  "category_id",
-                  "descriptor",
-                  "time",
-                ],
+                required: ["id", "fulfillment_id", "category_id", "time"],
               },
             },
             quote: {
@@ -207,11 +191,9 @@ module.exports = {
                   properties: {
                     currency: {
                       type: "string",
-                      const: "INR",
                     },
                     value: {
                       type: "string",
-                      const: "59.00",
                     },
                   },
                   required: ["currency", "value"],
@@ -223,7 +205,6 @@ module.exports = {
                     properties: {
                       "@ondc/org/item_id": {
                         type: "string",
-                        const: "I1",
                       },
                       "@ondc/org/title_type": {
                         type: "string",
@@ -234,7 +215,6 @@ module.exports = {
                         properties: {
                           currency: {
                             type: "string",
-                            const: "INR",
                           },
                           value: {
                             type: "string",
@@ -261,11 +241,9 @@ module.exports = {
                 properties: {
                   id: {
                     type: "string",
-                    const: "1",
                   },
                   type: {
                     type: "string",
-                    const: "Delivery",
                   },
                   state: {
                     type: "object",
@@ -276,7 +254,6 @@ module.exports = {
                           code: {
                             type: "string",
                             enum: FULFILLMENT_STATE,
-                            const: "Order-picked-up",
                           },
                         },
                         required: ["code"],
@@ -286,11 +263,10 @@ module.exports = {
                   },
                   "@ondc/org/awb_no": {
                     type: "string",
-                    const: "1227262193237777",
                   },
                   tracking: {
                     type: "boolean",
-                    const: false,
+                    enum: [true, false],
                   },
                   start: {
                     type: "object",
@@ -300,7 +276,6 @@ module.exports = {
                         properties: {
                           name: {
                             type: "string",
-                            const: "Ramu",
                           },
                         },
                         required: ["name"],
@@ -310,42 +285,33 @@ module.exports = {
                         properties: {
                           id: {
                             type: "string",
-                            const: "S1",
                           },
                           gps: {
                             type: "string",
-                            const: "12.4535,77.9283",
                           },
                           address: {
                             type: "object",
                             properties: {
                               name: {
                                 type: "string",
-                                const: "name",
                               },
                               building: {
                                 type: "string",
-                                const: "My house or building name",
                               },
                               locality: {
                                 type: "string",
-                                const: "My street name",
                               },
                               city: {
                                 type: "string",
-                                const: "Bengaluru",
                               },
                               state: {
                                 type: "string",
-                                const: "Karnataka",
                               },
                               country: {
                                 type: "string",
-                                const: "India",
                               },
                               area_code: {
                                 type: "string",
-                                const: "560041",
                               },
                             },
                             required: [
@@ -366,11 +332,9 @@ module.exports = {
                         properties: {
                           phone: {
                             type: "string",
-                            const: "9886098860",
                           },
                           email: {
                             type: "string",
-                            const: "abcd.efgh@gmail.com",
                           },
                         },
                         required: ["phone", "email"],
@@ -380,7 +344,6 @@ module.exports = {
                         properties: {
                           duration: {
                             type: "string",
-                            const: "PT15M",
                           },
                           range: {
                             type: "object",
@@ -388,12 +351,10 @@ module.exports = {
                               start: {
                                 type: "string",
                                 format: "date-time",
-                                const: "2024-11-20T23:45:00.000Z",
                               },
                               end: {
                                 type: "string",
                                 format: "date-time",
-                                const: "2024-11-20T00:00:00.000Z",
                               },
                             },
                             required: ["start", "end"],
@@ -401,7 +362,6 @@ module.exports = {
                           timestamp: {
                             type: "string",
                             format: "date-time",
-                            const: "2024-11-20T00:00:00.000Z",
                           },
                         },
                         required: ["duration", "range", "timestamp"],
@@ -412,22 +372,17 @@ module.exports = {
                           code: {
                             type: "string",
                             enum: PCC_CODE,
-                            const: "2",
                           },
                           short_desc: {
                             type: "string",
-                            const: "value of PCC",
                           },
                           long_desc: {
                             type: "string",
-                            const: "additional instructions for pickup",
                           },
                           images: {
                             type: "array",
                             items: {
                               type: "string",
-                              const:
-                                "link to downloadable shipping label (required for P2H2P)",
                             },
                           },
                           additional_desc: {
@@ -435,11 +390,9 @@ module.exports = {
                             properties: {
                               content_type: {
                                 type: "string",
-                                const: "text/html",
                               },
                               url: {
                                 type: "string",
-                                const: "..",
                               },
                             },
                             required: ["content_type", "url"],
@@ -464,7 +417,6 @@ module.exports = {
                         properties: {
                           name: {
                             type: "string",
-                            const: "person_name",
                           },
                         },
                         required: ["name"],
@@ -474,38 +426,30 @@ module.exports = {
                         properties: {
                           gps: {
                             type: "string",
-                            const: "12.453544,77.928379",
                           },
                           address: {
                             type: "object",
                             properties: {
                               name: {
                                 type: "string",
-                                const: "My house or building #",
                               },
                               building: {
                                 type: "string",
-                                const: "My house or building name",
                               },
                               locality: {
                                 type: "string",
-                                const: "My street name",
                               },
                               city: {
                                 type: "string",
-                                const: "Bengaluru",
                               },
                               state: {
                                 type: "string",
-                                const: "Karnataka",
                               },
                               country: {
                                 type: "string",
-                                const: "India",
                               },
                               area_code: {
                                 type: "string",
-                                const: "560076",
                               },
                             },
                             required: [
@@ -526,11 +470,9 @@ module.exports = {
                         properties: {
                           phone: {
                             type: "string",
-                            const: "9886098860",
                           },
                           email: {
                             type: "string",
-                            const: "abcd.efgh@gmail.com",
                           },
                         },
                         required: ["phone", "email"],
@@ -541,32 +483,27 @@ module.exports = {
                           code: {
                             type: "string",
                             enum: DCC_CODE,
-                            const: "3",
                           },
                           short_desc: {
                             type: "string",
-                            const: "value of DCC",
                           },
                           long_desc: {
                             type: "string",
-                            const: "additional instructions for delivery",
                           },
                           additional_desc: {
                             type: "object",
                             properties: {
                               content_type: {
                                 type: "string",
-                                const: "text/html",
                               },
                               url: {
                                 type: "string",
-                                const: "..",
                               },
                             },
                             required: ["content_type", "url"],
                           },
                         },
-                        required: ["code", "short_desc", "long_desc"],
+                        required: ["code", "short_desc"],
                       },
                       time: {
                         type: "object",
@@ -577,12 +514,10 @@ module.exports = {
                               start: {
                                 type: "string",
                                 format: "date-time",
-                                const: "2024-11-20T02:00:00.000Z",
                               },
                               end: {
                                 type: "string",
                                 format: "date-time",
-                                const: "2024-11-20T02:15:00.000Z",
                               },
                             },
                             required: ["start", "end"],
@@ -604,11 +539,9 @@ module.exports = {
                     properties: {
                       name: {
                         type: "string",
-                        const: "person_name",
                       },
                       phone: {
                         type: "string",
-                        const: "9886098860",
                       },
                     },
                     required: ["name", "phone"],
@@ -618,7 +551,6 @@ module.exports = {
                     properties: {
                       registration: {
                         type: "string",
-                        const: "3LVJ945",
                       },
                     },
                     required: ["registration"],
@@ -629,7 +561,6 @@ module.exports = {
                   "@ondc/org/ebnexpirydate": {
                     type: "string",
                     format: "date-time",
-                    const: "2024-11-20T12:00:00.000Z",
                   },
                   tags: {
                     type: "array",
@@ -669,14 +600,28 @@ module.exports = {
                   "id",
                   "type",
                   "state",
-                  "@ondc/org/awb_no",
                   "tracking",
                   "start",
                   "end",
-                  "agent",
                   "vehicle",
                   "tags",
                 ],
+                if: {
+                  properties: {
+                    context: {
+                      properties: {
+                        domain: {
+                          const: "ONDC:LOG11",
+                        },
+                      },
+                      required: ["domain"],
+                    },
+                  },
+                  required: ["context"],
+                },
+                then: {
+                  required: ["@ondc/org/awb_no"],
+                },
               },
             },
             billing: {
@@ -684,38 +629,30 @@ module.exports = {
               properties: {
                 name: {
                   type: "string",
-                  const: "ONDC sellerNP",
                 },
                 address: {
                   type: "object",
                   properties: {
                     name: {
                       type: "string",
-                      const: "My building no",
                     },
                     building: {
                       type: "string",
-                      const: "My building name",
                     },
                     locality: {
                       type: "string",
-                      const: "My street name",
                     },
                     city: {
                       type: "string",
-                      const: "Bengaluru",
                     },
                     state: {
                       type: "string",
-                      const: "Karnataka",
                     },
                     country: {
                       type: "string",
-                      const: "India",
                     },
                     area_code: {
                       type: "string",
-                      const: "560076",
                     },
                   },
                   required: [
@@ -730,25 +667,20 @@ module.exports = {
                 },
                 tax_number: {
                   type: "string",
-                  const: "XXXXXXXXXXXXXXX",
                 },
                 phone: {
                   type: "string",
-                  const: "9886098860",
                 },
                 email: {
                   type: "string",
-                  const: "abcd.efgh@gmail.com",
                 },
                 created_at: {
                   type: "string",
                   format: "date-time",
-                  const: "2024-11-20T21:30:00.000Z",
                 },
                 updated_at: {
                   type: "string",
                   format: "date-time",
-                  const: "2024-11-20T21:30:00.000Z",
                 },
               },
               required: [
@@ -766,24 +698,18 @@ module.exports = {
               properties: {
                 "@ondc/org/collection_amount": {
                   type: "string",
-                  const: "300.00",
                 },
                 collected_by: {
                   type: "string",
-                  const: "BPP",
                 },
                 type: {
                   type: "string",
-                  const: "POST-FULFILLMENT",
                 },
                 "@ondc/org/settlement_basis": {
                   type: "string",
                   const: "invoicing",
                 },
-                "@ondc/org/settlement_window": {
-                  type: "string",
-                  const: "P15D",
-                },
+                "@ondc/org/settlement_window": {},
                 "@ondc/org/settlement_details": {
                   type: "array",
                   items: {
@@ -791,23 +717,18 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
-                        const: "buyer-app",
                       },
                       settlement_type: {
                         type: "string",
-                        const: "upi",
                       },
                       upi_address: {
                         type: "string",
-                        const: "gft@oksbi",
                       },
                       settlement_bank_account_no: {
                         type: "string",
-                        const: "XXXXXXXXXX",
                       },
                       settlement_ifsc_code: {
                         type: "string",
-                        const: "XXXXXXXXX",
                       },
                     },
                     required: [
@@ -839,14 +760,12 @@ module.exports = {
                       category_id: {
                         type: "string",
                         enum: CATEGORIES,
-                        const: "Grocery",
                       },
                       descriptor: {
                         type: "object",
                         properties: {
                           name: {
                             type: "string",
-                            const: "Atta",
                           },
                         },
                         required: ["name"],
@@ -856,7 +775,6 @@ module.exports = {
                         properties: {
                           count: {
                             type: "integer",
-                            const: 2,
                           },
                           measure: {
                             type: "object",
@@ -864,11 +782,9 @@ module.exports = {
                               unit: {
                                 type: "string",
                                 enum: UNITS_WEIGHT,
-                                const: "kilogram",
                               },
                               value: {
                                 type: "number",
-                                const: 0.5,
                               },
                             },
                             required: ["unit", "value"],
@@ -881,11 +797,9 @@ module.exports = {
                         properties: {
                           currency: {
                             type: "string",
-                            const: "INR",
                           },
                           value: {
                             type: "string",
-                            const: "150.00",
                           },
                         },
                         required: ["currency", "value"],
@@ -907,7 +821,6 @@ module.exports = {
                       properties: {
                         name: {
                           type: "string",
-                          const: "Aadishwar Store",
                         },
                       },
                       required: ["name"],
@@ -917,31 +830,24 @@ module.exports = {
                       properties: {
                         name: {
                           type: "string",
-                          const: "KHB Towers",
                         },
                         building: {
                           type: "string",
-                          const: "Building or House No",
                         },
                         street: {
                           type: "string",
-                          const: "6th Block",
                         },
                         locality: {
                           type: "string",
-                          const: "Koramangala",
                         },
                         city: {
                           type: "string",
-                          const: "Bengaluru",
                         },
                         state: {
                           type: "string",
-                          const: "Karnataka",
                         },
                         area_code: {
                           type: "string",
-                          const: "560070",
                         },
                       },
                       required: [
@@ -962,7 +868,6 @@ module.exports = {
                   properties: {
                     id: {
                       type: "string",
-                      const: "O1",
                     },
                     weight: {
                       type: "object",
@@ -970,11 +875,9 @@ module.exports = {
                         unit: {
                           type: "string",
                           enum: UNITS_WEIGHT,
-                          const: "kilogram",
                         },
                         value: {
                           type: "number",
-                          const: 1,
                         },
                       },
                       required: ["unit", "value"],
@@ -988,11 +891,9 @@ module.exports = {
                             unit: {
                               type: "string",
                               enum: UNITS_DIMENSIONS,
-                              const: "centimeter",
                             },
                             value: {
                               type: "number",
-                              const: 1,
                             },
                           },
                           required: ["unit", "value"],
@@ -1003,11 +904,9 @@ module.exports = {
                             unit: {
                               type: "string",
                               enum: UNITS_DIMENSIONS,
-                              const: "centimeter",
                             },
                             value: {
                               type: "number",
-                              const: 1,
                             },
                           },
                           required: ["unit", "value"],
@@ -1018,11 +917,9 @@ module.exports = {
                             unit: {
                               type: "string",
                               enum: UNITS_DIMENSIONS,
-                              const: "centimeter",
                             },
                             value: {
                               type: "number",
-                              const: 1,
                             },
                           },
                           required: ["unit", "value"],
@@ -1039,7 +936,6 @@ module.exports = {
             updated_at: {
               type: "string",
               format: "date-time",
-              const: "2024-11-20T23:00:30.000Z",
             },
           },
           required: [

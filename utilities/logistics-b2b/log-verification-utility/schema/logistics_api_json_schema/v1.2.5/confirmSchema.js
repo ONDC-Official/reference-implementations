@@ -10,6 +10,7 @@ module.exports = {
         domain: {
           type: "string",
           enum: ["ONDC:LOG10", "ONDC:LOG11"],
+          const: { $data: "/on_init/0/context/domain" },
         },
         country: {
           type: "string",
@@ -187,7 +188,6 @@ module.exports = {
                 required: [
                   "id",
                   "category_id",
-                  "descriptor",
                   "time",
                   "fulfillment_id",
                 ],

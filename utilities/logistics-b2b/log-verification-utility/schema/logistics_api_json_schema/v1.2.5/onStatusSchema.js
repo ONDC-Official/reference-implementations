@@ -8,6 +8,7 @@ module.exports = {
         domain: {
           type: "string",
           enum: ["ONDC:LOG10", "ONDC:LOG11"],
+          const: { $data: "/status/0/context/domain" },
         },
         country: {
           type: "string",
@@ -149,7 +150,7 @@ module.exports = {
                   minItems: 1,
                 },
               },
-              required: ["id", "locations"],
+              required: ["id"],
             },
             items: {
               type: "array",
@@ -172,7 +173,6 @@ module.exports = {
                         type: "string",
                       },
                     },
-                    required: ["code"],
                   },
                   time: {
                     type: "object",
@@ -192,13 +192,7 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: [
-                  "id",
-                  "fulfillment_id",
-                  "category_id",
-                  "descriptor",
-                  "time",
-                ],
+                required: ["id", "fulfillment_id", "category_id", "time"],
               },
               minItems: 1,
             },

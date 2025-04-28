@@ -18,8 +18,22 @@ const checkSearch = async (data, msgIdSet) => {
   const {
     start: { location: startLocation },
     end: { location: endLocation },
+    tags,
   } = data.message.intent.fulfillment;
 
+  try {
+    tags?.map((tag) => {
+      if (tag?.code === "linked_order") {
+        tag?.list?.map((list) => {
+          if (list?.code === "cod_order") {
+            dao.setValue("cod_order", list?.value ?? "no");
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error while checking fulfillment tags:", error.stack);
+  }
   try {
     if (version === "1.2.5") {
       if (!startLocation?.id)
@@ -74,7 +88,11 @@ const checkSearch = async (data, msgIdSet) => {
     const pinToStd = JSON.parse(
       fs.readFileSync(path.join(__dirname, "pinToStd.json"), "utf8")
     );
-    const stdCode = data.context.city.split(":")[1];
+    const stdCode =
+      data?.context?.city === "*"
+        ? data?.context?.city
+        : data?.context?.city.split(":")[1];
+    console.log("stdCode", stdCode);
     const area_code = startLocation?.address?.area_code;
     if (pinToStd[area_code] && pinToStd[area_code] != stdCode) {
       srchObj[

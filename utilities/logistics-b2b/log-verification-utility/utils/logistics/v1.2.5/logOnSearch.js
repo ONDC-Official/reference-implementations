@@ -12,6 +12,7 @@ const checkOnSearch = async (data, msgIdSet) => {
   const contextTimestamp = new Date(timestamp || "");
   let search = dao.getValue("searchObj");
   let validFulfillmentIDs = new Set();
+  const code_order = dao.getValue("cod_order");
   onSearch = onSearch.message.catalog;
   let avgPickupTime;
   /**

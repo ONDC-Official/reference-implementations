@@ -13,7 +13,7 @@ const checkInit = (data, msgIdSet) => {
   init = init.message.order;
 
   let itemsArr = init.items;
-  let fulfillmentsArr = init.fulfillments;
+  let fulfillmentsArr = init?.fulfillments;
   let bppFulfillmentsArr = dao.getValue("bppFulfillmentsArr");
   let onSearchitemsArr;
   let providersArr = dao.getValue("providersArr");
@@ -59,7 +59,7 @@ const checkInit = (data, msgIdSet) => {
   } catch (error) {
     console.log(
       `!!Error while checking provider object in /${constants.LOG_INIT}`,
-      error
+      error?.stack
     );
   }
 
@@ -76,36 +76,32 @@ const checkInit = (data, msgIdSet) => {
   try {
     console.log(`Comparing item object in /init and /on_search`);
     let itemExists = false;
-
     itemsArr?.forEach((item, i) => {
-      dao.setValue(
-        "init_item_category_id",
-        item?.category_id ?? ""
-      );
-      if (item.descriptor.code === "P2H2P") {
+      dao.setValue("init_item_category_id", item?.category_id ?? "");
+      if (item?.descriptor?.code === "P2H2P") {
         p2h2p = true;
       }
       onSearchitemsArr?.forEach((element) => {
-        if (item.id === element.id) itemExists = true;
+        if (item?.id === element?.id) itemExists = true;
       });
       if (!itemExists) {
         let itemkey = `itemErr${i}`;
         initObj[itemkey] = `Item Id '${item.id}' does not exist in /on_search`;
       } else {
-        let itemObj = onSearchitemsArr.filter(
-          (element) => element.id === item.id
+        let itemObj = onSearchitemsArr?.filter(
+          (element) => element?.id === item?.id
         );
 
         itemObj = itemObj[0];
-        dao.setValue("selectedItem", itemObj.id);
+        dao.setValue("selectedItem", itemObj?.id);
         console.log(itemObj.id);
-        if (item.category_id != itemObj.category_id) {
+        if (item?.category_id != itemObj?.category_id) {
           let itemkey = `catIdErr${i}`;
           initObj[
             itemkey
           ] = `Category id '${item.category_id}' for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
-        if (item.descriptor.code != itemObj.descriptor.code) {
+        if (item?.descriptor?.code != itemObj?.descriptor?.code) {
           let itemkey = `codeErr${i}`;
           initObj[
             itemkey
@@ -113,19 +109,19 @@ const checkInit = (data, msgIdSet) => {
         }
         fulfillmentsArr.forEach((fulfillment, i) => {
           fulfillment?.tags?.map((item) => {
-            if (item.code === "linked_provider")
+            if (item?.code === "linked_provider")
               dao.setValue("init_linked_provider", item);
           });
-          if (fulfillment.id !== itemObj.fulfillment_id) {
+          if (fulfillment?.id !== itemObj?.fulfillment_id) {
             let itemkey = `flfillmentErr${i}`;
             initObj[
               itemkey
             ] = `Fulfillment id '${fulfillment.id}' for item with id '${item.id}' does not match with the catalog provided in /on_search`;
           } else {
             let bppfulfillment = bppFulfillmentsArr?.find(
-              (element) => element.id === fulfillment.id
+              (element) => element?.id === fulfillment?.id
             );
-            if (fulfillment.type !== bppfulfillment?.type) {
+            if (fulfillment?.type !== bppfulfillment?.type) {
               let itemkey = `flfillmentTypeErr${i}`;
               initObj[
                 itemkey
@@ -139,7 +135,7 @@ const checkInit = (data, msgIdSet) => {
   } catch (error) {
     console.log(
       `!!Error while checking items array in /${constants.log_INIT}`,
-      error
+      error?.stack
     );
   }
   dao.setValue("p2h2p", p2h2p);
