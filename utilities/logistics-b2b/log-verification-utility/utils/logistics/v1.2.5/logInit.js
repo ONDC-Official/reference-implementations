@@ -36,20 +36,20 @@ const checkInit = (data, msgIdSet) => {
         ) {
           initObj.provLocErr = `Provider location is mandatory if provided in the catalog in /on_search`;
         } else if (init?.provider?.locations) {
-          let providerLocArr = init.provider.locations;
+          let providerLocArr = init?.provider?.locations;
           let providerLocExists = false;
           providerLocArr.forEach((location, i) => {
             providerObj[0]?.locations?.forEach((element) => {
-              console.log(location.id, element.id);
+              console.log(location?.id, element?.id);
 
-              if (location.id === element.id) providerLocExists = true;
+              if (location?.id === element?.id) providerLocExists = true;
             });
 
             if (!providerLocExists) {
               let itemkey = `providerLocErr${i}`;
               initObj[
                 itemkey
-              ] = `Provider location with id '${location.id}' does not exist in the catalog provided in /on_search`;
+              ] = `Provider location with id '${location?.id}' does not exist in the catalog provided in /on_search`;
             }
             providerLocExists = false;
           });
@@ -64,7 +64,6 @@ const checkInit = (data, msgIdSet) => {
   }
 
   //billing check
-
   if (billing?.created_at > contextTimestamp) {
     initObj.BilngcreatedAtErr = `billing/created_at cannot be future dated w.r.t context/timestamp`;
   }
@@ -105,7 +104,7 @@ const checkInit = (data, msgIdSet) => {
           let itemkey = `codeErr${i}`;
           initObj[
             itemkey
-          ] = `Descriptor code '${item.descriptor.code}' for item with id '${item.id}' does not match with the catalog provided in /on_search`;
+          ] = `Descriptor code '${item?.descriptor?.code}' for item with id '${item?.id}' does not match with the catalog provided in /on_search`;
         }
         fulfillmentsArr.forEach((fulfillment, i) => {
           fulfillment?.tags?.map((item) => {
