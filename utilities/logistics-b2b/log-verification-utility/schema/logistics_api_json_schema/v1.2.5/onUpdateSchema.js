@@ -196,7 +196,7 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: ["id", "fulfillment_id", "category_id", "descriptor"],
+                required: ["id", "fulfillment_id", "category_id"],
               },
             },
             quote: {
