@@ -1,3 +1,11 @@
+const {
+  PCC_CODE,
+  DCC_CODE,
+  FULFILLMENT_TAGS_LIST_CODE,
+  FULFILLMENT_TAGS_LIST_VALUE,
+} = require("../../../utils/constants");
+const constants = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/updateSchema",
   title: "ONDC Logistics Update Fulfillment Schema",
@@ -107,212 +115,367 @@ module.exports = {
           type: "object",
           required: ["id", "items", "fulfillments", "updated_at"],
           properties: {
-            id: { type: "string" },
+            id: {
+              type: "string",
+              const: {
+                $data: "/confirm/0/message/order/id",
+              },
+            },
             items: {
               type: "array",
               items: {
                 type: "object",
-                required: ["id", "category_id"],
                 properties: {
-                  id: { type: "string" },
-                  category_id: { type: "string" },
-                  descriptor: {
-                    type: "object",
-                    required: ["code"],
-                    properties: {
-                      code: { type: "string" },
+                  id: {
+                    type: "string",
+                    const: {
+                      $data: "/confirm/0/message/order/items/0/id",
                     },
                   },
+                  category_id: {
+                    type: "string",
+                    const: {
+                      $data: "/confirm/0/message/order/items/0/category_id",
+                    },
+                  },
+                  descriptor: {
+                    type: "object",
+                    properties: {
+                      code: {
+                        type: "string",
+                        const: {
+                          $data:
+                            "/confirm/0/message/order/items/0/descriptor/code",
+                        },
+                      },
+                    },
+                    required: ["code"],
+                  },
                 },
+                required: ["id", "category_id"],
               },
             },
             fulfillments: {
               type: "array",
               items: {
                 type: "object",
-                required: [
-                  "id",
-                  "type",
-                  "start",
-                  "end",
-                  "tags",
-                ],
+                required: ["id", "type", "start", "end"],
                 properties: {
-                  id: { type: "string" },
-                  type: { type: "string", const: "Delivery" },
-                  "@ondc/org/awb_no": { type: "string" },
+                  id: {
+                    type: "string",
+                    const: {
+                      $data: "/init/0/message/order/items/0/fulfillment_id",
+                    },
+                  },
+                  type: {
+                    type: "string",
+                  },
+                  "@ondc/org/awb_no": {
+                    type: "string",
+                  },
                   start: {
                     type: "object",
-                    required: ["instructions", "authorization"],
                     properties: {
                       instructions: {
                         type: "object",
-                        required: [
-                          "code",
-                          "short_desc",
-                          "long_desc",
-                          "additional_desc",
-                        ],
                         properties: {
-                          code: { type: "string" },
-                          short_desc: { type: "string" },
-                          long_desc: { type: "string" },
-                          additional_desc: {
-                            type: "object",
-                            required: ["content_type", "url"],
-                            properties: {
-                              content_type: { type: "string" },
-                              url: { type: "string" },
+                          code: {
+                            type: "string",
+                            enum: PCC_CODE,
+                            const: {
+                              $data:
+                                "/confirm/0/message/order/fulfillments/0/start/instructions/code",
                             },
                           },
+                          name: {
+                            type: "string",
+                          },
+                          short_desc: {
+                            type: "string",
+                            const: {
+                              $data:
+                                "/confirm/0/message/order/fulfillments/0/start/instructions/short_desc",
+                            },
+                          },
+                          long_desc: {
+                            type: "string",
+                          },
                         },
-                      },
-                      authorization: {
-                        type: "object",
-                        required: ["type", "token", "valid_from", "valid_to"],
-                        properties: {
-                          type: { type: "string" },
-                          token: { type: "string" },
-                          valid_from: { type: "string", format: "date-time" },
-                          valid_to: { type: "string", format: "date-time" },
-                        },
+
+                        required: ["code", "short_desc"],
+                        allOf: [
+                          {
+                            if: { properties: { code: { const: "1" } } },
+                            then: {
+                              properties: {
+                                short_desc: {
+                                  minLength: 10,
+                                  maxLength: 10,
+                                  pattern: "^[0-9]{10}$",
+                                  errorMessage: "should be a 10 digit number",
+                                },
+                              },
+                            },
+                          },
+                          {
+                            if: {
+                              properties: { code: { enum: ["2", "3", "4"] } },
+                            },
+                            then: {
+                              properties: {
+                                short_desc: {
+                                  maxLength: 6,
+                                  pattern: "^[a-zA-Z0-9]{1,6}$",
+                                  errorMessage:
+                                    "should not be an empty string or have more than 6 digits",
+                                },
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
+                    // required: ["instructions"],
                   },
                   end: {
                     type: "object",
-                    required: ["instructions"],
                     properties: {
                       instructions: {
                         type: "object",
-                        required: ["code", "short_desc", "long_desc"],
                         properties: {
-                          code: { type: "string" },
-                          short_desc: { type: "string" },
-                          long_desc: { type: "string" },
+                          code: {
+                            type: "string",
+                            enum: DCC_CODE,
+                            const: {
+                              $data:
+                                "/confirm/0/message/order/fulfillments/0/end/instructions/code",
+                            },
+                          },
+                          name: {
+                            type: "string",
+                          },
+                          short_desc: {
+                            type: "string",
+                            not: {
+                              const: {
+                                $data: "3/start/instructions/short_desc",
+                              },
+                            },
+                            errorMessage:
+                              "cannot be same as PCC - ${3/start/instructions/short_desc}",
+                          },
+                          long_desc: {
+                            type: "string",
+                          },
                         },
+                        required: ["code"],
+                        allOf: [
+                          {
+                            if: { properties: { code: { const: "3" } } },
+                            then: {
+                              properties: {
+                                short_desc: {
+                                  maxLength: 0,
+                                  errorMessage: "is not required",
+                                },
+                              },
+                            },
+                          },
+                          {
+                            if: {
+                              properties: { code: { enum: ["1", "2"] } },
+                            },
+                            then: {
+                              properties: {
+                                short_desc: {
+                                  maxLength: 6,
+                                  pattern: "^[a-zA-Z0-9]{1,6}$",
+                                  errorMessage:
+                                    "should not be an empty string or have more than 6 digits",
+                                },
+                              },
+                              required: ["short_desc"],
+                            },
+                          },
+                        ],
                       },
                     },
+                    additionalProperties: false,
+                    // required: ["instructions"],
                   },
                   tags: {
                     type: "array",
                     items: {
                       type: "object",
-                      required: ["code", "list"],
                       properties: {
-                        code: { type: "string" },
+                        code: {
+                          type: "string",
+                          enum: [
+                            "state",
+                            "linked_provider",
+                            "linked_order",
+                            "linked_order_item",
+                          ],
+                        },
                         list: {
                           type: "array",
                           items: {
                             type: "object",
-                            required: ["code", "value"],
                             properties: {
-                              code: { type: "string" },
-                              value: { type: "string" },
+                              code: {
+                                type: "string",
+                              },
+                              value: {
+                                type: "string",
+                              },
                             },
+                            required: ["code", "value"],
                           },
                         },
                       },
+                      required: ["code", "list"],
                     },
+                    minItems: 2,
+                    errorMessage: "at least two tags are required",
                   },
                 },
               },
             },
             "@ondc/org/linked_order": {
               type: "object",
-              required: ["items", "order"],
               properties: {
                 items: {
                   type: "array",
                   items: {
                     type: "object",
+                    properties: {
+                      category_id: {
+                        type: "string",
+                        enum: constants.CATEGORIES,
+                      },
+                      descriptor: {
+                        type: "object",
+                        properties: {
+                          name: {
+                            type: "string",
+                          },
+                        },
+                        required: ["name"],
+                      },
+                      quantity: {
+                        type: "object",
+                        properties: {
+                          count: {
+                            type: "integer",
+                          },
+                          measure: {
+                            type: "object",
+                            properties: {
+                              unit: {
+                                type: "string",
+                                enum: constants.UNITS_WEIGHT,
+                              },
+                              value: {
+                                type: "number",
+                              },
+                            },
+                            required: ["unit", "value"],
+                          },
+                        },
+                        required: ["count", "measure"],
+                      },
+                      price: {
+                        type: "object",
+                        properties: {
+                          currency: {
+                            type: "string",
+                          },
+                          value: {
+                            type: "string",
+                          },
+                        },
+                        required: ["currency", "value"],
+                      },
+                    },
                     required: [
                       "category_id",
                       "descriptor",
                       "quantity",
                       "price",
                     ],
-                    properties: {
-                      category_id: { type: "string" },
-                      descriptor: {
-                        type: "object",
-                        required: ["name"],
-                        properties: {
-                          name: { type: "string" },
-                        },
-                      },
-                      quantity: {
-                        type: "object",
-                        required: ["count", "measure"],
-                        properties: {
-                          count: { type: "number" },
-                          measure: {
-                            type: "object",
-                            required: ["unit", "value"],
-                            properties: {
-                              unit: { type: "string" },
-                              value: { type: "number" },
-                            },
-                          },
-                        },
-                      },
-                      price: {
-                        type: "object",
-                        required: ["currency", "value"],
-                        properties: {
-                          currency: { type: "string" },
-                          value: { type: "string" },
-                        },
-                      },
-                    },
                   },
                 },
                 order: {
                   type: "object",
-                  required: ["id", "weight", "dimensions"],
                   properties: {
-                    id: { type: "string" },
+                    id: {
+                      type: "string",
+                    },
                     weight: {
                       type: "object",
-                      required: ["unit", "value"],
                       properties: {
-                        unit: { type: "string" },
-                        value: { type: "number" },
+                        unit: {
+                          type: "string",
+                          enum: constants.DEAD_wEIGHT,
+                        },
+                        value: {
+                          type: "number",
+                        },
                       },
+                      required: ["unit", "value"],
                     },
                     dimensions: {
                       type: "object",
-                      required: ["length", "breadth", "height"],
                       properties: {
                         length: {
                           type: "object",
-                          required: ["unit", "value"],
                           properties: {
-                            unit: { type: "string" },
-                            value: { type: "number" },
+                            unit: {
+                              type: "string",
+                              enum: constants.UNITS_DIMENSIONS,
+                            },
+                            value: {
+                              type: "number",
+                            },
                           },
+                          required: ["unit", "value"],
                         },
                         breadth: {
                           type: "object",
-                          required: ["unit", "value"],
                           properties: {
-                            unit: { type: "string" },
-                            value: { type: "number" },
+                            unit: {
+                              type: "string",
+                              enum: constants.UNITS_DIMENSIONS,
+                            },
+                            value: {
+                              type: "number",
+                            },
                           },
+                          required: ["unit", "value"],
                         },
                         height: {
                           type: "object",
-                          required: ["unit", "value"],
                           properties: {
-                            unit: { type: "string" },
-                            value: { type: "number" },
+                            unit: {
+                              type: "string",
+                              enum: constants.UNITS_DIMENSIONS,
+                            },
+                            value: {
+                              type: "number",
+                            },
                           },
+                          required: ["unit", "value"],
                         },
                       },
+                      required: ["length", "breadth", "height"],
                     },
                   },
+                  additionalProperties: false,
+                  required: ["id", "weight"],
                 },
               },
+              additionalProperties: false,
+              required: ["items", "order"],
             },
             updated_at: { type: "string", format: "date-time" },
           },

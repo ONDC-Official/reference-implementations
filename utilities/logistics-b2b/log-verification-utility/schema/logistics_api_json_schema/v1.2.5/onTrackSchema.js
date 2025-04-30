@@ -107,17 +107,18 @@ module.exports = {
           properties: {
             id: {
               type: "string",
+              const: {
+                $data: "/init/0/message/order/items/0/fulfillment_id",
+              },
             },
             url: {
               type: "string",
-              format: "uri",
             },
             location: {
               type: "object",
               properties: {
                 gps: {
                   type: "string",
-                  pattern: "^([-+]?\\d{1,2}\\.\\d+),([-+]?\\d{1,3}\\.\\d+)$",
                 },
                 time: {
                   type: "object",
@@ -134,6 +135,7 @@ module.exports = {
                   format: "date-time",
                 },
               },
+
               required: ["gps", "time", "updated_at"],
             },
             status: {
