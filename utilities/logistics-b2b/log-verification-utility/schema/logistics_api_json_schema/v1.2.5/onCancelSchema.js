@@ -203,6 +203,7 @@ module.exports = {
                         },
                       },
                     },
+                    required: ["code"],
                   },
                   time: {
                     type: "object",
@@ -257,7 +258,6 @@ module.exports = {
               required: ["price", "breakup"],
               isQuoteMatching: true,
             },
-
             fulfillments: {
               type: "array",
               minItems: 1,

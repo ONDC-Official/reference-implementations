@@ -1,3 +1,11 @@
+const constants = require("../../../utils/constants");
+const {
+  ORDER_STATE,
+  CANCELLATION_CODE,
+  TITLE_TYPE,
+  FULFILLMENT_STATE,
+} = require("../../../utils/constants");
+
 module.exports = {
   $id: "http://example.com/schema/onStatusSchema",
   type: "object",
@@ -99,42 +107,30 @@ module.exports = {
           properties: {
             id: {
               type: "string",
+              const: { $data: "/confirm/0/message/order/id" },
             },
             state: {
               type: "string",
               enum: ["Completed", "Cancelled", "In-progress", "Pending"],
             },
             cancellation: {
-              type: "object",
-              properties: {
-                cancelled_by: {
-                  type: "string",
-                  format: "hostname",
-                },
-                reason: {
-                  type: "object",
-                  properties: {
-                    id: {
-                      type: "string",
-                      pattern: "^\\d+$",
-                    },
-                  },
-                  required: ["id"],
-                },
-              },
-              required: ["cancelled_by", "reason"],
-              if: {
+              cancelled_by: { type: "string" },
+              reason: {
+                type: "object",
                 properties: {
-                  state: { const: "Cancelled" },
+                  reason: { type: "string", enum: CANCELLATION_CODE },
                 },
               },
-              then: { required: ["cancellation"] },
             },
             provider: {
               type: "object",
               properties: {
                 id: {
                   type: "string",
+                  const: {
+                    $data: "/init/0/message/order/provider/id",
+                  },
+                  errorMessage: "mismatches between /init and /on_status",
                 },
                 locations: {
                   type: "array",
@@ -143,11 +139,14 @@ module.exports = {
                     properties: {
                       id: {
                         type: "string",
+                        const: {
+                          $data:
+                            "/init/0/message/order/provider/locations/0/id",
+                        },
+                        errorMessage: "mismatches between /init and /on_status",
                       },
                     },
-                    required: ["id"],
                   },
-                  minItems: 1,
                 },
               },
               required: ["id"],
@@ -165,14 +164,22 @@ module.exports = {
                   },
                   category_id: {
                     type: "string",
+                    const: {
+                      $data: "/init/0/message/order/items/0/category_id",
+                    },
                   },
                   descriptor: {
                     type: "object",
                     properties: {
                       code: {
                         type: "string",
+                        const: {
+                          $data:
+                            "/init/0/message/order/items/0/descriptor/code",
+                        },
                       },
                     },
+                    required: ["code"],
                   },
                   time: {
                     type: "object",
@@ -182,38 +189,26 @@ module.exports = {
                       },
                       duration: {
                         type: "string",
-                        pattern: "^PT\\d+[MH]$",
                       },
                       timestamp: {
                         type: "string",
-                        format: "date",
                       },
                     },
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: ["id", "fulfillment_id", "category_id", "time"],
+                required: ["id", "category_id", "fulfillment_id"],
               },
-              minItems: 1,
             },
             quote: {
               type: "object",
               properties: {
                 price: {
-                  type: "object",
-                  properties: {
-                    currency: {
-                      type: "string",
-                    },
-                    value: {
-                      type: "string",
-                      pattern: "^\\d+\\.\\d{2}$",
-                    },
-                  },
-                  required: ["currency", "value"],
+                  $ref: "commonSchema#/properties/priceFormat",
                 },
                 breakup: {
                   type: "array",
+                  minItems: 1,
                   items: {
                     type: "object",
                     properties: {
@@ -222,20 +217,10 @@ module.exports = {
                       },
                       "@ondc/org/title_type": {
                         type: "string",
-                        enum: ["delivery", "tax", "rto", "convenience"],
+                        enum: TITLE_TYPE,
                       },
                       price: {
-                        type: "object",
-                        properties: {
-                          currency: {
-                            type: "string",
-                          },
-                          value: {
-                            type: "string",
-                            pattern: "^\\d+\\.\\d{2}$",
-                          },
-                        },
-                        required: ["currency", "value"],
+                        $ref: "commonSchema#/properties/priceFormat",
                       },
                     },
                     required: [
@@ -244,22 +229,21 @@ module.exports = {
                       "price",
                     ],
                   },
-                  minItems: 1,
                 },
               },
               required: ["price", "breakup"],
+              isQuoteMatching: true,
             },
             fulfillments: {
               type: "array",
+              minItems: 1,
               items: {
                 type: "object",
                 properties: {
-                  id: {
-                    type: "string",
-                  },
+                  id: { type: "string" },
                   type: {
                     type: "string",
-                    enum: ["Delivery", "RTO", "Pickup", "Delivery and Pickup"],
+                    enum: constants.FULFILLMENT_TYPE,
                   },
                   "@ondc/org/awb_no": {
                     type: "string",
@@ -272,9 +256,7 @@ module.exports = {
                         properties: {
                           code: {
                             type: "string",
-                          },
-                          short_desc: {
-                            type: "string",
+                            enum: FULFILLMENT_STATE,
                           },
                         },
                         required: ["code"],
@@ -288,10 +270,65 @@ module.exports = {
                   start: {
                     type: "object",
                     properties: {
+                      time: {
+                        type: "object",
+                        properties: {
+                          range: {
+                            type: "object",
+                            properties: {
+                              start: {
+                                type: "string",
+                                pattern:
+                                  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                                errorMessage:
+                                  "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                              },
+                              end: {
+                                type: "string",
+                                pattern:
+                                  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                                errorMessage:
+                                  "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                              },
+                            },
+                            required: ["start", "end"],
+                          },
+                          timestamp: {
+                            type: "string",
+                            pattern:
+                              "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                            errorMessage:
+                              "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                          },
+                        },
+                      },
+                      instructions: {
+                        code: { type: "string" },
+                        type: "object",
+                        properties: {
+                          name: {
+                            type: "string",
+                          },
+                          short_desc: {
+                            type: "string",
+                          },
+                          long_desc: {
+                            type: "string",
+                          },
+                          images: {
+                            type: "array",
+                            items: {
+                              type: "string",
+                            },
+                          },
+                        },
+                      },
                       person: {
                         type: "object",
                         properties: {
-                          name: { type: "string" },
+                          name: {
+                            type: "string",
+                          },
                         },
                       },
                       location: {
@@ -303,200 +340,43 @@ module.exports = {
                           gps: {
                             type: "string",
                             pattern:
-                              "^(-?\\d{1,3}\\.\\d{6,15}),\\s*(-?\\d{1,3}\\.\\d{6,15})$",
+                              "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
+                            errorMessage:
+                              "Incorrect gps value (min 6 decimal digits required)",
                           },
                           address: {
                             type: "object",
                             properties: {
-                              name: { type: "string" },
-                              building: { type: "string" },
-                              locality: { type: "string" },
-                              city: { type: "string" },
-                              state: { type: "string" },
-                              country: { type: "string" },
-                              area_code: { type: "string" },
-                            },
-                            required: [
-                              "name",
-                              "building",
-                              "locality",
-                              "city",
-                              "state",
-                              "country",
-                              "area_code",
-                            ],
-                          },
-                        },
-                        required: ["id", "gps", "address"],
-                      },
-                      contact: {
-                        type: "object",
-                        properties: {
-                          phone: { type: "string", pattern: "^\\d{10}$" },
-                          email: { type: "string", format: "email" },
-                        },
-                      },
-                      time: {
-                        type: "object",
-                        properties: {
-                          duration: { type: "string", pattern: "^PT\\d+[MH]$" },
-                          range: {
-                            type: "object",
-                            properties: {
-                              start: { type: "string", format: "date-time" },
-                              end: { type: "string", format: "date-time" },
-                            },
-                          },
-                          timestamp: { type: "string", format: "date-time" },
-                        },
-                      },
-                      instructions: {
-                        type: "object",
-                        properties: {
-                          code: { type: "string" },
-                          name: { type: "string" },
-                          short_desc: { type: "string" },
-                          long_desc: { type: "string" },
-                          images: {
-                            type: "array",
-                            items: { type: "string", format: "uri" },
-                          },
-                          additional_desc: {
-                            type: "object",
-                            properties: {
-                              content_type: { type: "string" },
-                              url: { type: "string", format: "uri" },
-                            },
-                          },
-                        },
-                      },
-                      authorization: {
-                        type: "object",
-                        properties: {
-                          type: { type: "string"},
-                          token: { type: "string" },
-                          valid_from: { type: "string", format: "date-time" },
-                          valid_to: { type: "string", format: "date-time" },
-                        },
-                      },
-                    },
-                    allOf: [
-                      {
-                        if: {
-                          properties: {
-                            type: {
-                              $data: "2/type", // Reference to fulfillment type from parent
-                            },
-                          },
-                          required: ["type"],
-                        },
-                        then: {
-                          required: [
-                            "person",
-                            "location",
-                            "contact",
-                            "time",
-                            "id",
-                          ],
-                          properties: {
-                            person: { required: ["name"] },
-                            location: {
-                              required: ["id", "gps", "address"],
-                              properties: {
-                                address: {
-                                  required: [
-                                    "name",
-                                    "building",
-                                    "locality",
-                                    "city",
-                                    "state",
-                                    "country",
-                                    "area_code",
-                                  ],
-                                },
+                              name: {
+                                type: "string",
+                                minLength: 3,
+                                not: { const: { $data: "1/locality" } },
+                                errorMessage: "cannot be equal to locality",
                               },
-                            },
-                            contact: { required: ["phone", "email"] },
-                            time: {
-                              required: ["duration", "range", "timestamp"],
-                              properties: {
-                                range: { required: ["start", "end"] },
+                              building: {
+                                type: "string",
+                                minLength: 3,
+                                not: { const: { $data: "1/locality" } },
+                                errorMessage: "cannot be equal to locality",
                               },
-                            },
-                            instructions: {
-                              required: ["code", "name", "short_desc"],
-                            },
-                            authorization: {
-                              required: [
-                                "type",
-                                "token",
-                                "valid_from",
-                                "valid_to",
-                              ],
-                            },
-                          },
-                        },
-                      },
-                      {
-                        if: {
-                          properties: {
-                            type: {
-                              $data: "2/type", // Reference to fulfillment type from parent
-                            },
-                          },
-                          required: ["type"],
-                        },
-                        then: {
-                          // Only basic requirements for RTO
-                          required: ["person"],
-                          properties: {
-                            person: { required: ["name"] },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                  end: {
-                    type: "object",
-                    properties: {
-                      person: {
-                        type: "object",
-                        properties: {
-                          name: { type: "string" },
-                        },
-                        required: ["name"],
-                      },
-                      location: {
-                        type: "object",
-                        properties: {
-                          gps: {
-                            type: "string",
-                            pattern:
-                              "^(-?\\d{1,3}\\.\\d{6,15}),\\s*(-?\\d{1,3}\\.\\d{6,15})$",
-                          },
-                          address: {
-                            type: "object",
-                            properties: {
-                              name: { type: "string" },
-                              building: { type: "string" },
-                              locality: { type: "string" },
-                              city: { type: "string" },
-                              state: { type: "string" },
-                              country: { type: "string" },
+                              locality: {
+                                type: "string",
+                                minLength: 3,
+                              },
+                              city: {
+                                type: "string",
+                              },
+                              state: {
+                                type: "string",
+                              },
+                              country: {
+                                type: "string",
+                              },
                               area_code: {
                                 type: "string",
-                                pattern: "^\\d{6}$",
                               },
                             },
-                            required: [
-                              "name",
-                              "building",
-                              "locality",
-                              "city",
-                              "state",
-                              "country",
-                              "area_code",
-                            ],
+                            isLengthValid: true,
                           },
                         },
                         required: ["gps", "address"],
@@ -504,151 +384,239 @@ module.exports = {
                       contact: {
                         type: "object",
                         properties: {
-                          phone: { type: "string", pattern: "^\\d{10}$" },
-                          email: { type: "string", format: "email" },
+                          phone: {
+                            type: "string",
+                          },
+                          email: {
+                            type: "string",
+                            format: "email",
+                          },
                         },
-                        required: ["phone", "email"],
+                        required: ["phone"],
                       },
+                    },
+                  },
+                  end: {
+                    type: "object",
+                    properties: {
                       time: {
                         type: "object",
                         properties: {
                           range: {
                             type: "object",
                             properties: {
-                              start: { type: "string", format: "date-time" },
-                              end: { type: "string", format: "date-time" },
+                              start: {
+                                type: "string",
+                                pattern:
+                                  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                                errorMessage:
+                                  "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                              },
+                              end: {
+                                type: "string",
+                                pattern:
+                                  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                                errorMessage:
+                                  "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                              },
                             },
                             required: ["start", "end"],
                           },
-                          timestamp: { type: "string", format: "date-time" },
+                          timestamp: {
+                            type: "string",
+                            pattern:
+                              "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                            errorMessage:
+                              "should be in RFC 3339 (YYYY-MM-DDTHH:MN:SS.MSSZ) Format",
+                          },
                         },
-                        required: ["range", "timestamp"],
                       },
                       instructions: {
+                        code: { type: "string" },
                         type: "object",
                         properties: {
-                          code: { type: "string" },
-                          name: { type: "string" },
-                          short_desc: { type: "string" },
-                          long_desc: { type: "string" },
+                          name: {
+                            type: "string",
+                          },
+                          short_desc: {
+                            type: "string",
+                          },
+                          long_desc: {
+                            type: "string",
+                          },
+                          images: {
+                            type: "array",
+                            items: {
+                              type: "string",
+                            },
+                          },
                         },
-                        required: ["code", "name", "short_desc"],
                       },
-                      authorization: {
+                      person: {
                         type: "object",
                         properties: {
-                          type: { type: "string",  },
-                          token: { type: "string" },
-                          valid_from: { type: "string", format: "date-time" },
-                          valid_to: { type: "string", format: "date-time" },
+                          name: {
+                            type: "string",
+                          },
                         },
-                        required: ["type", "token", "valid_from", "valid_to"],
+                      },
+                      location: {
+                        type: "object",
+                        properties: {
+                          gps: {
+                            type: "string",
+                            pattern:
+                              "^(-?[0-9]{1,3}(?:.[0-9]{6,15})?),( )*?(-?[0-9]{1,3}(?:.[0-9]{6,15})?)$",
+                            errorMessage:
+                              "Incorrect gps value (min 6 decimal digits required)",
+                          },
+                          address: {
+                            type: "object",
+                            properties: {
+                              name: {
+                                type: "string",
+                                minLength: 3,
+                                not: { const: { $data: "1/locality" } },
+                                errorMessage: "cannot be equal to locality",
+                              },
+                              building: {
+                                type: "string",
+                                minLength: 3,
+                                not: { const: { $data: "1/locality" } },
+                                errorMessage: "cannot be equal to locality",
+                              },
+                              locality: {
+                                type: "string",
+                                minLength: 3,
+                              },
+                              city: {
+                                type: "string",
+                              },
+                              state: {
+                                type: "string",
+                              },
+                              country: {
+                                type: "string",
+                              },
+                              area_code: {
+                                type: "string",
+                              },
+                            },
+                            isLengthValid: true,
+                          },
+                        },
+                        required: ["gps", "address"],
+                      },
+                      contact: {
+                        type: "object",
+                        properties: {
+                          phone: {
+                            type: "string",
+                          },
+                          email: {
+                            type: "string",
+                            format: "email",
+                          },
+                        },
+                        required: ["phone"],
                       },
                     },
-                    required: ["person", "location", "contact", "time"],
                   },
                   agent: {
                     type: "object",
                     properties: {
-                      name: { type: "string" },
-                      phone: { type: "string", pattern: "^\\d{10}$" },
+                      name: {
+                        type: "string",
+                      },
+                      phone: {
+                        type: "string",
+                      },
                     },
-                    required: ["name", "phone"],
                   },
                   vehicle: {
                     type: "object",
                     properties: {
-                      registration: { type: "string" },
+                      registration: {
+                        type: "string",
+                      },
                     },
                     required: ["registration"],
                   },
-                  "@ondc/org/ewaybillno": { type: "string" },
+                  "@ondc/org/ewaybillno": {
+                    type: "string",
+                  },
                   "@ondc/org/ebnexpirydate": {
                     type: "string",
-                    format: "date-time",
-                  },
-                  tags: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        code: { type: "string" },
-                        list: {
-                          type: "array",
-                          items: {
-                            type: "object",
-                            properties: {
-                              code: { type: "string" },
-                              value: { type: "string" },
-                            },
-                            required: ["code", "value"],
-                          },
-                        },
-                      },
-                      required: ["code", "list"],
-                    },
                   },
                 },
                 allOf: [
                   {
-                    if: {
-                      properties: { type: { const: "Delivery" } },
-                      required: ["type"],
-                    },
+                    if: { properties: { type: { const: "Delivery" } } },
                     then: {
-                      required: ["start", "end", "agent", "tags"],
+                      properties: {
+                        start: {
+                          properties: {
+                            time: { required: ["range"] },
+                          },
+                          required: ["time", "person", "location", "contact"],
+                        },
+
+                        end: {
+                          properties: {
+                            time: { required: ["range"] },
+                          },
+                          required: ["time", "person", "location", "contact"],
+                        },
+                      },
+                      required: [
+                        "id",
+                        "type",
+                        "state",
+                        "tracking",
+                        "start",
+                        "end",
+                      ],
                     },
-                  },
-                  {
-                    if: {
-                      properties: { type: { const: "Delivery and Pickup" } },
-                      required: ["type"],
-                    },
-                    then: {
-                      required: ["start", "end", "agent", "tags"],
+                    else: {
+                      properties: {
+                        start: {
+                          properties: {
+                            time: { required: ["timestamp"] },
+                          },
+                          required: ["time"],
+                        },
+                      },
+                      required: ["id", "type", "state", "start"],
                     },
                   },
                 ],
-                required: ["id", "type", "state"],
               },
-              minItems: 1,
             },
             payment: {
               type: "object",
               properties: {
                 "@ondc/org/collection_amount": {
                   type: "string",
-                  pattern: "^\\d+\\.\\d{2}$",
+                  const: {
+                    $data:
+                      "/on_confirm/0/message/order/payment/@ondc~1org~1collection_amount",
+                  },
                 },
                 type: {
                   type: "string",
-                  enum: ["POST-FULFILLMENT", "ON-ORDER", "ON-FULFILLMENT"],
-                },
-                collected_by: {
-                  type: "string",
-                  enum: ["BPP", "BAP"],
-                },
-                "@ondc/org/settlement_basis": {
-                  type: "string",
-                  enum: ["invoicing", "shipment", "delivery"],
-                },
-                "@ondc/org/settlement_window": {
-                  type: "string",
-                  pattern: "^P\\d+D$",
+                  const: {
+                    $data: "/on_confirm/0/message/order/payment/type",
+                  },
                 },
                 status: {
                   type: "string",
                   enum: ["PAID", "NOT-PAID"],
                 },
-                time: {
-                  type: "object",
-                  properties: {
-                    timestamp: {
-                      type: "string",
-                      format: "date-time",
-                    },
+                collected_by: {
+                  type: "string",
+                  const: {
+                    $data: "/on_confirm/0/message/order/payment/collected_by",
                   },
-                  required: ["timestamp"],
                 },
                 "@ondc/org/settlement_details": {
                   type: "array",
@@ -660,7 +628,6 @@ module.exports = {
                       },
                       settlement_type: {
                         type: "string",
-                        enum: ["upi", "neft", "rtgs", "wallet"],
                       },
                       upi_address: {
                         type: "string",
@@ -673,30 +640,30 @@ module.exports = {
                       },
                       settlement_status: {
                         type: "string",
-                        enum: ["PAID", "NOT-PAID"],
                       },
                       settlement_reference: {
                         type: "string",
                       },
                       settlement_timestamp: {
                         type: "string",
-                        format: "date-time",
                       },
                     },
-                    required: [
-                      "settlement_counterparty",
-                      "settlement_type",
-                      "settlement_status",
-                      "settlement_timestamp",
-                    ],
+                    required: ["settlement_counterparty", "settlement_type"],
                   },
+                },
+                "@ondc/org/settlement_basis": {
+                  type: "string",
+                  enum: ["invoicing", "shipment", "delivery"],
+                },
+                "@ondc/org/settlement_window": {
+                  type: "string",
+                  pattern: "^P\\d+D$",
                 },
               },
               required: [
                 "type",
                 "collected_by",
                 "status",
-                "time",
                 "@ondc/org/settlement_window",
                 "@ondc/org/settlement_basis",
               ],
@@ -716,31 +683,75 @@ module.exports = {
               properties: {
                 name: {
                   type: "string",
+                  const: {
+                    $data: "/confirm/0/message/order/billing/name",
+                  },
+                  errorMessage:
+                    "mismatches in /billing in /confirm and /on_status",
                 },
                 address: {
                   type: "object",
                   properties: {
                     name: {
                       type: "string",
+                      not: { const: { $data: "1/locality" } },
+                      const: {
+                        $data: "/confirm/0/message/order/billing/address/name",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                     building: {
                       type: "string",
+                      const: {
+                        $data:
+                          "/confirm/0/message/order/billing/address/building",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                     locality: {
                       type: "string",
+                      const: {
+                        $data:
+                          "/confirm/0/message/order/billing/address/locality",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                     city: {
                       type: "string",
+                      const: {
+                        $data: "/confirm/0/message/order/billing/address/city",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                     state: {
                       type: "string",
+                      const: {
+                        $data: "/confirm/0/message/order/billing/address/state",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                     country: {
                       type: "string",
+                      const: {
+                        $data:
+                          "/confirm/0/message/order/billing/address/country",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                     area_code: {
                       type: "string",
-                      pattern: "^\\d{6}$",
+                      const: {
+                        $data:
+                          "/confirm/0/message/order/billing/address/area code",
+                      },
+                      errorMessage:
+                        "mismatches in /billing in /confirm and /on_status",
                     },
                   },
                   required: [
@@ -755,196 +766,41 @@ module.exports = {
                 },
                 tax_number: {
                   type: "string",
+                  const: {
+                    $data: "/confirm/0/message/order/billing/tax_number",
+                  },
+                  errorMessage:
+                    "mismatches in /billing in /confirm and /on_status",
                 },
                 phone: {
                   type: "string",
-                  pattern: "^\\d{10}$",
+                  const: {
+                    $data: "/confirm/0/message/order/billing/phone",
+                  },
+                  errorMessage:
+                    "mismatches in /billing in /confirm and /on_status",
                 },
                 email: {
                   type: "string",
-                  format: "email",
+                  const: {
+                    $data: "/confirm/0/message/order/billing/email",
+                  },
+                  errorMessage:
+                    "mismatches in /billing in /confirm and /on_status",
                 },
               },
-              required: ["name", "address", "phone", "email"],
+
+              required: ["name", "address", "phone", "email", "tax_number"],
             },
             "@ondc/org/linked_order": {
-              type: "object",
-              properties: {
-                items: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      category_id: {
-                        type: "string",
-                      },
-                      descriptor: {
-                        type: "object",
-                        properties: {
-                          name: {
-                            type: "string",
-                          },
-                        },
-                        required: ["name"],
-                      },
-                      quantity: {
-                        type: "object",
-                        properties: {
-                          count: {
-                            type: "integer",
-                          },
-                          measure: {
-                            type: "object",
-                            properties: {
-                              unit: {
-                                type: "string",
-                              },
-                              value: {
-                                type: "number",
-                              },
-                            },
-                            required: ["unit", "value"],
-                          },
-                        },
-                        required: ["count", "measure"],
-                      },
-                      price: {
-                        type: "object",
-                        properties: {
-                          currency: {
-                            type: "string",
-                          },
-                          value: {
-                            type: "string",
-                            pattern: "^\\d+\\.\\d{2}$",
-                          },
-                        },
-                        required: ["currency", "value"],
-                      },
-                    },
-                    required: [
-                      "category_id",
-                      "descriptor",
-                      "quantity",
-                      "price",
-                    ],
-                  },
+              allOf: [
+                {
+                  $ref: "confirmSchema#/properties/message/properties/order/properties/@ondc~1org~1linked_order",
                 },
-                provider: {
-                  type: "object",
-                  properties: {
-                    descriptor: {
-                      type: "object",
-                      properties: {
-                        name: {
-                          type: "string",
-                        },
-                      },
-                      required: ["name"],
-                    },
-                    address: {
-                      type: "object",
-                      properties: {
-                        name: {
-                          type: "string",
-                        },
-                        building: {
-                          type: "string",
-                        },
-                        street: {
-                          type: "string",
-                        },
-                        locality: {
-                          type: "string",
-                        },
-                        city: {
-                          type: "string",
-                        },
-                        state: {
-                          type: "string",
-                        },
-                        area_code: {
-                          type: "string",
-                          pattern: "^\\d{6}$",
-                        },
-                      },
-                      required: [
-                        "name",
-                        "building",
-                        "locality",
-                        "city",
-                        "state",
-                        "area_code",
-                      ],
-                    },
-                  },
-                  required: ["descriptor", "address"],
+                {
+                  $data: "/confirm/0/message/order/@ondc~1org~1linked_order",
                 },
-                order: {
-                  type: "object",
-                  properties: {
-                    id: {
-                      type: "string",
-                    },
-                    weight: {
-                      type: "object",
-                      properties: {
-                        unit: {
-                          type: "string",
-                        },
-                        value: {
-                          type: "number",
-                        },
-                      },
-                      required: ["unit", "value"],
-                    },
-                    dimensions: {
-                      type: "object",
-                      properties: {
-                        length: {
-                          type: "object",
-                          properties: {
-                            unit: {
-                              type: "string",
-                            },
-                            value: {
-                              type: "number",
-                            },
-                          },
-                          required: ["unit", "value"],
-                        },
-                        breadth: {
-                          type: "object",
-                          properties: {
-                            unit: {
-                              type: "string",
-                            },
-                            value: {
-                              type: "number",
-                            },
-                          },
-                          required: ["unit", "value"],
-                        },
-                        height: {
-                          type: "object",
-                          properties: {
-                            unit: {
-                              type: "string",
-                            },
-                            value: {
-                              type: "number",
-                            },
-                          },
-                          required: ["unit", "value"],
-                        },
-                      },
-                      required: ["length", "breadth", "height"],
-                    },
-                  },
-                  required: ["id", "weight", "dimensions"],
-                },
-              },
-              required: ["items", "provider", "order"],
+              ],
             },
             tags: {
               type: "array",
@@ -953,6 +809,12 @@ module.exports = {
                 properties: {
                   code: {
                     type: "string",
+                    enum: [
+                      "linked_provider",
+                      "linked_order",
+                      "linked_order_item",
+                      "shipping_label",
+                    ],
                   },
                   list: {
                     type: "array",
@@ -963,7 +825,7 @@ module.exports = {
                           type: "string",
                         },
                         value: {
-                          type: "string",
+                          type: ["string", "number"],
                         },
                       },
                       required: ["code", "value"],
@@ -983,11 +845,11 @@ module.exports = {
             "state",
             "provider",
             "items",
-            "tags",
             "quote",
             "fulfillments",
             "payment",
             "billing",
+            "cancellation",
             "updated_at",
           ],
         },
