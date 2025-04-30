@@ -7,12 +7,13 @@ const checkInit = (data, msgIdSet) => {
   const billing = data.message.order.billing;
   const billingAdd = billing.address;
   const contextTimestamp = data?.context.timestamp;
+  const cod_order = dao.getValue("cod_order");
   const initObj = {};
   let init = data;
   let p2h2p = false;
   init = init.message.order;
 
-  let itemsArr = init.items;
+  let itemsArr = init?.items;
   let fulfillmentsArr = init?.fulfillments;
   let bppFulfillmentsArr = dao.getValue("bppFulfillmentsArr");
   let onSearchitemsArr;
@@ -24,7 +25,7 @@ const checkInit = (data, msgIdSet) => {
     if (init.provider) {
       onSearchitemsArr = dao.getValue(`${init.provider.id}itemsArr`);
       let providerObj = providersArr?.filter(
-        (prov) => prov.id === init?.provider?.id
+        (prov) => prov?.id === init?.provider?.id
       );
       if (!providerObj || providerObj?.length < 1) {
         initObj.prvdrErr = `Provider with id '${init.provider.id}' does not exist in the catalog provided in /on_search`;
@@ -107,10 +108,39 @@ const checkInit = (data, msgIdSet) => {
           ] = `Descriptor code '${item?.descriptor?.code}' for item with id '${item?.id}' does not match with the catalog provided in /on_search`;
         }
         fulfillmentsArr.forEach((fulfillment, i) => {
-          fulfillment?.tags?.map((item) => {
-            if (item?.code === "linked_provider")
+          fulfillment?.tags?.forEach((item) => {
+            if (item?.code === "linked_provider") {
               dao.setValue("init_linked_provider", item);
+            }
           });
+          if (cod_order) {
+            const linkedOrderTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "linked_order"
+            );
+            const codOrderItem = linkedOrderTag.list?.find(
+              (item) => item.code === "cod_order"
+            );
+            if (!linkedOrderTag) {
+              initObj.codOrderErr = `linked_order tag is mandatory in /init when order type is COD`;
+            } else if (!codOrderItem) {
+              initObj.codOrderErr = `cod_order code must be present inside linked_order for COD`;
+            }
+            const requiredFields = [
+              "currency",
+              "declared_value",
+              "collection_amount",
+            ];
+            const missingFields = requiredFields.filter(
+              (field) =>
+                !linkedOrderTag.list?.some((item) => item.code === field)
+            );
+
+            if (missingFields.length > 0) {
+              initObj.codOrderMissingPropertyErr = `Missing required fields in linked_order: ${missingFields.join(
+                ", "
+              )}`;
+            }
+          }
           if (fulfillment?.id !== itemObj?.fulfillment_id) {
             let itemkey = `flfillmentErr${i}`;
             initObj[

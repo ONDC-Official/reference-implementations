@@ -12,7 +12,7 @@ const checkOnSearch = async (data, msgIdSet) => {
   const contextTimestamp = new Date(timestamp || "");
   let search = dao.getValue("searchObj");
   let validFulfillmentIDs = new Set();
-  const code_order = dao.getValue("cod_order");
+  const cod_order = dao.getValue("cod_order");
   onSearch = onSearch.message.catalog;
   let avgPickupTime;
   /**
@@ -66,9 +66,22 @@ const checkOnSearch = async (data, msgIdSet) => {
     );
     if (onSearch.hasOwnProperty("bpp/providers")) {
       onSearch["bpp/providers"].forEach((provider) => {
-        provider.categories.forEach((category) => {
-          const catName = category.id;
-          const categoryTime = category.time;
+        if (cod_order) {
+          if (!provider?.tags) {
+            onSrchObj.codOrder = `cod_order tag is mandatory in ${constants.LOG_ONSEARCH} call "bpp/provider/tags"`;
+          } else if (
+            !provider.tags.some(
+              (tag) =>
+                tag.code === "special_req" &&
+                tag.list?.some((item) => item.code === "cod_order")
+            )
+          ) {
+            onSrchObj.codOrder = `cod_order tag is mandatory in ${constants.LOG_ONSEARCH} call in "bpp/provider/tags"`;
+          }
+        }
+        provider?.categories?.forEach((category) => {
+          const catName = category?.id;
+          const categoryTime = category?.time;
           const currentDate = timestamp.split("T")[0];
           const dateObj = new Date(currentDate);
           const nextDate = new Date(dateObj.setDate(dateObj.getDate() + 1))
@@ -94,9 +107,9 @@ const checkOnSearch = async (data, msgIdSet) => {
           ) {
             onSrchObj.catTAT = `For Next Day Delivery, TAT date should be the next date i.e. ${nextDate}`;
           }
-          provider.items.forEach((item, i) => {
-            const catId = item.category_id;
-            const itemTime = item.time;
+          provider?.items?.forEach((item, i) => {
+            const catId = item?.category_id;
+            const itemTime = item?.time;
             const itemTimestamp =
               core_version == "1.1.0"
                 ? itemTime?.timestamp?.split("T")[0]
