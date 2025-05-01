@@ -23,9 +23,9 @@ The following environment variables can be set to customize the behavior of the 
 | Environment Variable | Description                                                     | Default Value                                                                                                                       |
 | -------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `REGISTRY_URL`     | The URL of the ONDC registry to which the POST request is sent. | `https://staging.registry.ondc.org/v2.0/lookup`                                                                                   |
-| `SUBSCRIBER_ID`    | The subscriber ID used for generating the authorization header. | `staging-automation.ondc.org/api-service/ONDC:LOG10/1.2.5`                                                                        |
-| `UNIQUE_KEY_ID`    | The unique key ID used for generating the authorization header. | `ONDC:LOG10-1.2.5-protocol-workbench-staging`                                                                                     |
-| `PRIVATE_KEY`      | The private key used for generating the authorization header.   | `TNQyLktBlHNYIecRgfgNaR+F2JgdAP1xTDng2vuOWL0YMB5ZoixsNDtExgDkBHOkoizQ5WN9qzs9NQaa1Vr6yg==` (Replace with your actual private key) |
+| `SUBSCRIBER_ID`    | The subscriber ID used for generating the authorization header. | `staging-automation.ondc.org`                                                                        |
+| `UNIQUE_KEY_ID`    | The unique key ID used for generating the authorization header. | `unique_key_id`                                                                                     |
+| `PRIVATE_KEY`      | The private key used for generating the authorization header.   | `TNQyLktBlHNYIecRgfgNaR+F2JgdAP1xTDng2vuOWL0YMB5DtExgDkBHOkoizQ5WN9qzs9NQaa1Vr6yg==` (Replace with your actual private key) |
 
 ---
 
