@@ -173,7 +173,7 @@ const checkOnStatus = (data, msgIdSet) => {
             onStatusObj.delvryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
           }
         }
-        if (ffState === "Out-for-delivery") {
+        if (ffState === "Out-for-delivery" ||ffState === "At-destination-hub"|| ffState === "In-transit" ) {
           if (orderState !== "In-progress") {
             onStatusObj.ordrStatErr = `Order state should be 'In-progress' for fulfillment state - ${ffState}`;
           }

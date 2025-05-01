@@ -198,21 +198,38 @@ const timestampCheck = (date) => {
 };
 
 const getVersion = (data, vertical) => {
+  // Helper to extract version from the first element of any API array
+  const getFirstVersion = (data) => {
+    for (const key in data) {
+      if (Array.isArray(data[key]) && data[key][0]?.context) {
+        return (
+          data[key][0].context.version || data[key][0].context.core_version
+        );
+      }
+    }
+    return null; // Return null if no version is found
+  };
+
+  const version = getFirstVersion(data);
+
+  // Determine the output based on the vertical and extracted version
   if (vertical === "logistics") {
-    if (data?.search && data?.search[0]?.context?.version === "2.0.0")
-      return "v2.0";
-    if (data?.search && data?.search[0]?.context?.core_version === "1.1.0")
-      return "v1.1";
-    else return "v1.2";
+    if (version === "2.0.0") return "v2.0";
+    if (version === "1.1.0") return "v1.1";
+    return "v1.2";
   }
+
   if (vertical === "b2b") {
-    if (data?.search && data?.search[0]?.context?.version === "2.0.1")
-      return "v1";
-    else return "v2";
+    if (version === "2.0.1") return "v1";
+    return "v2";
   }
+
   if (vertical === "services") return "v2";
   if (vertical === "b2c-exports") return "v2.0.2";
+
+  return "Unknown version";
 };
+
 function compareDates(dateString1, dateString2) {
   const date1 = new Date(dateString1);
   const date2 = new Date(dateString2);
@@ -436,10 +453,10 @@ const findMissingTags = (list, code, mandatoryAttr) => {
   return missingAttr;
 };
 
-const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => { 
+const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
   console.log(`Checking mandatory attributes for ${categoryName}`);
   items.forEach((item, index) => {
-    console.log("Item in items", item.tags)
+    console.log("Item in items", item.tags);
     let attributeTag = null;
     let originTag = null;
     for (const tag of item.tags) {
@@ -536,7 +553,7 @@ const checkMandatoryTags = (i, items, errorObj, categoryJSON, categoryName) => {
             }
           }
         }
-      } else {   
+      } else {
         const key = `invalidCategoryId${ctgrID}`;
         errorObj[key] = `Invalid category_id (${ctgrID}) for ${categoryName}`;
       }
