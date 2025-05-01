@@ -16,8 +16,7 @@ const checkOnStatus = (data, msgIdSet) => {
   let fulfillments = on_status.fulfillments;
   let pickupTime, deliveryTime, RtoPickupTime, RtoDeliveredTime;
   let paymentStatus = on_status?.payment?.status;
-  let trackingEnabled= false;
-
+  let trackingEnabled = false;
 
   if (on_status.state === "Complete" && payment.type === "ON-FULFILLMENT") {
     if (paymentStatus !== "PAID") {
@@ -50,10 +49,76 @@ const checkOnStatus = (data, msgIdSet) => {
   } catch (error) {
     console.log(error);
   }
+
+  try {
+    const isRtoFulfillment = fulfillments.find(
+      (fulfillment) => fulfillment.type === "RTO"
+    );
+
+    if (isRtoFulfillment) {
+      const RtoItemId = items?.find(
+        (item) => item.fulfillment_id === isRtoFulfillment.id
+      );
+
+      if (!RtoItemId) {
+        onStatusObj.itemIdErr = "RTO Item is missing in the order";
+      }
+
+      const breakupItems = on_status?.quote?.breakup || [];
+      let RtoQuoteItem = null;
+      let RtoTax = null;
+      let foundDeliveryItem = false;
+      let foundDeliveryTax = false;
+
+      for (const item of breakupItems) {
+        if (item["@ondc/org/item_id"] === RtoItemId?.id) {
+          if (item["@ondc/org/title_type"] === "rto") {
+            RtoQuoteItem = item;
+          }
+          if (item["@ondc/org/title_type"] === "tax") {
+            RtoTax = item;
+          }
+        }
+
+        if (item["@ondc/org/title_type"] === "delivery") {
+          foundDeliveryItem = true;
+        }
+
+        if (
+          item["@ondc/org/title_type"] === "tax" &&
+          item["@ondc/org/item_id"] !== RtoItemId?.id
+        ) {
+          foundDeliveryTax = true;
+        }
+      }
+
+      if (!foundDeliveryItem) {
+        onStatusObj.deliveryItem =
+          "Delivery Quote Item is missing in the breakup array.";
+      }
+
+      if (!foundDeliveryTax) {
+        onStatusObj.deliveryTax =
+          "Delivery Tax is missing in the breakup array.";
+      }
+
+      if (!RtoQuoteItem) {
+        onStatusObj.rtoQuoteItemErr =
+          "RTO Quote Item is missing in the breakup array.";
+      }
+
+      if (!RtoTax) {
+        onStatusObj.rtoTaxErr = "RTO Tax is missing in the breakup array.";
+      }
+    }
+  } catch (error) {
+    console.log("Error processing RTO fulfillment:", error);
+  }
+
   try {
     fulfillments.forEach((fulfillment) => {
       ffState = fulfillment?.state?.descriptor?.code;
-      let fulfillmentTags= fulfillment?.tags
+      let fulfillmentTags = fulfillment?.tags;
       console.log(
         `Comparing pickup and delivery timestamps for on_status_${ffState}`
       );
@@ -62,15 +127,15 @@ const checkOnStatus = (data, msgIdSet) => {
         fulfillment.type === "CoD" ||
         fulfillment.type === "Delivery"
       ) {
-
-        if(fulfillmentTags){
-          fulfillmentTags.forEach(tag=>{
-            if(tag.code==='tracking') trackingEnabled = true
-          })
+        if (fulfillmentTags) {
+          fulfillmentTags.forEach((tag) => {
+            if (tag.code === "tracking") trackingEnabled = true;
+          });
         }
         if (
           categoryId === "Immediate Delivery" &&
-          fulfillment.tracking !== true && ffState!=='Cancelled'
+          fulfillment.tracking !== true &&
+          ffState !== "Cancelled"
         ) {
           onStatusObj.trckErr = `tracking should be enabled (true) for hyperlocal (Immediate Delivery)`;
         }
@@ -89,8 +154,8 @@ const checkOnStatus = (data, msgIdSet) => {
           }
         }
         if (ffState === "Order-picked-up") {
-          if(!trackingEnabled && fulfillment.tracking === true){
-            onStatusObj.trackingTagErr=`tracking tag to be provided in fulfillments/tags`
+          if (!trackingEnabled && fulfillment.tracking === true) {
+            onStatusObj.trackingTagErr = `tracking tag to be provided in fulfillments/tags`;
           }
           if (orderState !== "In-progress") {
             onStatusObj.ordrStatErr = `Order state should be 'In-progress' for fulfillment state - ${ffState}`;
@@ -164,7 +229,11 @@ const checkOnStatus = (data, msgIdSet) => {
               onStatusObj.msngPickupTimeErr = `Pickup timestamp (fulfillments/start/time/timestamp) is missing for fulfillment state - ${ffState}`;
             }
           }
-        
+
+          if (fulfillment.end.time.timestamp) {
+            onStatusObj.delvryTimeErr = `Delivery timestamp (fulfillments/end/time/timestamp) cannot be provided for fulfillment state - ${ffState}`;
+          }
+
           if (fulfillment.start.time.timestamp && dao.getValue("pickupTime")) {
             if (
               !_.isEqual(
@@ -187,43 +256,42 @@ const checkOnStatus = (data, msgIdSet) => {
           }
         }
       } else if (fulfillment.type === "RTO" || fulfillment.type === "Return") {
+        const startTimestamp = fulfillment?.start?.time?.timestamp;
+        const endTimestamp = fulfillment?.end?.time?.timestamp;
+
         if (orderState !== "Cancelled") {
           onStatusObj.ordrStatErr = `Order state should be 'Cancelled' for fulfillment state - ${ffState}`;
         }
-        if (ffState === "RTO-Initiated" && fulfillment.type === "Prepaid") {
-          RtoPickupTime = fulfillment?.start?.time?.timestamp;
-          console.log(RtoPickupTime);
-          if (RtoPickupTime) {
+        if (ffState === "RTO-Initiated") {
+          if (!startTimestamp) {
+            onStatusObj.rtoPickupTimeErr = `RTO Pickup (fulfillments/start/time/timestamp) time is missing for fulfillment state - ${ffState}`;
+          }
+          if (endTimestamp) {
+            onStatusObj.rtoDeliveryTimeErr = `RTO Delivered Timestamp (fulfillments/end/time/timestamp) time is not required in end state because item is not delivered yet for fulfillment state - ${ffState}`;
+          }
+          if (startTimestamp) {
             dao.setValue("RtoPickupTime", RtoPickupTime);
           } else {
             onStatusObj.rtoPickupTimeErr = `RTO Pickup (fulfillments/start/time/timestamp) time is missing for fulfillment state - ${ffState}`;
           }
-          if (_.gt(RtoPickupTime, contextTime)) {
+          if (_.gt(startTimestamp, contextTime)) {
             onStatusObj.rtoPickupErr = `RTO Pickup (fulfillments/start/time/timestamp) time cannot be future dated for fulfillment state - ${ffState}`;
           }
         }
 
         if (ffState === "RTO-Delivered" || ffState === "RTO-Disposed") {
-          RtoDeliveredTime = fulfillment?.end?.time?.timestamp;
-          console.log(RtoDeliveredTime,"rto delivered");
-          
-          if (!RtoDeliveredTime && (ffState === "RTO-Delivered" ||ffState === "RTO-Disposed"))
-            onStatusObj.rtoDlvryTimeErr = `fulfillments/end/time/timestamp is missing for RTO fulfillment with state - ${ffState}`;
-          if (
-            fulfillment.start.time.timestamp &&
-            dao.getValue("RtoPickupTime")
-          ) {
-            if (
-              !_.isEqual(
-                fulfillment.start.time.timestamp,
-                dao.getValue("RtoPickupTime")
-              )
-            ) {
+          if (!startTimestamp && ffState === "RTO-Delivered") {
+            onStatusObj.rtoPickupTimeErr = `RTO Pickup timestamp (fulfillments/start/time/timestamp) is missing for fulfillment state - ${ffState}`;
+          }
+          if (!endTimestamp && ffState === "RTO-Delivered")
+            onStatusObj.rtoDlvryTimeErr = `RTO Delivery timestamp (fulfillments/end/time/timestamp) is missing for fulfillment state - ${ffState}`;
+          if (startTimestamp && dao.getValue("RtoPickupTime")) {
+            if (!_.isEqual(RtoPickupTime, dao.getValue("RtoPickupTime"))) {
               onStatusObj.rtoPickupErr = `RTO Pickup time (fulfillments/start/time/timestamp) cannot change for fulfillment state - ${ffState}`;
             }
           }
-          if (RtoDeliveredTime && _.gt(RtoDeliveredTime, contextTime)) {
-            onStatusObj.rtoDeliveredErr = `RTO Delivery/Disposed time (fulfillments/end/time/timestamp) cannot be future dated for fulfillment state - ${ffState}`;
+          if (endTimestamp && _.gt(startTimestamp, contextTime)) {
+            onStatusObj.rtoDeliveredErr = `RTO Delivery time (fulfillments/end/time/timestamp) cannot be future dated for fulfillment state - ${ffState}`;
           }
         }
       }

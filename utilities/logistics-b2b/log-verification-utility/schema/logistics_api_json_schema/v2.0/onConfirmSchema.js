@@ -301,6 +301,7 @@ module.exports = {
                         properties: {
                           code: {
                             type: "string",
+                            enum: FULFILLMENT_STATES,
                           },
                         },
                         required: ["code"],

@@ -260,45 +260,48 @@ module.exports = {
                     },
                   },
                   tags: {
-                    type: "object",
-                    properties: {
-                      descriptor: {
-                        type: "object",
-                        properties: {
-                          code: {
-                            type: "string",
-                            enum: ["Delivery_Terms"],
-                          },
-                        },
-                        required: ["code"],
-                      },
-                      list: {
-                        type: "array",
-                        items: [
-                          {
-                            type: "object",
-                            properties: {
-                              descriptor: {
-                                type: "object",
-                                properties: {
-                                  code: {
-                                    type: "string",
-                                    enum: [
-                                      "INCOTERMS",
-                                      "NAMED_PLACE_OF_DELIVERY",
-                                    ],
-                                  },
-                                },
-                                required: ["code"],
-                              },
-                              value: {
-                                type: "string",
-                                enum: ["CIF", "EXW", "FOB", "DAP", "DDP"],
-                              },
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        descriptor: {
+                          type: "object",
+                          properties: {
+                            code: {
+                              type: "string",
+                              enum: ["Delivery_Terms"],
                             },
-                            required: ["descriptor", "value"],
                           },
-                        ],
+                          required: ["code"],
+                        },
+                        list: {
+                          type: "array",
+                          items: [
+                            {
+                              type: "object",
+                              properties: {
+                                descriptor: {
+                                  type: "object",
+                                  properties: {
+                                    code: {
+                                      type: "string",
+                                      enum: [
+                                        "INCOTERMS",
+                                        "NAMED_PLACE_OF_DELIVERY",
+                                      ],
+                                    },
+                                  },
+                                  required: ["code"],
+                                },
+                                value: {
+                                  type: "string",
+                                  enum: ["CIF", "EXW", "FOB", "DAP", "DDP"],
+                                },
+                              },
+                              required: ["descriptor", "value"],
+                            },
+                          ],
+                        },
                       },
                     },
                   },
@@ -526,7 +529,7 @@ module.exports = {
                 },
                 required: ["descriptor", "list"],
               },
-			  validateAcceptBPP_Terms:true
+              validateAcceptBPP_Terms: true,
             },
             created_at: {
               type: "string",
@@ -535,7 +538,7 @@ module.exports = {
               type: "string",
             },
           },
-		  validateTime:true,
+          validateTime: true,
           required: [
             "id",
             "status",

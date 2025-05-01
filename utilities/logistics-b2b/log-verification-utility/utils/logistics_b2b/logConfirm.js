@@ -43,6 +43,7 @@ const checkConfirm = (data, msgIdSet) => {
     console.log("Checking if tags are same between /search and /confirm");
     let searchTags = search?.tags;
     let confirmTags = confirm?.tags;
+    let confirmPayment = confirm?.payments;
     searchTags.push(transformedBPPTerms);
     searchTags.forEach((searchTag) => {
       const matchingConfirmTag = confirmTags.find(
@@ -170,6 +171,23 @@ const checkConfirm = (data, msgIdSet) => {
     console.error(
       "Error occured while checking created_at and updated_at in /confirm"
     );
+  }
+
+  try {
+    const validatePayments = confirmPayment?.some((payment) => {
+      return (
+        payment?.type === "ON-ORDER" &&
+        payment?.collected_by === "BAP" &&
+        !payment?.params?.transaction_id
+      );
+    });
+
+    if (validatePayments) {
+      confirmObj["payment_transaction_id_err"] =
+        "transaction_id is missing in payment params if collector is BAP";
+    }
+  } catch (error) {
+    console.error("Error occured while checking confirm payment array");
   }
 
   dao.setValue("confirmObj", confirm);
