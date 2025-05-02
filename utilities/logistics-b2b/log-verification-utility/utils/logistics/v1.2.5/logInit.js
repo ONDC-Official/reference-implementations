@@ -7,7 +7,9 @@ const checkInit = (data, msgIdSet) => {
   const billing = data.message.order.billing;
   const billingAdd = billing.address;
   const contextTimestamp = data?.context.timestamp;
+  let initItemId = [];
   const cod_order = dao.getValue("cod_order");
+  const COD_ITEM = dao.getValue("COD_ITEM");
   const initObj = {};
   let init = data;
   let p2h2p = false;
@@ -77,6 +79,7 @@ const checkInit = (data, msgIdSet) => {
     console.log(`Comparing item object in /init and /on_search`);
     let itemExists = false;
     itemsArr?.forEach((item, i) => {
+      initItemId.push(item?.id);
       dao.setValue("init_item_category_id", item?.category_id ?? "");
       if (item?.descriptor?.code === "P2H2P") {
         p2h2p = true;
@@ -124,22 +127,8 @@ const checkInit = (data, msgIdSet) => {
               initObj.codOrderErr = `linked_order tag is mandatory in /init when order type is COD`;
             } else if (!codOrderItem) {
               initObj.codOrderErr = `cod_order code must be present inside linked_order for COD`;
-            }
-            const requiredFields = [
-              "currency",
-              "declared_value",
-              "collection_amount",
-            ];
-            const missingFields = requiredFields.filter(
-              (field) =>
-                !linkedOrderTag.list?.some((item) => item.code === field)
-            );
-
-            if (missingFields.length > 0) {
-              initObj.codOrderMissingPropertyErr = `Missing required fields in linked_order: ${missingFields.join(
-                ", "
-              )}`;
-            }
+            } else if (codOrderItem?.value !== cod_order)
+              initObj.codOrderErr = `cod_order value '${codOrderItem?.value}' in linked_order does not match with the one provided in /search (${cod_order})`;
           }
           if (fulfillment?.id !== itemObj?.fulfillment_id) {
             let itemkey = `flfillmentErr${i}`;
@@ -161,6 +150,14 @@ const checkInit = (data, msgIdSet) => {
       }
       itemExists = false;
     });
+
+    if (cod_order) {
+      COD_ITEM?.forEach((item) => {
+        if (!initItemId.includes(item?.id)) {
+          initObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /init when order type is COD`;
+        }
+      });
+    }
   } catch (error) {
     console.log(
       `!!Error while checking items array in /${constants.log_INIT}`,

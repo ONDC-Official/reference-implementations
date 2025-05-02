@@ -143,6 +143,13 @@ const checkOnSearch = async (data, msgIdSet) => {
               console.log("Error while validating item timestamps", e);
             }
           });
+          if (cod_order) {
+            if (provider?.items?.length === 1)
+              onSearch.CodItemErr = `For COD order, there should be more than one item in the order`;
+            else {
+              dao.setValue("COD_ITEM", provider?.items);
+            }
+          }
         });
       });
     }

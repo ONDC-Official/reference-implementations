@@ -6,19 +6,27 @@ const utils = require("../../utils.js");
 const checkOnStatus = (data, msgIdSet) => {
   let onStatusObj = {};
   let on_status = data;
-  let contextTime = on_status.context.timestamp;
-  let messageId = on_status.context.message_id;
+  let contextTime = on_status?.context?.timestamp;
+  let messageId = on_status?.context?.message_id;
 
-  on_status = on_status.message.order;
+  on_status = on_status?.message?.order;
   let ffState;
-  let orderState = on_status.state;
-  let items = on_status.items;
-  let fulfillments = on_status.fulfillments;
+  const cod_order = dao.getValue("cod_order");
+  const COD_ITEM = dao.getValue("COD_ITEM");
+  let orderState = on_status?.state;
+  let items = on_status?.items;
+  let onStatusItemId = [];
+  let fulfillments = on_status?.fulfillments;
   let pickupTime, deliveryTime, RtoPickupTime, RtoDeliveredTime;
   let paymentStatus = on_status?.payment?.status;
+  const confirm_fulfillment_tags = dao.getValue("confirm_fulfillment_tags");
   let trackingEnabled = false;
 
-  if (on_status.state === "Complete" && payment.type === "ON-FULFILLMENT") {
+  let confirmFulfillmentTag = JSON.parse(confirm_fulfillment_tags)?.filter(
+    (i) => i.code !== "state" && i.code !== "rto_action"
+  );
+
+  if (on_status?.state === "Complete" && payment?.type === "ON-FULFILLMENT") {
     if (paymentStatus !== "PAID") {
       onStatusObj.pymntStatusErr = `Payment status should be 'PAID' once the order is complete for payment type 'ON-FULFILLMENT'`;
     }
@@ -28,9 +36,26 @@ const checkOnStatus = (data, msgIdSet) => {
   }
 
   let categoryId;
-  items.forEach((item) => {
-    categoryId = item.category_id;
+  items?.forEach((item) => {
+    onStatusItemId?.push(item?.id);
+    categoryId = item?.category_id;
   });
+
+  try {
+    if (cod_order) {
+      COD_ITEM?.forEach((item) => {
+        if (!onStatusItemId.includes(item?.id)) {
+          onStatusObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_status when order type is COD`;
+        }
+      });
+    }
+  } catch (error) {
+    console.log(
+      `!!Error fetching order item  in${constants.LOG_ONSTATUS}`,
+      err
+    );
+  }
+
   try {
     if (fulfillments?.length > 1) {
       console.log(
@@ -116,6 +141,19 @@ const checkOnStatus = (data, msgIdSet) => {
   }
 
   try {
+    if (cod_order && Array.isArray(on_status?.quote?.breakup)) {
+      const hasCodTitle = on_status?.quote?.breakup.some(
+        (item) => item?.["@ondc/org/title_type"] === "cod"
+      );
+      if (!hasCodTitle) {
+        onStatusObj.quotebreakupErr = `title_type "cod" is mandatory in /on_status breakup array when order type is COD`;
+      }
+    }
+  } catch (error) {
+    console.error(`Error checking quote object in /on_status:`, error);
+  }
+
+  try {
     fulfillments.forEach((fulfillment) => {
       ffState = fulfillment?.state?.descriptor?.code;
       let fulfillmentTags = fulfillment?.tags;
@@ -132,6 +170,40 @@ const checkOnStatus = (data, msgIdSet) => {
             if (tag.code === "tracking") trackingEnabled = true;
           });
         }
+
+        const checkFulfillmentTags = fulfillmentTags?.filter(
+          (i) => i.code !== "shipping_label"
+        );
+        if (
+          !_.isEqual(
+            JSON.stringify(checkFulfillmentTags),
+            JSON.stringify(confirmFulfillmentTag)
+          )
+        ) {
+          onStatusObj.fulfillmentTagsErr = `Fulfillment tags in /on_status does not match with the one provided in /confirm`;
+        }
+
+        if (cod_order) {
+          const cod_settlement_tags = fulfillment?.tags?.some(
+            (item) => item?.code === "cod_settlement_detail"
+          );
+          if (!cod_settlement_tags) {
+            onStatusObj.codSettlementErr = `cod_settlement_detail tag is mandatory in /on_status inside fulfillment/tags when order type is COD`;
+          }
+          const linkedOrderTag = fulfillment?.tags?.find(
+            (tag) => tag.code === "linked_order"
+          );
+          const codOrderItem = linkedOrderTag.list?.find(
+            (item) => item.code === "cod_order"
+          );
+          if (!linkedOrderTag) {
+            onStatusObj.codOrderErr = `linked_order tag is mandatory in /on_status when order type is COD`;
+          } else if (!codOrderItem) {
+            onStatusObj.codOrderErr = `cod_order code must be present inside linked_order for COD`;
+          } else if (codOrderItem?.value !== cod_order)
+            onStatusObj.codOrderErr = `cod_order value '${codOrderItem?.value}' in linked_order does not match with the one provided in /search (${cod_order})`;
+        }
+
         if (
           categoryId === "Immediate Delivery" &&
           fulfillment.tracking !== true &&

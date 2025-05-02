@@ -9,11 +9,14 @@ const checkConfirm = (data, msgIdSet) => {
   const initLinkedProviderTags = JSON.stringify(
     dao.getValue("init_linked_provider")
   );
+  let confirmItemId = [];
   const contextTimestamp = confirm.context.timestamp;
   dao.setValue("cnfrmTimestamp", contextTimestamp);
   let version = confirm.context.core_version;
   let missingTags = [];
   let onSearchProvArr = dao.getValue("providersArr");
+  const cod_order = dao.getValue("cod_order");
+  const COD_ITEM = dao.getValue("COD_ITEM");
   confirm = confirm.message.order;
   const orderTags = confirm?.tags;
   let bpp_terms = false;
@@ -53,7 +56,8 @@ const checkConfirm = (data, msgIdSet) => {
       `Comparing item duration and timestamp in /on_search and /confirm`
     );
     2;
-    items.forEach((item) => {
+    items?.forEach((item) => {
+      confirmItemId?.push(item?.id);
       if (item.time) {
         onSearchProvArr.forEach((provider) => {
           if (provider.id === provId) {
@@ -71,6 +75,18 @@ const checkConfirm = (data, msgIdSet) => {
       }
     });
   } catch (error) {}
+
+  try {
+    if (cod_order) {
+      COD_ITEM?.forEach((item) => {
+        if (!confirmItemId.includes(item?.id)) {
+          cnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_init when order type is COD`;
+        }
+      });
+    }
+  } catch (error) {
+    console.log(`!!Error fetching order item  in${constants.LOG_CONFIRM}`, err);
+  }
 
   dao.setValue("rts", rts);
   const cnfrmOrdrId = confirm.id;
@@ -126,6 +142,27 @@ const checkConfirm = (data, msgIdSet) => {
         fulfillmentTagSet.add(code);
       });
 
+      if (cod_order) {
+        const cod_settlement_tags = fulfillmentTags?.some(
+          (item) => item?.code === "cod_settlement_detail"
+        );
+        if (!cod_settlement_tags) {
+          cnfrmObj.codSettlementErr = `cod_settlement_detail tag is mandatory in /confirm inside fulfillment/tags when order type is COD`;
+        }
+        const linkedOrderTag = fulfillment?.tags?.find(
+          (tag) => tag.code === "linked_order"
+        );
+        const codOrderItem = linkedOrderTag.list?.find(
+          (item) => item.code === "cod_order"
+        );
+        if (!linkedOrderTag) {
+          cnfrmObj.codOrderErr = `linked_order tag is mandatory in /init when order type is COD`;
+        } else if (!codOrderItem) {
+          cnfrmObj.codOrderErr = `cod_order code must be present inside linked_order for COD`;
+        } else if (codOrderItem?.value !== cod_order)
+          cnfrmObj.codOrderErr = `cod_order value '${codOrderItem?.value}' in linked_order does not match with the one provided in /search (${cod_order})`;
+      }
+
       missingTags = utils.findRequiredTags(fulfillmentTagSet, reqFulTags);
       if (missingTags.length > 0) {
         let itemKey = `missingFlmntTags-${i}-err`;
@@ -135,6 +172,20 @@ const checkConfirm = (data, msgIdSet) => {
       }
     }
   });
+
+  try {
+    if (cod_order && Array.isArray(confirm?.quote?.breakup)) {
+      const hasCodTitle = confirm.quote.breakup.some(
+        (item) => item?.["@ondc/org/title_type"] === "cod"
+      );
+
+      if (!hasCodTitle) {
+        cnfrmObj.quotebreakupErr = `title_type "cod" is mandatory in /confirm breakup array when order type is COD`;
+      }
+    }
+  } catch (error) {
+    console.error(`Error checking quote object in /confirm:`, error);
+  }
 
   try {
     console.log("checking linked order in /confirm");
