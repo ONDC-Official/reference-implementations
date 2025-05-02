@@ -17,6 +17,7 @@ const checkConfirm = (data, msgIdSet) => {
   let onSearchProvArr = dao.getValue("providersArr");
   const cod_order = dao.getValue("cod_order");
   const COD_ITEM = dao.getValue("COD_ITEM");
+  const initCategoryId = JSON.stringify(dao.getValue("init_item_category_id"));
   confirm = confirm.message.order;
   const orderTags = confirm?.tags;
   let bpp_terms = false;
@@ -48,6 +49,45 @@ const checkConfirm = (data, msgIdSet) => {
       }
     });
   }
+
+  try {
+    if (JSON.parse(initCategoryId) === "Immediate Delivery") {
+      const state = confirm?.fulfillments[0].tags?.find(
+        (tag) => tag?.code === "state"
+      );
+      const linked_order = confirm?.fulfillments[0].tags?.find(
+        (tag) => tag?.code === "linked_order"
+      );
+      const readyToShip = state?.list?.some(
+        (item) => item?.code === "ready_to_ship"
+      );
+      if (!state)
+        cnfrmObj.stateErr = `state tag is mandatory in /confirm when category_id is Immediate Delivery`;
+      else if (!readyToShip)
+        cnfrmObj.stateErr = `ready_to_ship code is mandatory in state tag in /confirm when category_id is Immediate Delivery`;
+      else if (readyToShip?.value !== "yes")
+        cnfrmObj.stateErr = `ready_to_ship value "yes" is mandatory in state tag in /confirm when category_id is Immediate Delivery`;
+
+      if (linked_order) {
+        const reatilId = linked_order?.list?.find((i) => i.code === "id");
+        const orderPrepTime = linked_order?.list?.find(
+          (i) => i.code === "prep_time"
+        );
+        if (!reatilId)
+          cnfrmObj.retailId = `id code is mandatory in linked_order tag in /confirm when category_id is Immediate Delivery`;
+        if (!orderPrepTime)
+          cnfrmObj.orderPrepTime = `prep_time code is mandatory in linked_order tag in /confirm when category_id is Immediate Delivery`;
+      } else {
+        cnfrmObj.linkedOrderErr = `linked_order tag is mandatory in /confirm when category_id is Immediate Delivery`;
+      }
+    }
+  } catch (error) {
+    console.log(
+      `!!Error fetching immediaste Delivery fulfillment in${constants.LOG_CONFIRM}`,
+      error
+    );
+  }
+
   let provId = confirm.provider.id;
   let items = confirm.items;
 

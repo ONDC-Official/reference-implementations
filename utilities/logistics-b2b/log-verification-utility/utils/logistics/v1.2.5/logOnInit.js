@@ -115,7 +115,7 @@ const checkOnInit = (data, msgIdSet) => {
   }
 
   try {
-    let riderCheck = false;
+    let riderCheck = undefined;
     on_init?.fulfillments?.forEach((fulfillment) => {
       fulfillment?.tags?.forEach((item) => {
         if (item?.code === "linked_provider") {
@@ -124,7 +124,7 @@ const checkOnInit = (data, msgIdSet) => {
           }
         }
 
-        if (item?.code === "rider_check") riderCheck = true;
+        if (item?.code === "rider_check") riderCheck = item?.list;
       });
       if (cod_order) {
         const linkedOrderTag = fulfillment?.tags?.find(
@@ -142,8 +142,16 @@ const checkOnInit = (data, msgIdSet) => {
       }
     });
 
-    if (JSON.parse(initCategoryId) === "Immediate Delivery" && !riderCheck) {
-      onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
+    if (JSON.parse(initCategoryId) === "Immediate Delivery") {
+      const inlineRiderCheck = riderCheck?.find(
+        (i) => i.code === "inline_check_for_rider"
+      );
+      if (!riderCheck)
+        onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
+      else if (!inlineRiderCheck)
+        onInitObj.riderCheckErr = `inline_check_for_rider tag is mandatory in /on_init when category_id is Immediate Delivery`;
+      else if (inlineRiderCheck?.value !== "yes")
+        onInitObj.riderCheckErr = `inline_check_for_rider value should be "yes" in /on_init when category_id is Immediate Delivery`;
     }
   } catch (error) {
     console.log(
