@@ -411,4 +411,18 @@ module.exports = Object.freeze({
     Freebie: ["qualifier_min_value"],
     BuyXGetY: ["item_required", "item_free"],
   },
+  fulfillment_delay_reason_id: [
+    "001",
+    "002",
+    "003",
+    "004",
+    "005",
+    "006",
+    "007",
+    "008",
+    "009",
+    "010",
+    "011",
+    "012",
+  ],
 });

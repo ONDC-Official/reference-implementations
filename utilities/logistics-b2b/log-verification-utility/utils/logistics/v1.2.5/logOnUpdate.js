@@ -8,6 +8,7 @@ const checkOnUpdate = (data, msgIdSet) => {
   let item_descriptor_code = dao.getValue("item_descriptor_code");
   const shipping_label = dao.getValue("shipping_label");
   let on_update = data;
+  const contextDomain = data?.context?.domain;
   let contextTimestamp = on_update?.context?.timestamp;
   let rts = dao.getValue("rts");
   on_update = on_update.message.order;
@@ -30,13 +31,59 @@ const checkOnUpdate = (data, msgIdSet) => {
     console.log(
       `Checking if start and end time range required in /on_update api`
     );
-    fulfillments.forEach((fulfillment) => {
+    fulfillments?.forEach((fulfillment) => {
       const ffState = fulfillment?.state?.descriptor?.code;
       let avgPickupTime = fulfillment?.start?.time?.duration;
       console.log(
         avgPickupTime,
         dao.getValue(`${fulfillment?.id}-avgPickupTime`)
       );
+
+      if (contextDomain === "ONDC:LOG11") {
+        const fulfillment_delay = fulfillment?.tags?.find(
+          (tag) => tag.code === "fulfillment_delay"
+        );
+        const list = fulfillment_delay?.list || [];
+        const getByCode = (code) => list.find((item) => item.code === code);
+
+        const state = getByCode("state");
+
+        if (
+          fulfillment_delay &&
+          state &&
+          ["Order-picked-up", "Order-delivered"].includes(state?.value)
+        ) {
+          const reason_id = getByCode("reason_id");
+          const timestamp = getByCode("timestamp");
+          const attempt = getByCode("attempt");
+          if (ffState !== "Pickup-rescheduled")
+            onUpdtObj.fulfillment_delay_fulfillmentState = `fulfillment state should be "Pickup-rescheduled" if there is fulfillment_delay tags.`;
+          if (!reason_id) {
+            onUpdtObj.fulfillment_delay_reasonErr = `reason_id is required for fulfillment_delay state ${state.value}`;
+          } else if (
+            !constants?.fulfillment_delay_reason_id?.includes(reason_id.value)
+          ) {
+            onUpdtObj.fulfillment_delay_reasonErr = `reason_id ${
+              reason_id.value
+            } is not valid for fulfillment_delay state. Should be one of: ${constants?.fulfillment_delay_reason_id.join(
+              ", "
+            )}`;
+          }
+
+          if (!timestamp) {
+            onUpdtObj.fulfillment_delay_timestampErr = `fulfillment_delay timestamp is required for fulfillment_delay state ${state.value}`;
+          } else if (timestamp.value > contextTimestamp) {
+            onUpdtObj.fulfillment_delay_timestampErr = `fulfillment_delay timestamp cannot be future dated w.r.t context/timestamp`;
+          }
+
+          if (!attempt) {
+            onUpdtObj.fulfillment_delay_attemptErr = `fulfillment_delay attempt is required for fulfillment_delay state ${state.value}`;
+          } else if (!["yes", "no"].includes(attempt.value)) {
+            onUpdtObj.fulfillment_delay_attemptErr = `fulfillment_delay attempt should be 'yes' or 'no' for fulfillment_delay state ${state.value}`;
+          }
+        }
+      }
+
       if (
         avgPickupTime &&
         dao.getValue(`${fulfillment?.id}-avgPickupTime`) &&
