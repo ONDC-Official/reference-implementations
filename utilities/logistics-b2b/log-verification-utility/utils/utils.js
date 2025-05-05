@@ -198,6 +198,21 @@ const timestampCheck = (date) => {
 };
 
 const getVersion = (data, vertical) => {
+  // Helper to extract version from the first element of any API array
+  const getFirstVersion = (data) => {
+    for (const key in data) {
+      if (Array.isArray(data[key]) && data[key][0]?.context) {
+        return (
+          data[key][0].context.version || data[key][0].context.core_version
+        );
+      }
+    }
+    return null; // Return null if no version is found
+  };
+
+  const version = getFirstVersion(data);
+
+  // Determine the output based on the vertical and extracted version
   if (vertical === "logistics") {
     if (data?.search && data?.search[0]?.context?.version === "2.0.0")
       return "v2.0";
@@ -207,14 +222,18 @@ const getVersion = (data, vertical) => {
       return "v1.2.5";
     else return "v1.2";
   }
+
   if (vertical === "b2b") {
-    if (data?.search && data?.search[0]?.context?.version === "2.0.1")
-      return "v1";
-    else return "v2";
+    if (version === "2.0.1") return "v1";
+    return "v2";
   }
+
   if (vertical === "services") return "v2";
   if (vertical === "b2c-exports") return "v2.0.2";
+
+  return "Unknown version";
 };
+
 function compareDates(dateString1, dateString2) {
   const date1 = new Date(dateString1);
   const date2 = new Date(dateString2);
