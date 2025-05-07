@@ -10,6 +10,7 @@ const checkConfirm = (data, msgIdSet) => {
     dao.getValue("init_linked_provider")
   );
   let confirmItemId = [];
+  const domain = data?.context?.domain;
   const contextTimestamp = confirm.context.timestamp;
   dao.setValue("cnfrmTimestamp", contextTimestamp);
   let version = confirm.context.core_version;
@@ -96,7 +97,12 @@ const checkConfirm = (data, msgIdSet) => {
       `Comparing item duration and timestamp in /on_search and /confirm`
     );
     2;
-    items?.forEach((item) => {
+    items?.forEach((item, i) => {
+      if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
+        cnfrmObj[
+          `Item${i}_timestamp`
+        ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
+      }
       confirmItemId?.push(item?.id);
       if (item.time) {
         onSearchProvArr.forEach((provider) => {

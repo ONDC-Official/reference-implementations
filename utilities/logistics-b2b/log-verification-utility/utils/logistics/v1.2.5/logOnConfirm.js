@@ -8,6 +8,7 @@ const constants = require("../../constants");
 const checkOnConfirm = (data, msgIdSet) => {
   let on_confirm = data;
   const onCnfrmObj = {};
+  const domain = data?.context?.domain;
   const contextTimestamp = on_confirm.context.timestamp;
   const confirm_fulfillment_tags = dao.getValue("confirm_fulfillment_tags");
   on_confirm = on_confirm.message.order;
@@ -39,7 +40,12 @@ const checkOnConfirm = (data, msgIdSet) => {
   }
   let categoryId;
   let descriptor_code;
-  items?.forEach((item) => {
+  items?.forEach((item, i) => {
+    if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
+      onCnfrmObj[
+        `Item${i}_timestamp`
+      ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
+    }
     onCnfrmItemId.push(item?.id);
     categoryId = item.category_id;
     descriptor_code = item.descriptor?.code;

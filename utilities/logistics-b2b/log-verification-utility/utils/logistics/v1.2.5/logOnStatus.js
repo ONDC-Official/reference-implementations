@@ -6,6 +6,7 @@ const utils = require("../../utils.js");
 const checkOnStatus = (data, msgIdSet) => {
   let onStatusObj = {};
   let on_status = data;
+  const domain = data?.context?.domain;
   let contextTime = on_status?.context?.timestamp;
   let messageId = on_status?.context?.message_id;
 
@@ -39,7 +40,12 @@ const checkOnStatus = (data, msgIdSet) => {
   }
 
   let categoryId;
-  items?.forEach((item) => {
+  items?.forEach((item, i) => {
+    if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
+      onStatusObj[
+        `Item${i}_timestamp`
+      ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
+    }
     onStatusItemId?.push(item?.id);
     categoryId = item?.category_id;
 

@@ -193,7 +193,7 @@ module.exports = {
                         },
                       },
                     },
-                    required: ["label", "duration", "timestamp"],
+                    required: ["label", "duration"],
                   },
                 },
                 required: ["id", "fulfillment_id", "category_id"],

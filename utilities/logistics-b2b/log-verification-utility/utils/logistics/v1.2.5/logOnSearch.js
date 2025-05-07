@@ -7,6 +7,7 @@ const { reverseGeoCodingCheck } = require("../../reverseGeoCoding");
 const checkOnSearch = async (data, msgIdSet) => {
   const onSrchObj = {};
   let onSearch = data;
+  const domain = data?.context?.domain;
   let core_version = onSearch.context.core_version;
   const timestamp = onSearch.context.timestamp;
   const contextTimestamp = new Date(timestamp || "");
@@ -108,6 +109,11 @@ const checkOnSearch = async (data, msgIdSet) => {
             onSrchObj.catTAT = `For Next Day Delivery, TAT date should be the next date i.e. ${nextDate}`;
           }
           provider?.items?.forEach((item, i) => {
+            if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
+              onSrchObj[
+                `Item${i}_timestamp`
+              ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
+            }
             const catId = item?.category_id;
             const itemTime = item?.time;
             const itemTimestamp =
@@ -260,7 +266,7 @@ const checkOnSearch = async (data, msgIdSet) => {
 
           if (surgeInfo) {
             dao.setValue("is_surge_item", true);
-            dao.setValue("surge_item",item)
+            dao.setValue("surge_item", item);
           }
 
           if (!validFulfillmentIDs.has(item.fulfillment_id)) {

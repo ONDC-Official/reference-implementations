@@ -5,6 +5,7 @@ const utils = require("../../utils.js");
 
 const checkOnUpdate = (data, msgIdSet) => {
   let onUpdtObj = {};
+  const domain = data?.context?.domain;
   let item_descriptor_code = dao.getValue("item_descriptor_code");
   const shipping_label = dao.getValue("shipping_label");
   let on_update = data;
@@ -27,6 +28,19 @@ const checkOnUpdate = (data, msgIdSet) => {
       onUpdtObj.locationsErr = `order/provider/locations mismatch between /confirm and /on_update`;
     }
   }
+
+  try {
+    items?.map((item, i) => {
+      if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
+        onUpdtObj[
+          `Item${i}_timestamp`
+        ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
+      }
+    });
+  } catch (error) {
+    console.error("Error while checking on update:", error.stack);
+  }
+
   try {
     console.log(
       `Checking if start and end time range required in /on_update api`

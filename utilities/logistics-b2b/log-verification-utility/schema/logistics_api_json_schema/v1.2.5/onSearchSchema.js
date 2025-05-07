@@ -287,7 +287,7 @@ module.exports = {
                             duration: { type: "string", format: "duration" },
                             timestamp: { type: "string", format: "date" },
                           },
-                          required: ["label", "duration", "timestamp"],
+                          required: ["label", "duration"],
                         },
                       },
                       additionalProperties: false,

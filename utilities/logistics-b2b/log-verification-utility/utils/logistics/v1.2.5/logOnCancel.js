@@ -6,6 +6,7 @@ const utils = require("../../utils.js");
 const checkOnCancel = (data, msgIdSet) => {
   let onCancelObj = {};
   let on_cancel = data;
+  const domain = data?.context?.domain;
   let contextTime = on_cancel.context.timestamp;
   let version = on_cancel.context.core_version;
   let messageId = on_cancel.context.message_id;
@@ -26,6 +27,18 @@ const checkOnCancel = (data, msgIdSet) => {
 
   if (created_at > contextTime || updated_at > contextTime) {
     onCancelObj.crtdAtTimeErr = `order/created_at or updated_at should not be future dated w.r.t context/timestamp`;
+  }
+
+  try {
+    items?.map((item, i) => {
+      if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
+        onCancelObj[
+          `Item${i}_timestamp`
+        ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
+      }
+    });
+  } catch (error) {
+    console.log("Error while checking items object/array", error?.stack);
   }
 
   try {
