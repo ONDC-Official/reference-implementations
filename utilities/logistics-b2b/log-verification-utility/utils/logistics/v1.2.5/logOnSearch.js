@@ -253,6 +253,16 @@ const checkOnSearch = async (data, msgIdSet) => {
 
         dao.setValue(`${providerId}itemsArr`, itemsArr);
         itemsArr.forEach((item, j) => {
+          const typeTag = item?.tags?.find((tag) => tag.code === "type");
+          const surgeInfo = typeTag?.list?.find(
+            (i) => i.code === "type" && i.value === "surge"
+          );
+
+          if (surgeInfo) {
+            dao.setValue("is_surge_item", true);
+            dao.setValue("surge_item",item)
+          }
+
           if (!validFulfillmentIDs.has(item.fulfillment_id)) {
             onSrchObj.fulfillmentIDerr = `fulfillment_id - ${item.fulfillment_id} of /items/${j} does not match with any id in fulfillments array in ${constants.LOG_ONSEARCH} api`;
           }

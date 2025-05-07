@@ -39,7 +39,7 @@ const checkOnCancel = (data, msgIdSet) => {
         if (fulfillment.type === "RTO") {
           rtoFulfillment_id = fulfillment?.id;
           RtoItemId = items?.find(
-            (item) => item.fulfillment_id === rtoFulfillment_id
+            (item) => item?.fulfillment_id === rtoFulfillment_id
           );
 
           if (!RtoItemId) {

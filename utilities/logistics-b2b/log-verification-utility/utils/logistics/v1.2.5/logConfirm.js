@@ -120,7 +120,7 @@ const checkConfirm = (data, msgIdSet) => {
     if (cod_order) {
       COD_ITEM?.forEach((item) => {
         if (!confirmItemId.includes(item?.id)) {
-          cnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_init when order type is COD`;
+          cnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /confirm when order type is COD`;
         }
       });
     }

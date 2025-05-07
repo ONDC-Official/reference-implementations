@@ -20,6 +20,9 @@ const checkOnConfirm = (data, msgIdSet) => {
   let rts = dao.getValue("rts");
   let p2h2p = dao.getValue("p2h2p");
   let awbNo = dao.getValue("awbNo");
+  const surgeItem = dao.getValue("is_surge_item");
+  const surgeItemData = dao.getValue("surge_item");
+  let surgeItemFound = null;
 
   if (on_confirm?.updated_at > contextTimestamp) {
     onCnfrmObj.updatedAtErr = `order/updated_at cannot be future dated w.r.t context/timestamp`;
@@ -36,11 +39,27 @@ const checkOnConfirm = (data, msgIdSet) => {
   }
   let categoryId;
   let descriptor_code;
-  items.forEach((item) => {
+  items?.forEach((item) => {
     onCnfrmItemId.push(item?.id);
     categoryId = item.category_id;
     descriptor_code = item.descriptor?.code;
+
+    if (
+      surgeItem &&
+      item?.id === surgeItemData?.id &&
+      Array.isArray(item.tags) &&
+      item.tags.length > 0
+    ) {
+      surgeItemFound = item;
+    }
   });
+
+  if (!surgeItemFound) {
+    onCnfrmObj.surgeItemErr = `Surge item is missing in the order`;
+  } else if (!_.isEqual(surgeItemFound.price, surgeItemData?.price)) {
+    onCnfrmObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
+  }
+
   dao.setValue("item_descriptor_code", descriptor_code);
 
   try {
@@ -153,6 +172,36 @@ const checkOnConfirm = (data, msgIdSet) => {
     }
   } catch (error) {
     console.error(`Error checking quote object in /confirm:`, error);
+  }
+
+  try {
+    if (surgeItem) {
+      const breakup = on_confirm?.quote?.breakup || [];
+
+      const hasSurgeItem = breakup.find(
+        (item) => item?.["@ondc/org/title_type"] === "surge"
+      );
+
+      const hasSurgeTax = breakup.find(
+        (item) =>
+          item?.["@ondc/org/title_type"] === "tax" &&
+          item?.["@ondc/org/item_id"] === surgeItemData?.id
+      );
+
+      if (!hasSurgeItem) {
+        onCnfrmObj.surgequoteItembreakupErr = `Missing title_type "surge" in /on_confirm breakup when surge item was sent in /on_search`;
+      } else if (!_.isEqual(hasSurgeItem?.price, surgeItemData?.price)) {
+        onCnfrmObj.surgequoteItembreakupErr = `Surge item price mismatch: received ${JSON.stringify(
+          hasSurgeItem?.price
+        )}, expected ${JSON.stringify(surgeItemData?.price)}`;
+      }
+
+      if (!hasSurgeTax) {
+        onCnfrmObj.surgequoteTaxbreakupErr = `Missing tax item with item_id "${surgeItemData?.id}" in /on_confirm breakup when surge item was sent in /on_search`;
+      }
+    }
+  } catch (error) {
+    console.error("Error checking quote object in /confirm:", error);
   }
 
   try {

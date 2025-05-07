@@ -185,12 +185,7 @@ module.exports = {
                     required: ["label", "duration", "timestamp"],
                   },
                 },
-                required: [
-                  "id",
-                  "category_id",
-                  "time",
-                  "fulfillment_id",
-                ],
+                required: ["id", "category_id", "time", "fulfillment_id"],
               },
             },
             quote: {
@@ -738,7 +733,7 @@ module.exports = {
                     properties: {
                       settlement_counterparty: {
                         type: "string",
-                        enum: constants.SETTLEMENT_COUNTERPARTY,
+                        enum: ["lbnp", "lsp"],
                       },
                       settlement_type: {
                         type: "string",
