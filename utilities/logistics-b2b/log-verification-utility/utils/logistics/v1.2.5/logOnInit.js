@@ -141,7 +141,59 @@ const checkOnInit = (data, msgIdSet) => {
           onInitObj.codOrderErr = `cod_order value '${codOrderItem?.value}' in linked_order does not match with the one provided in /search (${cod_order})`;
       }
     });
+    if (on_init?.hasOwnProperty("cancellation_terms")) {
+    console.log("validating cancellation terms"+initCategoryId);
+    const cancellationTerms= on_init?.cancellation_terms;
+    if (!Array.isArray(cancellationTerms)) {
+     onInitObj.cancellationTerms='cancellation_terms must be an array';
+    } else {
+      cancellationTerms.forEach((term, index) => {
+        const path = `cancellation_terms[${index}]`;
+    
+        // fulfillment_state
+        const descriptor = term?.fulfillment_state?.descriptor;
+        if (!descriptor) {
+          onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
+        } else {
+          if (!descriptor.code) {
+            onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
+          } 
+          else
+          {
+            if(!constants.fulfillment_state.includes.descriptor.code)
+            {
+              onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
+            }
+          }
+          if (!descriptor.short_desc) {
+            onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
+          }
+        }
+    
+        // cancellation_fee
+        const fee = term?.cancellation_fee;
+        if (!fee) {
+          onInitObj.cancellationTerms=`${path}.cancellation_fee is missing`;
+        } else {
+          if (!fee.percentage) {
+            onInitObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
+          }
+          if (!fee.amount) {
+            onInitObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
+          } else {
+            if (!fee.amount.currency) {
+              onInitObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
+            }
+            if (!fee.amount.value) {
+              onInitObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
+            }
+          }
+        }
+      });
+    }
 
+    }
+    if(initCategoryId!=undefined && initCategoryId!=null && initCategoryId!="null" && initCategoryId!="undefined"){
     if (JSON.parse(initCategoryId) === "Immediate Delivery") {
       const inlineRiderCheck = riderCheck?.find(
         (i) => i.code === "inline_check_for_rider"
@@ -153,6 +205,7 @@ const checkOnInit = (data, msgIdSet) => {
       else if (inlineRiderCheck?.value !== "yes")
         onInitObj.riderCheckErr = `inline_check_for_rider value should be "yes" in /on_init when category_id is Immediate Delivery`;
     }
+  }
   } catch (error) {
     console.log(
       `!!Error while checking fulfillment array in /${constants.LOG_ONINIT}`,

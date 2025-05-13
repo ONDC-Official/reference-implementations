@@ -293,6 +293,59 @@ const checkConfirm = (data, msgIdSet) => {
       });
     }
     console.log(bpp_terms, bap_terms);
+    if (confirm?.hasOwnProperty("cancellation_terms")) {
+        console.log("validating cancellation terms"+confirm);
+        const cancellationTerms= confirm?.cancellation_terms;
+        if (!Array.isArray(cancellationTerms)) {
+          cnfrmObj.cancellationTerms='cancellation_terms must be an array';
+        } else {
+          cancellationTerms.forEach((term, index) => {
+            const path = `cancellation_terms[${index}]`;
+        
+            // fulfillment_state
+            const descriptor = term?.fulfillment_state?.descriptor;
+            if (!descriptor) {
+              cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
+            } else {
+              if (!descriptor.code) {
+                cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
+              } 
+              else
+              {
+                if(!constants.fulfillment_state.includes.descriptor.code)
+                {
+                  cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
+                }
+              }
+              if (!descriptor.short_desc) {
+                cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
+              }
+            }
+        
+            // cancellation_fee
+            const fee = term?.cancellation_fee;
+            if (!fee) {
+              cnfrmObj.cancellationTerms=`${path}.cancellation_fee is missing`;
+            } else {
+              if (!fee.percentage) {
+                cnfrmObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
+              }
+              if (!fee.amount) {
+                cnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
+              } else {
+                if (!fee.amount.currency) {
+                  cnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
+                }
+                if (!fee.amount.value) {
+                  cnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
+                }
+              }
+            }
+          });
+        }
+    
+        }
+    
 
     if (bpp_terms && !dao.getValue("bppTerms")) {
       cnfrmObj.bppTermsErr = `Which terms LBNP is providing as LSP did not provide bpp_terms in on_init?`;
