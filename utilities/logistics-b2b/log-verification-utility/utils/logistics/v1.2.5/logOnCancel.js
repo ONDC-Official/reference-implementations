@@ -21,7 +21,10 @@ const checkOnCancel = (data, msgIdSet) => {
   let RtoPickupTime;
   RtoDeliveryTime = "";
   let missingTags = [];
+  const surgeItem = dao.getValue("is_surge_item");
+  const surgeItemData = dao.getValue("surge_item");
   let rtoID, reasonId, preCnclState;
+  let surgeItemFound = null;
   const created_at = on_cancel.created_at;
   const updated_at = on_cancel.updated_at;
 
@@ -36,7 +39,22 @@ const checkOnCancel = (data, msgIdSet) => {
           `Item${i}_timestamp`
         ] = `Timestamp is mandatory inside time object for item ${item.id} in ${constants.LOG_ONSEARCH} api in order type P2P (ONDC:LOG10)`;
       }
+
+      if (
+        surgeItem &&
+        item?.id === surgeItemData?.id &&
+        Array.isArray(item.tags) &&
+        item.tags.length > 0
+      ) {
+        surgeItemFound = item;
+      }
     });
+
+    if (!surgeItemFound) {
+      onCancelObj.surgeItemErr = `Surge item is missing in the order`;
+    } else if (!_.isEqual(surgeItemFound.price, surgeItemData?.price)) {
+      onCancelObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
+    }
   } catch (error) {
     console.log("Error while checking items object/array", error?.stack);
   }
@@ -118,6 +136,36 @@ const checkOnCancel = (data, msgIdSet) => {
     }
   } catch (error) {
     console.log(error);
+  }
+
+  try {
+    if (surgeItem) {
+      const breakup = on_cancel?.quote?.breakup || [];
+
+      const hasSurgeItem = breakup.find(
+        (item) => item?.["@ondc/org/title_type"] === "surge"
+      );
+
+      const hasSurgeTax = breakup.find(
+        (item) =>
+          item?.["@ondc/org/title_type"] === "tax" &&
+          item?.["@ondc/org/item_id"] === surgeItemData?.id
+      );
+
+      if (!hasSurgeItem) {
+        onCancelObj.surgequoteItembreakupErr = `Missing title_type "surge" in /on_cancel breakup when surge item was sent in /on_search`;
+      } else if (!_.isEqual(hasSurgeItem?.price, surgeItemData?.price)) {
+        onCancelObj.surgequoteItembreakupErr = `Surge item price mismatch: received ${JSON.stringify(
+          hasSurgeItem?.price
+        )}, expected ${JSON.stringify(surgeItemData?.price)}`;
+      }
+
+      if (!hasSurgeTax) {
+        onCancelObj.surgequoteTaxbreakupErr = `Missing tax item with item_id "${surgeItemData?.id}" in /on_cancel breakup when surge item was sent in /on_search`;
+      }
+    }
+  } catch (error) {
+    console.error("Error checking quote object in /confirm:", error);
   }
 
   if (onSearchItemsArr) {
