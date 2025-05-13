@@ -312,7 +312,7 @@ const checkConfirm = (data, msgIdSet) => {
               } 
               else
               {
-                if(!constants.fulfillment_state.includes.descriptor.code)
+                if(!constants.FULFILLMENT_STATE.includes(descriptor.code))
                 {
                   cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
                 }

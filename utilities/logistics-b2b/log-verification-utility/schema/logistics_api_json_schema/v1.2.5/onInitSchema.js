@@ -421,44 +421,6 @@ module.exports = {
               },
               required: ["type", "collected_by"],
             },
-            cancellation_terms: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  fulfillment_state: {
-                    type: "object",
-                    properties: {
-                      descriptor: {
-                        type: "object",
-                        properties: {
-                          code: { type: "string",enum: constants.FULFILLMENT_TYPE },
-                          short_desc: { type: "string" }
-                        },
-                        required: ["code", "short_desc"]
-                      }
-                    },
-                    required: ["descriptor"]
-                  },
-                  cancellation_fee: {
-                    type: "object",
-                    properties: {
-                      percentage: { type: "string" },
-                      amount: {
-                        type: "object",
-                        properties: {
-                          currency: { type: "string" },
-                          value: { type: "string" }
-                        },
-                        required: ["currency", "value"]
-                      }
-                    },
-                    required: ["percentage", "amount"]
-                  }
-                },
-                required: ["fulfillment_state", "cancellation_fee"]
-              }
-            },
             tags: {
               type: "array",
               items: {

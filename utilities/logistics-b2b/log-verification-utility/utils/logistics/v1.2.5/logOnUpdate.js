@@ -169,7 +169,7 @@ if (on_update?.hasOwnProperty("cancellation_terms")) {
                 } 
                 else
                 {
-                  if(!constants.fulfillment_state.includes.descriptor.code)
+                  if(!constants.FULFILLMENT_STATE.includes(descriptor.code))
                   {
                     onUpdtObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
                   }

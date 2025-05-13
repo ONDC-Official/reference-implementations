@@ -160,7 +160,7 @@ const checkOnInit = (data, msgIdSet) => {
           } 
           else
           {
-            if(!constants.fulfillment_state.includes.descriptor.code)
+            if(!constants.fulfillment_state.includes(descriptor.code))
             {
               onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
             }
