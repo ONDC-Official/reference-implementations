@@ -6,16 +6,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.spec.InvalidKeySpecException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Map;
-import java.util.TimeZone;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -23,12 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 
 @RestController
@@ -200,5 +202,39 @@ public class Routes extends  Utils{
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(httpResponse.body());
+    }
+
+    @PostMapping("/verify-signature")
+    public ResponseEntity<String> verifySignedRequest(@RequestBody JsonNode request) throws JSONException {
+        try {
+            String signedRequestId = request.get("signed_request_id").asText();
+            String publicKeyBase64 = request.get("public_key").asText();
+            String requestId2 = request.get("request_id").asText();
+            
+            // Convert public key from Base64 to bytes
+            byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyBase64);
+            
+            // Verify the signature
+            boolean isValid = verify(
+                Base64.getDecoder().decode(signedRequestId),
+                requestId2.getBytes(),
+                publicKeyBytes
+            );
+            
+            JSONObject response = new JSONObject();
+            response.put("is_valid", isValid);
+            response.put("request_id", requestId2);
+            
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(response.toString());
+                    
+        } catch (Exception e) {
+            JSONObject errorResponse = new JSONObject();
+            errorResponse.put("error", "Verification failed: " + e.getMessage());
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(errorResponse.toString());
+        }
     }
 }
