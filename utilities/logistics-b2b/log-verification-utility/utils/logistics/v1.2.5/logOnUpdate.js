@@ -190,6 +190,68 @@ const checkOnUpdate = (data, msgIdSet) => {
         onUpdtObj.shipLblErr = `Shipping label (/start/instructions/images) is required for P2H2P shipments.`;
       }
 
+      if(fulfillment?.type== "Delivery")
+      {
+        if(fulfillment?.hasOwnProperty("tags"))
+        {
+          fulfillment?.tags?.forEach((tag) => {
+            if(tag.code === "linked_provider")
+            {
+              if(!_.isEqual(JSON.stringify(tag), shipping_label))
+              {
+                onUpdtObj.linkedPrvdrErr = `linked_provider tag in /on_update does not match with the one provided in /init`;
+              }
+              if(tag?.list?.length > 0)
+              {
+                var found=false;
+                tag.list.forEach((item) => {
+                  if(item.code === "id")
+                  {
+                    found=true;
+                    }
+                  });
+                  if(!found)
+                  {
+                    onUpdtObj.linkedPrvdrErr = `linked_provider tag in /on_update does not have id code`;
+                  }
+                };
+              }
+              if(tag.code==="linked_order_diff")
+              {
+                const requiredCodes = [
+                  "id",
+                  "weight_unit",
+                  "weight_value",
+                  "dim_unit",
+                  "length",
+                  "breadth",
+                  "height",
+                ];
+                requiredCodes.forEach((key) => {
+                  const found = input.list.find((item) => item.code === key);
+                  if (!found) {
+                    onUpdtObj.linkedPrvdrErr = `${key} code is missing in list of linked_order_diff tag`;
+                  }
+                });
+              }
+              if(tag.code==="linked_order_diff_proof")
+                {
+                  const requiredCodes = [
+                    "id",
+                    "url"
+                  ];
+                  requiredCodes.forEach((key) => {
+                    const found = input.list.find((item) => item.code === key);
+                    if (!found) {
+                      onUpdtObj.linkedPrvdrErr = `${key} code is missing in list of linked_order_diff_proof tag`;
+                    }
+                  });
+                }
+            }
+          );
+        }
+      }
+
       // if (p2h2p && !fulfillment?.start?.instructions?.images) {
       //   onUpdtObj.shipLblErr = `Shipping label (/start/instructions/images) is required for P2H2P shipments`;
       // }

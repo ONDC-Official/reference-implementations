@@ -421,6 +421,37 @@ const checkOnStatus = (data, msgIdSet) => {
           }
         }
       }
+
+    if(fulfillment?.type== "Delivery")
+          {
+            if(fulfillment?.hasOwnProperty("tags"))
+            {
+              fulfillment?.tags?.forEach((tag) => {
+                if(tag.code === "linked_provider")
+                {
+                  if(!_.isEqual(JSON.stringify(tag), shipping_label))
+                  {
+                    onStatusObj.linkedPrvdrErr = `linked_provider tag in /on_update does not match with the one provided in /init`;
+                  }
+                  if(tag?.list?.length > 0)
+                  {
+                    var found=false;
+                    tag.list.forEach((item) => {
+                      if(item.code === "id")
+                      {
+                        found=true;
+                        }
+                      });
+                      if(!found)
+                      {
+                        onStatusObj.linkedPrvdrErr = `linked_provider tag in /on_update does not have id code`;
+                      }
+                    };
+                  }
+                }
+              );
+            }
+          }
     });
   } catch (error) {
     console.log(`Error checking fulfillments/start in /on_status`);

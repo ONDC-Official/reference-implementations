@@ -1,3 +1,4 @@
+const { QUOTE_TITLE_TYPE } = require("../../../utils/1.2.5/constants");
 const constants = require("../../../utils/constants");
 const {
   ORDER_STATE,
@@ -213,7 +214,7 @@ module.exports = {
                       "@ondc/org/item_id": { type: "string" },
                       "@ondc/org/title_type": {
                         type: "string",
-                        enum: TITLE_TYPE,
+                        enum: QUOTE_TITLE_TYPE,
                       },
                       price: {
                         $ref: "commonSchema#/properties/priceFormat",
@@ -456,6 +457,8 @@ module.exports = {
                             "linked_order",
                             "linked_order_item",
                             "shipping_label",
+                            "linked_order_diff",
+                            "linked_order_diff_proof"
                           ],
                         },
                         list: {

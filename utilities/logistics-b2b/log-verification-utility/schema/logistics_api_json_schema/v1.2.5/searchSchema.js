@@ -177,6 +177,17 @@ module.exports = {
                       },
                       required: ["type"],
                     },
+                    instructions:
+                    {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                      },
+                      required: ["code"],
+                    }
+          
                   },
                   required: ["location"],
                 },
@@ -224,6 +235,16 @@ module.exports = {
                       },
                       required: ["type"],
                     },
+                    instructions:
+                    {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string"
+                        },
+                      },
+                      required: ["code"],
+                    }
                   },
                   required: ["location"],
                 },
