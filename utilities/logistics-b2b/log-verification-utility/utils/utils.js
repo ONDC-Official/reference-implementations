@@ -214,9 +214,13 @@ const getVersion = (data, vertical) => {
 
   // Determine the output based on the vertical and extracted version
   if (vertical === "logistics") {
-    if (version === "2.0.0") return "v2.0";
-    if (version === "1.1.0") return "v1.1";
-    return "v1.2";
+    if (data?.search && data?.search[0]?.context?.version === "2.0.0")
+      return "v2.0";
+    if (data?.search && data?.search[0]?.context?.core_version === "1.1.0")
+      return "v1.1";
+    if (data?.search && data?.search[0]?.context?.core_version === "1.2.5")
+      return "v1.2.5";
+    else return "v1.2";
   }
 
   if (vertical === "b2b") {
