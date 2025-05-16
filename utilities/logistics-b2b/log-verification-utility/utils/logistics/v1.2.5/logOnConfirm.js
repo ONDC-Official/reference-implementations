@@ -60,9 +60,9 @@ const checkOnConfirm = (data, msgIdSet) => {
     }
   });
 
-  if (!surgeItemFound) {
+  if (surgeItem && !surgeItemFound) {
     onCnfrmObj.surgeItemErr = `Surge item is missing in the order`;
-  } else if (!_.isEqual(surgeItemFound.price, surgeItemData?.price)) {
+  } else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
     onCnfrmObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
   }
 
@@ -243,58 +243,54 @@ const checkOnConfirm = (data, msgIdSet) => {
   } catch (error) {
     console.log(error);
   }
-    if (on_confirm?.hasOwnProperty("cancellation_terms")) {
-          console.log("validating cancellation terms"+on_confirm);
-          const cancellationTerms= on_confirm?.cancellation_terms;
-          if (!Array.isArray(cancellationTerms)) {
-            onCnfrmObj.cancellationTerms='cancellation_terms must be an array';
+  if (on_confirm?.hasOwnProperty("cancellation_terms")) {
+    console.log("validating cancellation terms" + on_confirm);
+    const cancellationTerms = on_confirm?.cancellation_terms;
+    if (!Array.isArray(cancellationTerms)) {
+      onCnfrmObj.cancellationTerms = "cancellation_terms must be an array";
+    } else {
+      cancellationTerms.forEach((term, index) => {
+        const path = `cancellation_terms[${index}]`;
+
+        // fulfillment_state
+        const descriptor = term?.fulfillment_state?.descriptor;
+        if (!descriptor) {
+          onCnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor is missing`;
+        } else {
+          if (!descriptor.code) {
+            onCnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is missing`;
           } else {
-            cancellationTerms.forEach((term, index) => {
-              const path = `cancellation_terms[${index}]`;
-          
-              // fulfillment_state
-              const descriptor = term?.fulfillment_state?.descriptor;
-              if (!descriptor) {
-                onCnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
-              } else {
-                if (!descriptor.code) {
-                  onCnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
-                } 
-                else
-                {
-                  if(!constants.FULFILLMENT_STATE.includes(descriptor.code))
-                  {
-                    onCnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
-                  }
-                }
-                if (!descriptor.short_desc) {
-                  onCnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
-                }
-              }
-          
-              // cancellation_fee
-              const fee = term?.cancellation_fee;
-              if (!fee) {
-                onCnfrmObj.cancellationTerms=`${path}.cancellation_fee is missing`;
-              } else {
-                if (!fee.percentage) {
-                  onCnfrmObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
-                }
-                if (!fee.amount) {
-                  onCnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
-                } else {
-                  if (!fee.amount.currency) {
-                    onCnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
-                  }
-                  if (!fee.amount.value) {
-                    onCnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
-                  }
-                }
-              }
-            });
+            if (!constants.FULFILLMENT_STATE.includes(descriptor.code)) {
+              onCnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is Invalid`;
+            }
           }
-      
+          if (!descriptor.short_desc) {
+            onCnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor.short_desc is missing`;
+          }
+        }
+
+        // cancellation_fee
+        const fee = term?.cancellation_fee;
+        if (!fee) {
+          onCnfrmObj.cancellationTerms = `${path}.cancellation_fee is missing`;
+        } else {
+          if (!fee.percentage) {
+            onCnfrmObj.cancellationTerms = `${path}.cancellation_fee.percentage is missing`;
+          }
+          if (!fee.amount) {
+            onCnfrmObj.cancellationTerms = `${path}.cancellation_fee.amount is missing`;
+          } else {
+            if (!fee.amount.currency) {
+              onCnfrmObj.cancellationTerms = `${path}.cancellation_fee.amount.currency is missing`;
+            }
+            if (!fee.amount.value) {
+              onCnfrmObj.cancellationTerms = `${path}.cancellation_fee.amount.value is missing`;
+            }
+          }
+        }
+      });
     }
+  }
   dao.setValue("awbNo", awbNo);
   return onCnfrmObj;
 };

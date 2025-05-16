@@ -50,9 +50,9 @@ const checkOnCancel = (data, msgIdSet) => {
       }
     });
 
-    if (!surgeItemFound) {
+    if (surgeItem && !surgeItemFound) {
       onCancelObj.surgeItemErr = `Surge item is missing in the order`;
-    } else if (!_.isEqual(surgeItemFound.price, surgeItemData?.price)) {
+    } else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
       onCancelObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
     }
   } catch (error) {

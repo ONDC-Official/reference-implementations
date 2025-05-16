@@ -59,9 +59,9 @@ const checkOnStatus = (data, msgIdSet) => {
     }
   });
 
-  if (!surgeItemFound) {
+  if (surgeItem && !surgeItemFound) {
     onStatusObj.surgeItemErr = `Surge item is missing in the order`;
-  } else if (!_.isEqual(surgeItemFound.price, surgeItemData?.price)) {
+  } else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
     onStatusObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
   }
 

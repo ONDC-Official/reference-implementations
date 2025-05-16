@@ -49,9 +49,9 @@ const checkOnUpdate = (data, msgIdSet) => {
       }
     });
 
-    if (!surgeItemFound) {
+    if (surgeItem && !surgeItemFound) {
       onUpdtObj.surgeItemErr = `Surge item is missing in the order`;
-    } else if (!_.isEqual(surgeItemFound.price, surgeItemData?.price)) {
+    } else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
       onUpdtObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
     }
   } catch (error) {
