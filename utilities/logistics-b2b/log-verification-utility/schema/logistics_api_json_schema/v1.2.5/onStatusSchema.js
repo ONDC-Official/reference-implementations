@@ -849,7 +849,6 @@ module.exports = {
             "fulfillments",
             "payment",
             "billing",
-            "cancellation",
             "updated_at",
           ],
         },

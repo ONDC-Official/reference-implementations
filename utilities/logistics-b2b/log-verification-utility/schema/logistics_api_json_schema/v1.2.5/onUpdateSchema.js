@@ -488,7 +488,6 @@ module.exports = {
                   "tracking",
                   "start",
                   "end",
-                  "vehicle",
                 ],
               },
             },

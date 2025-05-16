@@ -39,6 +39,9 @@ const checkOnStatus = (data, msgIdSet) => {
     }
   }
 
+  if (on_status?.state === "Cancelled" && !on_status?.cancellation)
+    onStatusObj.cancellationErr = `Cancellation object is mandatory for order state 'Cancelled'`;
+
   let categoryId;
   items?.forEach((item, i) => {
     if (domain === "ONDC:LOG10" && !item?.time?.timestamp) {
@@ -422,92 +425,80 @@ const checkOnStatus = (data, msgIdSet) => {
         }
       }
 
-    if(fulfillment?.type== "Delivery")
-          {
-            if(fulfillment?.hasOwnProperty("tags"))
-            {
-              fulfillment?.tags?.forEach((tag) => {
-                if(tag.code === "linked_provider")
-                {
-                  if(!_.isEqual(JSON.stringify(tag), shipping_label))
-                  {
-                    onStatusObj.linkedPrvdrErr = `linked_provider tag in /on_update does not match with the one provided in /init`;
+      if (fulfillment?.type == "Delivery") {
+        if (fulfillment?.hasOwnProperty("tags")) {
+          fulfillment?.tags?.forEach((tag) => {
+            if (tag.code === "linked_provider") {
+              if (!_.isEqual(JSON.stringify(tag), shipping_label)) {
+                onStatusObj.linkedPrvdrErr = `linked_provider tag in /on_update does not match with the one provided in /init`;
+              }
+              if (tag?.list?.length > 0) {
+                var found = false;
+                tag.list.forEach((item) => {
+                  if (item.code === "id") {
+                    found = true;
                   }
-                  if(tag?.list?.length > 0)
-                  {
-                    var found=false;
-                    tag.list.forEach((item) => {
-                      if(item.code === "id")
-                      {
-                        found=true;
-                        }
-                      });
-                      if(!found)
-                      {
-                        onStatusObj.linkedPrvdrErr = `linked_provider tag in /on_update does not have id code`;
-                      }
-                    };
-                  }
+                });
+                if (!found) {
+                  onStatusObj.linkedPrvdrErr = `linked_provider tag in /on_update does not have id code`;
                 }
-              );
+              }
             }
-          }
+          });
+        }
+      }
     });
   } catch (error) {
     console.log(`Error checking fulfillments/start in /on_status`);
   }
- if (on_status?.hasOwnProperty("cancellation_terms")) {
-          console.log("validating cancellation terms"+on_status);
-          const cancellationTerms= on_confirm?.cancellation_terms;
-          if (!Array.isArray(cancellationTerms)) {
-            onStatusObj.cancellationTerms='cancellation_terms must be an array';
+  if (on_status?.hasOwnProperty("cancellation_terms")) {
+    console.log("validating cancellation terms" + on_status);
+    const cancellationTerms = on_confirm?.cancellation_terms;
+    if (!Array.isArray(cancellationTerms)) {
+      onStatusObj.cancellationTerms = "cancellation_terms must be an array";
+    } else {
+      cancellationTerms.forEach((term, index) => {
+        const path = `cancellation_terms[${index}]`;
+
+        // fulfillment_state
+        const descriptor = term?.fulfillment_state?.descriptor;
+        if (!descriptor) {
+          onStatusObj.cancellationTerms = `${path}.fulfillment_state.descriptor is missing`;
+        } else {
+          if (!descriptor.code) {
+            onStatusObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is missing`;
           } else {
-            cancellationTerms.forEach((term, index) => {
-              const path = `cancellation_terms[${index}]`;
-          
-              // fulfillment_state
-              const descriptor = term?.fulfillment_state?.descriptor;
-              if (!descriptor) {
-                onStatusObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
-              } else {
-                if (!descriptor.code) {
-                  onStatusObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
-                } 
-                else
-                {
-                  if(!constants.FULFILLMENT_STATE.includes(descriptor.code))
-                  {
-                    onStatusObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
-                  }
-                }
-                if (!descriptor.short_desc) {
-                  onStatusObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
-                }
-              }
-          
-              // cancellation_fee
-              const fee = term?.cancellation_fee;
-              if (!fee) {
-                onStatusObj.cancellationTerms=`${path}.cancellation_fee is missing`;
-              } else {
-                if (!fee.percentage) {
-                  onStatusObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
-                }
-                if (!fee.amount) {
-                  onStatusObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
-                } else {
-                  if (!fee.amount.currency) {
-                    onStatusObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
-                  }
-                  if (!fee.amount.value) {
-                    onStatusObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
-                  }
-                }
-              }
-            });
+            if (!constants.FULFILLMENT_STATE.includes(descriptor.code)) {
+              onStatusObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is Invalid`;
+            }
           }
-      
+          if (!descriptor.short_desc) {
+            onStatusObj.cancellationTerms = `${path}.fulfillment_state.descriptor.short_desc is missing`;
+          }
+        }
+
+        // cancellation_fee
+        const fee = term?.cancellation_fee;
+        if (!fee) {
+          onStatusObj.cancellationTerms = `${path}.cancellation_fee is missing`;
+        } else {
+          if (!fee.percentage) {
+            onStatusObj.cancellationTerms = `${path}.cancellation_fee.percentage is missing`;
+          }
+          if (!fee.amount) {
+            onStatusObj.cancellationTerms = `${path}.cancellation_fee.amount is missing`;
+          } else {
+            if (!fee.amount.currency) {
+              onStatusObj.cancellationTerms = `${path}.cancellation_fee.amount.currency is missing`;
+            }
+            if (!fee.amount.value) {
+              onStatusObj.cancellationTerms = `${path}.cancellation_fee.amount.value is missing`;
+            }
+          }
+        }
+      });
     }
+  }
   return onStatusObj;
 };
 
