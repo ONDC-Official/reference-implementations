@@ -104,12 +104,6 @@ const checkInit = (data, msgIdSet) => {
             itemkey
           ] = `Category id '${item.category_id}' for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
-        if (item?.descriptor?.code != itemObj?.descriptor?.code) {
-          let itemkey = `codeErr${i}`;
-          initObj[
-            itemkey
-          ] = `Descriptor code '${item?.descriptor?.code}' for item with id '${item?.id}' does not match with the catalog provided in /on_search`;
-        }
         fulfillmentsArr.forEach((fulfillment, i) => {
           fulfillment?.tags?.forEach((item) => {
             if (item?.code === "linked_provider") {
