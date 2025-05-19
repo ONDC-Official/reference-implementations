@@ -290,7 +290,6 @@ module.exports = {
                           required: ["label", "duration"],
                         },
                       },
-                      additionalProperties: false,
                       required: [
                         "id",
                         "parent_item_id",

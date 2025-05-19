@@ -203,7 +203,6 @@ module.exports = {
                         },
                       },
                     },
-                    required: ["code"],
                   },
                   time: {
                     type: "object",

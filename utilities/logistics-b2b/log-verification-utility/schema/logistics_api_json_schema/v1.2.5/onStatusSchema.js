@@ -179,7 +179,6 @@ module.exports = {
                         },
                       },
                     },
-                    required: ["code"],
                   },
                   time: {
                     type: "object",
@@ -666,16 +665,6 @@ module.exports = {
                 "status",
                 "@ondc/org/settlement_window",
                 "@ondc/org/settlement_basis",
-              ],
-              allOf: [
-                {
-                  if: {
-                    properties: { type: { const: "POST-FULFILLMENT" } },
-                  },
-                  then: {
-                    required: ["@ondc/org/collection_amount"],
-                  },
-                },
               ],
             },
             billing: {

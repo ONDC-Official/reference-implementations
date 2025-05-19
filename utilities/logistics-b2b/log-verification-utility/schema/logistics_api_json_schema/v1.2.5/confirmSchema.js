@@ -783,38 +783,6 @@ module.exports = {
                   },
                 },
               },
-              allOf: [
-                {
-                  if: {
-                    properties: { type: { const: "ON-FULFILLMENT" } },
-                  },
-                  then: {
-                    required: ["@ondc/org/collection_amount"],
-                  },
-                },
-                {
-                  if: {
-                    properties: {
-                      type: { enum: ["ON-ORDER", "POST-FULFILLMENT"] },
-                    },
-                  },
-                  then: {
-                    not: { required: ["@ondc/org/collection_amount"] },
-                    errorMessage:
-                      "@ondc/org/collection_amount is required only for payment/type 'ON-FULFILLMENT'",
-                  },
-                },
-                {
-                  if: { properties: { type: { const: "ON-FULFILLMENT" } } },
-                  then: {
-                    properties: {
-                      collected_by: {
-                        const: "BPP",
-                      },
-                    },
-                  },
-                },
-              ],
               required: [
                 "type",
                 "collected_by",

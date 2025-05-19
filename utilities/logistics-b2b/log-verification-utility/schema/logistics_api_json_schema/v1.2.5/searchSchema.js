@@ -325,28 +325,6 @@ module.exports = {
                 },
               },
               required: ["type"],
-              allOf: [
-                {
-                  if: {
-                    properties: { type: { const: "POST-FULFILLMENT" } },
-                  },
-                  then: {
-                    required: ["@ondc/org/collection_amount"],
-                  },
-                },
-                {
-                  if: {
-                    properties: {
-                      type: { enum: ["ON-ORDER", "POST-FULFILLMENT"] },
-                    },
-                  },
-                  then: {
-                    not: { required: ["@ondc/org/collection_amount"] },
-                    errorMessage:
-                      "@ondc/org/collection_amount is required only for payment/type 'POST-FULFILLMENT'",
-                  },
-                },
-              ],
             },
             "@ondc/org/payload_details": {
               type: "object",
