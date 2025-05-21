@@ -245,7 +245,15 @@ module.exports = {
                     items: {
                       type: "object",
                       properties: {
-                        code: { type: "string" },
+                        code: {
+                          type: "string",
+                          enum: [
+                            "linked_provider",
+                            "linked_order",
+                            "fulfill_request",
+                            "fulfill_response",
+                          ],
+                        },
                         list: {
                           type: "array",
                           items: {

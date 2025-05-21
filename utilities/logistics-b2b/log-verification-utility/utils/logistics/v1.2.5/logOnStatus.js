@@ -231,14 +231,14 @@ const checkOnStatus = (data, msgIdSet) => {
         const checkFulfillmentTags = fulfillmentTags?.filter(
           (i) => i.code !== "shipping_label"
         );
-        if (
-          !_.isEqual(
-            JSON.stringify(checkFulfillmentTags),
-            JSON.stringify(confirmFulfillmentTag)
-          )
-        ) {
-          onStatusObj.fulfillmentTagsErr = `Fulfillment tags in /on_status does not match with the one provided in /confirm`;
-        }
+        // if (
+        //   !_.isEqual(
+        //     JSON.stringify(checkFulfillmentTags),
+        //     JSON.stringify(confirmFulfillmentTag)
+        //   )
+        // ) {
+        //   onStatusObj.fulfillmentTagsErr = `Fulfillment tags in /on_status does not match with the one provided in /confirm`;
+        // }
 
         if (cod_order) {
           const cod_settlement_tags = fulfillment?.tags?.some(

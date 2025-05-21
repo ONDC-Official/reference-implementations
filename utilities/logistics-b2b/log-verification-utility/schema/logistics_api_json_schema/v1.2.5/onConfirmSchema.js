@@ -733,11 +733,11 @@ module.exports = {
                         code: {
                           type: "string",
                           enum: [
-                            "state",
-                            "rto_action",
                             "linked_provider",
                             "linked_order",
                             "linked_order_item",
+                            "state",
+                            "rto_action",
                             "shipping_label",
                             "weather_check",
                           ],
@@ -1030,7 +1030,6 @@ module.exports = {
                           enum: constants.UNITS_WEIGHT,
                         },
                         value: {
-                          type: "number",
                           const: {
                             $data:
                               "/confirm/0/message/order/@ondc~1org~1linked_order/order/weight/value",

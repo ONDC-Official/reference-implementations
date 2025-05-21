@@ -537,11 +537,17 @@ module.exports = {
                         code: {
                           type: "string",
                           enum: [
-                            "state",
-                            "rto_action",
+                            "linked_order_item",
                             "linked_provider",
                             "linked_order",
-                            "linked_order_item",
+                            "state",
+                            "rto_action",
+                            "provider",
+                            "order",
+                            "cod_settlement_detail",
+                            "rto_verification",
+                            "items",
+                            "reverseqc_input",
                           ],
                         },
                         list: {
@@ -921,7 +927,6 @@ module.exports = {
                           enum: constants.DEAD_wEIGHT,
                         },
                         value: {
-                          type: "number",
                           const: {
                             $data:
                               "/search/0/message/intent/@ondc~1org~1payload_details/weight/value",

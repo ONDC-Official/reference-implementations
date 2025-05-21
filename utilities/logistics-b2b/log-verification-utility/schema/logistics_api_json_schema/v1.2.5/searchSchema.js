@@ -177,17 +177,15 @@ module.exports = {
                       },
                       required: ["type"],
                     },
-                    instructions:
-                    {
+                    instructions: {
                       type: "object",
                       properties: {
                         code: {
-                          type: "string"
+                          type: "string",
                         },
                       },
                       required: ["code"],
-                    }
-          
+                    },
                   },
                   required: ["location"],
                 },
@@ -235,16 +233,15 @@ module.exports = {
                       },
                       required: ["type"],
                     },
-                    instructions:
-                    {
+                    instructions: {
                       type: "object",
                       properties: {
                         code: {
-                          type: "string"
+                          type: "string",
                         },
                       },
                       required: ["code"],
-                    }
+                    },
                   },
                   required: ["location"],
                 },
@@ -255,7 +252,11 @@ module.exports = {
                     properties: {
                       code: {
                         type: "string",
-                        enum: ["linked_provider", "linked_order"],
+                        enum: [
+                          "linked_provider",
+                          "linked_order",
+                          "fulfill_request",
+                        ],
                       },
                       list: {
                         type: "array",

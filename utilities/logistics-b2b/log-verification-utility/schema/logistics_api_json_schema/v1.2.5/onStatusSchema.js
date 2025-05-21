@@ -547,6 +547,47 @@ module.exports = {
                   "@ondc/org/ebnexpirydate": {
                     type: "string",
                   },
+                  tags: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        code: {
+                          type: "string",
+                          enum: [
+                            "tracking",
+                            "linked_provider",
+                            "linked_order",
+                            "linked_order_item",
+                            "shipping_label",
+                            "fulfill_request",
+                            "fulfill_response",
+                            "rider_details",
+                            "cod_collection_detail",
+                            "cod_settlement_detail",
+                            "rto_event",
+                            "reverseqc_output",
+                          ],
+                        },
+                        list: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            properties: {
+                              code: {
+                                type: "string",
+                              },
+                              value: {
+                                type: ["string", "number"],
+                              },
+                            },
+                            required: ["code", "value"],
+                          },
+                        },
+                      },
+                      required: ["code", "list"],
+                    },
+                  },
                 },
                 allOf: [
                   {
@@ -790,39 +831,6 @@ module.exports = {
                   $data: "/confirm/0/message/order/@ondc~1org~1linked_order",
                 },
               ],
-            },
-            tags: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  code: {
-                    type: "string",
-                    enum: [
-                      "linked_provider",
-                      "linked_order",
-                      "linked_order_item",
-                      "shipping_label",
-                    ],
-                  },
-                  list: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        code: {
-                          type: "string",
-                        },
-                        value: {
-                          type: ["string", "number"],
-                        },
-                      },
-                      required: ["code", "value"],
-                    },
-                  },
-                },
-                required: ["code", "list"],
-              },
             },
             updated_at: {
               type: "string",

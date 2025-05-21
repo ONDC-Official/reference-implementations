@@ -425,7 +425,6 @@ module.exports = {
                       },
                     },
                   },
-
                   end: {
                     type: "object",
                     properties: {
@@ -579,7 +578,15 @@ module.exports = {
                       properties: {
                         code: {
                           type: "string",
-                          enum: constants.CANCELLATION_TAGS_CODES,
+                          enum: [
+                            "igm_request",
+                            "precancel_state",
+                            "linked_provider",
+                            "linked_order",
+                            "linked_order_item",
+                            "shipping_label",
+                            "rto_event",
+                          ],
                         },
                         list: {
                           type: "array",

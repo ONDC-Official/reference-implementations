@@ -457,8 +457,14 @@ module.exports = {
                             "linked_order",
                             "linked_order_item",
                             "shipping_label",
+                            "fulfill_request",
+                            "fulfill_response",
+                            "rider_details",
+                            "fulfillment_delay",
+                            "fulfillment_proof",
+                            "ebn",
                             "linked_order_diff",
-                            "linked_order_diff_proof"
+                            "linked_order_diff_proof",
                           ],
                         },
                         list: {
@@ -481,14 +487,7 @@ module.exports = {
                     },
                   },
                 },
-                required: [
-                  "id",
-                  "type",
-                  "state",
-                  "tracking",
-                  "start",
-                  "end",
-                ],
+                required: ["id", "type", "state", "tracking", "start", "end"],
               },
             },
             billing: {
