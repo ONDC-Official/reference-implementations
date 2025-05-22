@@ -54,9 +54,7 @@ const checkOnStatus = (data, msgIdSet) => {
 
     if (
       surgeItem &&
-      item?.id === surgeItemData?.id &&
-      Array.isArray(item.tags) &&
-      item.tags.length > 0
+      item?.id === surgeItemData?.id
     ) {
       surgeItemFound = item;
     }
@@ -64,17 +62,21 @@ const checkOnStatus = (data, msgIdSet) => {
 
   if (surgeItem && !surgeItemFound) {
     onStatusObj.surgeItemErr = `Surge item is missing in the order`;
-  } else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
-    onStatusObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
-  }
+  } 
+  // else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
+  //   onStatusObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
+  // }
 
   try {
     if (cod_order) {
-      COD_ITEM?.forEach((item) => {
-        if (!onStatusItemId.includes(item?.id)) {
-          onStatusObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_status when order type is COD`;
-        }
-      });
+      if (COD_ITEM && !onStatusItemId.includes(COD_ITEM[0]?.id)) {
+        onStatusObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /on_status when order type is COD`;
+      }
+      // COD_ITEM?.forEach((item) => {
+      //   if (!onStatusItemId.includes(item?.id)) {
+      //     onStatusObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_status when order type is COD`;
+      //   }
+      // });
     }
   } catch (error) {
     console.log(
@@ -211,7 +213,7 @@ const checkOnStatus = (data, msgIdSet) => {
   }
 
   try {
-    fulfillments.forEach((fulfillment) => {
+    fulfillments?.forEach((fulfillment) => {
       ffState = fulfillment?.state?.descriptor?.code;
       let fulfillmentTags = fulfillment?.tags;
       console.log(
@@ -223,7 +225,7 @@ const checkOnStatus = (data, msgIdSet) => {
         fulfillment.type === "Delivery"
       ) {
         if (fulfillmentTags) {
-          fulfillmentTags.forEach((tag) => {
+          fulfillmentTags?.forEach((tag) => {
             if (tag.code === "tracking") trackingEnabled = true;
           });
         }

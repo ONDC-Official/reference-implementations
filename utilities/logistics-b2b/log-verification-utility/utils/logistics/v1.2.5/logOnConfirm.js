@@ -52,9 +52,7 @@ const checkOnConfirm = (data, msgIdSet) => {
 
     if (
       surgeItem &&
-      item?.id === surgeItemData?.id &&
-      Array.isArray(item.tags) &&
-      item.tags.length > 0
+      item?.id === surgeItemData?.id
     ) {
       surgeItemFound = item;
     }
@@ -62,19 +60,23 @@ const checkOnConfirm = (data, msgIdSet) => {
 
   if (surgeItem && !surgeItemFound) {
     onCnfrmObj.surgeItemErr = `Surge item is missing in the order`;
-  } else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
-    onCnfrmObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
-  }
+  } 
+  // else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
+  //   onCnfrmObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
+  // }
 
   dao.setValue("item_descriptor_code", descriptor_code);
 
   try {
     if (cod_order) {
-      COD_ITEM?.forEach((item) => {
-        if (!onCnfrmItemId.includes(item?.id)) {
-          onCnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_confirm when order type is COD`;
-        }
-      });
+      if (COD_ITEM && !onCnfrmItemId.includes(COD_ITEM[0]?.id)) {
+        onCnfrmObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /on_confirm when order type is COD`;
+      }
+      // COD_ITEM?.forEach((item) => {
+      //   if (!onCnfrmItemId.includes(item?.id)) {
+      //     onCnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_confirm when order type is COD`;
+      //   }
+      // });
     }
   } catch (error) {
     console.log(

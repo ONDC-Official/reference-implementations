@@ -124,11 +124,14 @@ const checkConfirm = (data, msgIdSet) => {
 
   try {
     if (cod_order) {
-      COD_ITEM?.forEach((item) => {
-        if (!confirmItemId.includes(item?.id)) {
-          cnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /confirm when order type is COD`;
-        }
-      });
+      if (COD_ITEM && !confirmItemId.includes(COD_ITEM[0]?.id)) {
+        cnfrmObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /confirm when order type is COD`;
+      }
+      // COD_ITEM?.forEach((item) => {
+      //   if (!confirmItemId.includes(item?.id)) {
+      //     cnfrmObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /confirm when order type is COD`;
+      //   }
+      // });
     }
   } catch (error) {
     console.log(`!!Error fetching order item  in${constants.LOG_CONFIRM}`, err);

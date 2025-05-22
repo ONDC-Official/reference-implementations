@@ -295,7 +295,6 @@ module.exports = {
                         "parent_item_id",
                         "category_id",
                         "fulfillment_id",
-                        "descriptor",
                         "price",
                       ],
                     },

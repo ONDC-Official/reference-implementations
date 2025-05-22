@@ -153,7 +153,21 @@ const checkOnSearch = async (data, msgIdSet) => {
             if (provider?.items?.length === 1)
               onSearch.CodItemErr = `For COD order, there should be more than one item in the order`;
             else {
-              dao.setValue("COD_ITEM", provider?.items);
+              // dao.setValue("COD_ITEM", provider?.items);
+              const codItem = provider?.items?.filter(
+                (item) =>
+                  item.tags &&
+                  item.tags.some(
+                    (tag) =>
+                      tag.code === "type" &&
+                      tag.list.some((entry) => entry.value === "cod")
+                  )
+              );
+              if (!codItem)
+                onSrchObj.codOrderItemErr = `Tags is missing for COD order item`;
+              else {
+                dao.setValue("COD_ITEM", codItem);
+              }
             }
           }
         });

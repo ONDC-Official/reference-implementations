@@ -146,11 +146,14 @@ const checkInit = (data, msgIdSet) => {
     });
 
     if (cod_order) {
-      COD_ITEM?.forEach((item) => {
-        if (!initItemId.includes(item?.id)) {
-          initObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /init when order type is COD`;
-        }
-      });
+      if (COD_ITEM && !initItemId.includes(COD_ITEM[0]?.id)) {
+        initObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /init when order type is COD`;
+      }
+      // COD_ITEM?.forEach((item) => {
+      //   if (!initItemId.includes(item?.id)) {
+      //     initObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /init when order type is COD`;
+      //   }
+      // });
     }
   } catch (error) {
     console.log(

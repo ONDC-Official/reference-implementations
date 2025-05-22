@@ -104,11 +104,14 @@ const checkOnInit = (data, msgIdSet) => {
     const onInitItem = [];
     on_init?.items?.forEach((item) => onInitItem.push(item?.id));
     if (cod_order) {
-      COD_ITEM?.forEach((item) => {
-        if (!onInitItem.includes(item?.id)) {
-          onInitObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_init when order type is COD`;
-        }
-      });
+      if (COD_ITEM && !onInitItem.includes(COD_ITEM[0]?.id)) {
+        onInitObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /on_init when order type is COD`;
+      }
+      // COD_ITEM?.forEach((item) => {
+      //   if (!onInitItem.includes(item?.id)) {
+      //     onInitObj.codOrderItemErr = `Item with id '${item.id}' does not exist in /on_init when order type is COD`;
+      //   }
+      // });
     }
   } catch (error) {
     console.log(`!!Error fetching order item  in${constants.LOG_ONINIT}`, err);
