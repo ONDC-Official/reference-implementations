@@ -462,6 +462,7 @@ module.exports = {
                             "rider_details",
                             "fulfillment_delay",
                             "fulfillment_proof",
+                            "cod_settlement_detail",
                             "ebn",
                             "linked_order_diff",
                             "linked_order_diff_proof",

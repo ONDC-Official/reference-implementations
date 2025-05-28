@@ -740,6 +740,7 @@ module.exports = {
                             "rto_action",
                             "shipping_label",
                             "weather_check",
+                            "cod_settlement_detail"
                           ],
                         },
                         list: {
