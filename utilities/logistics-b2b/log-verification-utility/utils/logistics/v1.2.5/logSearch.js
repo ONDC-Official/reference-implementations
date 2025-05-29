@@ -34,6 +34,37 @@ const checkSearch = async (data, msgIdSet) => {
   } catch (error) {
     console.error("Error while checking fulfillment tags:", error.stack);
   }
+
+  if (
+    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "016"))
+  ) {
+    dao.setValue("Dynamic_otp_verification_rto", true);
+  }
+
+  if (
+    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "011"))
+  ) {
+    dao.setValue("Update_delivery_address", true);
+  }
+
+  if (dao.getValue("Dynamic_otp_verification_rto")) {
+    const startType = search?.fulfillment?.start?.authorization?.type;
+    const endType = search?.fulfillment?.end?.authorization?.type;
+
+    if (startType !== "OTP" || endType !== "OTP") {
+      if (startType !== "OTP" && endType !== "OTP") {
+        srchObj["dynamic_flow_authorization_error"] =
+          "Authorization type should be OTP for Dynamic OTP verification RTO flow in both start and end object of fulfillment.";
+      } else if (startType !== "OTP") {
+        srchObj["dynamic_flow_authorization_error"] =
+          "Authorization type should be OTP for Dynamic OTP verification RTO flow in start object of fulfillment.";
+      } else if (endType !== "OTP") {
+        srchObj["dynamic_flow_authorization_error"] =
+          "Authorization type should be OTP for Dynamic OTP verification RTO flow in end object of fulfillment.";
+      }
+    }
+  }
+
   try {
     if (version === "1.2.5") {
       if (!startLocation?.id)

@@ -11,6 +11,17 @@ const checkUpdate = (data, msgIdSet) => {
   const initCategoryId = JSON.stringify(dao.getValue("init_item_category_id"));
   let p2h2p = dao.getValue("p2h2p");
   let awbNo = dao.getValue("awbNo");
+  const Update_delivery_address = dao.getValue("Update_delivery_address");
+  const confirmdeliveryAddress = dao.getValue("confirm_end_location");
+  const dymanicOtpVerificationRto = dao.getValue(
+    "Dynamic_otp_verification_rto"
+  );
+
+  console.log(
+    "________________",
+    Update_delivery_address,
+    confirmdeliveryAddress
+  );
 
   dao.setValue("updateApi", true);
 
@@ -84,14 +95,54 @@ const checkUpdate = (data, msgIdSet) => {
     console.error("Error while immediate Delivery flow:", error.stack);
   }
 
+  try {
+    try {
+      if (dymanicOtpVerificationRto) {
+        update?.fulfillments?.forEach((fulfillment) => {
+          const startAuth = fulfillment?.start?.authorization;
+          const endAuth = fulfillment?.end?.authorization;
+
+          if (!startAuth || startAuth.type !== "OTP") {
+            updtObj.startAuthErr = `start.authorization must have type 'OTP' when flow is dymanicOtpVerificationRto.`;
+          } else if (!startAuth.valid_from || !startAuth.valid_to) {
+            updtObj.startAuthKeysErr = `start.authorization must include 'valid_from' and 'valid_until' keys in dymanicOtpVerificationRto flow.`;
+          }
+
+          if (!endAuth || endAuth.type !== "OTP") {
+            updtObj.endAuthErr = `end.authorization must have type 'OTP' when flow is dymanicOtpVerificationRto.`;
+          } else if (!endAuth.valid_from || !endAuth.valid_to) {
+            updtObj.endAuthKeysErr = `end.authorization must include 'valid_from' and 'valid_until' keys in dymanicOtpVerificationRto flow.`;
+          }
+        });
+      }
+    } catch (error) {
+      console.error(
+        "Error while checking OTP authorization in fulfillments:",
+        error.stack
+      );
+    }
+  } catch (error) {
+    console.error("Error while immediate Delivery flow:", error.stack);
+  }
+
   dao.setValue("rts", rts);
   let items = update.items;
-  let fulfillments = update.fulfillments;
+  let fulfillments = update?.fulfillments;
 
   try {
     console.log(`Checking if PCC code required in case of P2P/P2H2P shipments`);
 
     fulfillments.forEach((fulfillment) => {
+      if (Update_delivery_address) {
+        if (!fulfillment?.end?.location?.address) {
+          updtObj.deliveryAddressErr = `Delivery address in fulfillments/end is missing in Update Delivery Address Flow`;
+        } else if (
+          _.isEqual(fulfillment.end.location.address, confirmdeliveryAddress)
+        ) {
+          updtObj.deliveryAddressErr = `Delivery address in fulfillments/end should not be the same as the one provided in /confirm in Update Delivery Address Flow`;
+        }
+      }
+
       if (fulfillment["@ondc/org/awb_no"] && p2h2p) awbNo = true;
       if (rts === "yes" && !fulfillment?.start) {
         updtObj.startErr = `/fulfillments/start is required when ready_to_ship = yes`;

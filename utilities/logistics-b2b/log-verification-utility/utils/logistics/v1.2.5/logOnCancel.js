@@ -79,11 +79,22 @@ const checkOnCancel = (data, msgIdSet) => {
         }
 
         ffState = fulfillment?.state?.descriptor?.code;
+        if (fulfillment.type === "Delivery" && ffState !== "RTO") {
+          onCancelObj.flflmntstErr = `In case of RTO, fulfillment with type 'Delivery' needs to in 'RTO' state`;
+        }
         if (
-          (fulfillment.type === "Prepaid" || fulfillment.type === "Delivery") &&
-          ffState !== "Cancelled"
+          fulfillment.type === "RTO" &&
+          (ffState == "RTO-Initiated" || ffState == "RTO-Disposed") &&
+          on_cancel?.order !== "In-progress"
         ) {
-          onCancelObj.flflmntstErr = `In case of RTO, fulfillment with type '${fulfillment.type}' needs to be 'Cancelled'`;
+          onCancelObj.stateErr = `In case of RTO-Initiated fulfillment state, order state should be 'In-progress'`;
+        }
+        if (
+          fulfillment.type === "RTO" &&
+          ffState == "RTO-Delivered" &&
+          on_cancel?.order !== "Completed"
+        ) {
+          onCancelObj.stateErr = `In case of RTO-Delivered fulfillment state, order state should be 'Completed'`;
         }
       });
 
@@ -184,11 +195,7 @@ const checkOnCancel = (data, msgIdSet) => {
         `Comparing pickup and delivery timestamps for on_cancel_${ffState}`
       );
 
-      if (
-        fulfillment.type === "Prepaid" ||
-        fulfillment.type === "CoD" ||
-        fulfillment.type === "Delivery"
-      ) {
+      if (fulfillment.type === "COD" || fulfillment.type === "Delivery") {
         if (ffState === "Cancelled") {
           if (orderState !== "Cancelled") {
             onCancelObj.ordrStatErr = `Order state should be 'Cancelled' for fulfillment state - ${ffState}`;

@@ -52,17 +52,14 @@ const checkOnStatus = (data, msgIdSet) => {
     onStatusItemId?.push(item?.id);
     categoryId = item?.category_id;
 
-    if (
-      surgeItem &&
-      item?.id === surgeItemData?.id
-    ) {
+    if (surgeItem && item?.id === surgeItemData?.id) {
       surgeItemFound = item;
     }
   });
 
   if (surgeItem && !surgeItemFound) {
     onStatusObj.surgeItemErr = `Surge item is missing in the order`;
-  } 
+  }
   // else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
   //   onStatusObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
   // }
@@ -92,11 +89,22 @@ const checkOnStatus = (data, msgIdSet) => {
       );
       fulfillments.forEach((fulfillment) => {
         ffState = fulfillment?.state?.descriptor?.code;
+        if (fulfillment.type === "Delivery" && ffState !== "RTO") {
+          onStatusObj.flflmntstErr = `In case of RTO, fulfillment with type 'Delivery' needs to in 'RTO' state`;
+        }
         if (
-          (fulfillment.type === "Prepaid" || fulfillment.type === "Delivery") &&
-          ffState !== "Cancelled"
+          fulfillment.type === "RTO" &&
+          (ffState == "RTO-Initiated" || ffState == "RTO-Disposed") &&
+          on_status?.order !== "In-progress"
         ) {
-          onStatusObj.flflmntstErr = `In case of RTO, fulfillment with type 'Delivery/Prepaid' needs to in 'Cancelled' state`;
+          onStatusObj.stateErr = `In case of RTO-Initiated fulfillment state, order state should be 'In-progress'`;
+        }
+        if (
+          fulfillment.type === "RTO" &&
+          ffState == "RTO-Delivered" &&
+          on_status?.order !== "Completed"
+        ) {
+          onStatusObj.stateErr = `In case of RTO-Delivered fulfillment state, order state should be 'Completed'`;
         }
       });
     }
@@ -219,11 +227,7 @@ const checkOnStatus = (data, msgIdSet) => {
       console.log(
         `Comparing pickup and delivery timestamps for on_status_${ffState}`
       );
-      if (
-        fulfillment.type === "Prepaid" ||
-        fulfillment.type === "CoD" ||
-        fulfillment.type === "Delivery"
-      ) {
+      if (fulfillment.type === "COD" || fulfillment.type === "Delivery") {
         if (fulfillmentTags) {
           fulfillmentTags?.forEach((tag) => {
             if (tag.code === "tracking") trackingEnabled = true;

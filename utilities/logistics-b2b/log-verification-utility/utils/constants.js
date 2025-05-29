@@ -205,6 +205,7 @@ module.exports = Object.freeze({
     "RTO-Delivered",
     "RTO-Disposed",
     "Cancelled",
+    "RTO",
   ],
   FULFILLMENT_EXP_STATE: [
     "Custom-cleared-domestic",

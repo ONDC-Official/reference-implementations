@@ -278,7 +278,7 @@ module.exports = {
                         properties: {
                           code: {
                             type: "string",
-                            enum: ["Cancelled", "RTO-Initiated"],
+                            enum: constants.FULFILLMENT_STATE,
                           },
                         },
                         required: ["code"],
@@ -586,6 +586,11 @@ module.exports = {
                             "linked_order_item",
                             "shipping_label",
                             "rto_event",
+                            "linked_order_diff",
+                            "linked_order_diff_proff",
+                            "ebn",
+                            "cod_settlement_detail",
+                            "cod_collection_detail",
                           ],
                         },
                         list: {
@@ -626,15 +631,7 @@ module.exports = {
                       required: ["person", "location", "contact"],
                     },
                   },
-                  required: [
-                    "id",
-                    "type",
-                    "state",
-                    "start",
-                    "end",
-                    "tracking",
-                    "tags",
-                  ],
+                  required: ["id", "type", "state", "start", "end", "tracking"],
                 },
                 else: {
                   properties: {
@@ -648,7 +645,7 @@ module.exports = {
                       required: ["location"],
                     },
                   },
-                  required: ["id", "type", "state", "start", "end", "tags"],
+                  required: ["id", "type", "state", "start", "end"],
                 },
               },
             },

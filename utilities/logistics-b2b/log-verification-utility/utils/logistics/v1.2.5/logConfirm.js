@@ -18,6 +18,7 @@ const checkConfirm = (data, msgIdSet) => {
   let onSearchProvArr = dao.getValue("providersArr");
   const cod_order = dao.getValue("cod_order");
   const COD_ITEM = dao.getValue("COD_ITEM");
+  const Update_delivery_address = dao.getValue("Update_delivery_address");
   const initCategoryId = JSON.stringify(dao.getValue("init_item_category_id"));
   confirm = confirm.message.order;
   const orderTags = confirm?.tags;
@@ -146,6 +147,9 @@ const checkConfirm = (data, msgIdSet) => {
   let p2h2p = dao.getValue("p2h2p");
   let fulfillmentTagSet = new Set();
   fulfillments.forEach((fulfillment, i) => {
+    if (Update_delivery_address)
+      dao.setValue("confirm_end_location", fulfillment?.end?.location?.address);
+
     let fulfillmentTags = fulfillment?.tags;
     let avgPickupTime = fulfillment?.start?.time?.duration;
     console.log(
@@ -297,58 +301,53 @@ const checkConfirm = (data, msgIdSet) => {
     }
     console.log(bpp_terms, bap_terms);
     if (confirm?.hasOwnProperty("cancellation_terms")) {
-        console.log("validating cancellation terms"+confirm);
-        const cancellationTerms= confirm?.cancellation_terms;
-        if (!Array.isArray(cancellationTerms)) {
-          cnfrmObj.cancellationTerms='cancellation_terms must be an array';
-        } else {
-          cancellationTerms.forEach((term, index) => {
-            const path = `cancellation_terms[${index}]`;
-        
-            // fulfillment_state
-            const descriptor = term?.fulfillment_state?.descriptor;
-            if (!descriptor) {
-              cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
+      console.log("validating cancellation terms" + confirm);
+      const cancellationTerms = confirm?.cancellation_terms;
+      if (!Array.isArray(cancellationTerms)) {
+        cnfrmObj.cancellationTerms = "cancellation_terms must be an array";
+      } else {
+        cancellationTerms.forEach((term, index) => {
+          const path = `cancellation_terms[${index}]`;
+
+          // fulfillment_state
+          const descriptor = term?.fulfillment_state?.descriptor;
+          if (!descriptor) {
+            cnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor is missing`;
+          } else {
+            if (!descriptor.code) {
+              cnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is missing`;
             } else {
-              if (!descriptor.code) {
-                cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
-              } 
-              else
-              {
-                if(!constants.FULFILLMENT_STATE.includes(descriptor.code))
-                {
-                  cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
-                }
-              }
-              if (!descriptor.short_desc) {
-                cnfrmObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
+              if (!constants.FULFILLMENT_STATE.includes(descriptor.code)) {
+                cnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is Invalid`;
               }
             }
-        
-            // cancellation_fee
-            const fee = term?.cancellation_fee;
-            if (!fee) {
-              cnfrmObj.cancellationTerms=`${path}.cancellation_fee is missing`;
+            if (!descriptor.short_desc) {
+              cnfrmObj.cancellationTerms = `${path}.fulfillment_state.descriptor.short_desc is missing`;
+            }
+          }
+
+          // cancellation_fee
+          const fee = term?.cancellation_fee;
+          if (!fee) {
+            cnfrmObj.cancellationTerms = `${path}.cancellation_fee is missing`;
+          } else {
+            if (!fee.percentage) {
+              cnfrmObj.cancellationTerms = `${path}.cancellation_fee.percentage is missing`;
+            }
+            if (!fee.amount) {
+              cnfrmObj.cancellationTerms = `${path}.cancellation_fee.amount is missing`;
             } else {
-              if (!fee.percentage) {
-                cnfrmObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
+              if (!fee.amount.currency) {
+                cnfrmObj.cancellationTerms = `${path}.cancellation_fee.amount.currency is missing`;
               }
-              if (!fee.amount) {
-                cnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
-              } else {
-                if (!fee.amount.currency) {
-                  cnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
-                }
-                if (!fee.amount.value) {
-                  cnfrmObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
-                }
+              if (!fee.amount.value) {
+                cnfrmObj.cancellationTerms = `${path}.cancellation_fee.amount.value is missing`;
               }
             }
-          });
-        }
-    
-        }
-    
+          }
+        });
+      }
+    }
 
     if (bpp_terms && !dao.getValue("bppTerms")) {
       cnfrmObj.bppTermsErr = `Which terms LBNP is providing as LSP did not provide bpp_terms in on_init?`;

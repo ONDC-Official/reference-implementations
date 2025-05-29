@@ -299,9 +299,7 @@ module.exports = {
                           },
                         ],
                       },
-                    },
-                    additionalProperties: false,
-                    // required: ["instructions"],
+                    }, // required: ["instructions"],
                   },
                   tags: {
                     type: "array",
