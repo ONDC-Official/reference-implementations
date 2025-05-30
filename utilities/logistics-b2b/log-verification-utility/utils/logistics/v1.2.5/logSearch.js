@@ -1,10 +1,10 @@
 const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
-const dao = require("../../dao/dao");
-const constants = require("../constants");
-const utils = require("../utils.js");
-const { reverseGeoCodingCheck } = require("../reverseGeoCoding");
+const dao = require("../../../dao/dao.js");
+const constants = require("../../constants");
+const utils = require("../../utils.js");
+const { reverseGeoCodingCheck } = require("../../reverseGeoCoding");
 
 const checkSearch = async (data, msgIdSet) => {
   let srchObj = {};
@@ -18,7 +18,52 @@ const checkSearch = async (data, msgIdSet) => {
   const {
     start: { location: startLocation },
     end: { location: endLocation },
+    tags,
   } = data.message.intent.fulfillment;
+
+  try {
+    tags?.map((tag) => {
+      if (tag?.code === "linked_order") {
+        tag?.list?.map((list) => {
+          if (list?.code === "cod_order") {
+            dao.setValue("cod_order", list?.value ?? "no");
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error while checking fulfillment tags:", error.stack);
+  }
+
+  if (
+    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "016"))
+  ) {
+    dao.setValue("Dynamic_otp_verification_rto", true);
+  }
+
+  if (
+    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "011"))
+  ) {
+    dao.setValue("Update_delivery_address", true);
+  }
+
+  if (dao.getValue("Dynamic_otp_verification_rto")) {
+    const startType = search?.fulfillment?.start?.authorization?.type;
+    const endType = search?.fulfillment?.end?.authorization?.type;
+
+    if (startType !== "OTP" || endType !== "OTP") {
+      if (startType !== "OTP" && endType !== "OTP") {
+        srchObj["dynamic_flow_authorization_error"] =
+          "Authorization type should be OTP for Dynamic OTP verification RTO flow in both start and end object of fulfillment.";
+      } else if (startType !== "OTP") {
+        srchObj["dynamic_flow_authorization_error"] =
+          "Authorization type should be OTP for Dynamic OTP verification RTO flow in start object of fulfillment.";
+      } else if (endType !== "OTP") {
+        srchObj["dynamic_flow_authorization_error"] =
+          "Authorization type should be OTP for Dynamic OTP verification RTO flow in end object of fulfillment.";
+      }
+    }
+  }
 
   try {
     if (version === "1.2.5") {
@@ -74,7 +119,11 @@ const checkSearch = async (data, msgIdSet) => {
     const pinToStd = JSON.parse(
       fs.readFileSync(path.join(__dirname, "pinToStd.json"), "utf8")
     );
-    const stdCode = data.context.city.split(":")[1];
+    const stdCode =
+      data?.context?.city === "*"
+        ? data?.context?.city
+        : data?.context?.city.split(":")[1];
+    console.log("stdCode", stdCode);
     const area_code = startLocation?.address?.area_code;
     if (pinToStd[area_code] && pinToStd[area_code] != stdCode) {
       srchObj[
