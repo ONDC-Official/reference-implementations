@@ -16,12 +16,7 @@ const checkUpdate = (data, msgIdSet) => {
   const dymanicOtpVerificationRto = dao.getValue(
     "Dynamic_otp_verification_rto"
   );
-
-  console.log(
-    "________________",
-    Update_delivery_address,
-    confirmdeliveryAddress
-  );
+  const reverseQC = dao.getValue("Reverse_QC");
 
   dao.setValue("updateApi", true);
 
@@ -140,6 +135,33 @@ const checkUpdate = (data, msgIdSet) => {
           _.isEqual(fulfillment.end.location.address, confirmdeliveryAddress)
         ) {
           updtObj.deliveryAddressErr = `Delivery address in fulfillments/end should not be the same as the one provided in /confirm in Update Delivery Address Flow`;
+        }
+      }
+
+      if (reverseQC) {
+        if (fulfillment?.type === "Return") {
+          const deliveryTags = fulfillment?.tags;
+          if (!deliveryTags || !Array.isArray(deliveryTags)) {
+            updtObj[
+              `deliveryTagsErr`
+            ] = `Tags are missing or invalid in fulfillment of type 'Return' for Reverse QC flow.`;
+          } else {
+            const reverseQCInputTag = deliveryTags.find(
+              (tag) => tag.code === "reverseqc_output"
+            );
+            if (!reverseQCInputTag) {
+              updtObj[
+                `reverseQCInputTagErr`
+              ] = `reverseqc_input tag is missing in fulfillment of type 'Return' for Reverse QC flow.`;
+            } else if (
+              !Array.isArray(reverseQCInputTag.list) ||
+              reverseQCInputTag.list.length === 0
+            ) {
+              updtObj[
+                `reverseQCInputListErr`
+              ] = `list array inside reverseqc_input tag is missing or empty in fulfillment of type 'Return' for Reverse QC flow.`;
+            }
+          }
         }
       }
 

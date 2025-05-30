@@ -20,6 +20,7 @@ const checkConfirm = (data, msgIdSet) => {
   const COD_ITEM = dao.getValue("COD_ITEM");
   const Update_delivery_address = dao.getValue("Update_delivery_address");
   const initCategoryId = JSON.stringify(dao.getValue("init_item_category_id"));
+  const reverseQC = dao.getValue("Reverse_QC");
   confirm = confirm.message.order;
   const orderTags = confirm?.tags;
   let bpp_terms = false;
@@ -149,6 +150,33 @@ const checkConfirm = (data, msgIdSet) => {
   fulfillments.forEach((fulfillment, i) => {
     if (Update_delivery_address)
       dao.setValue("confirm_end_location", fulfillment?.end?.location?.address);
+
+    if (reverseQC) {
+      if (fulfillment?.type === "Return") {
+        const deliveryTags = fulfillment?.tags;
+        if (!deliveryTags || !Array.isArray(deliveryTags)) {
+          cnfrmObj[
+            `deliveryTagsErr-${i}`
+          ] = `Tags are missing or invalid in fulfillment of type 'Return' for Reverse QC flow.`;
+        } else {
+          const reverseQCInputTag = deliveryTags.find(
+            (tag) => tag.code === "reverseqc_input"
+          );
+          if (!reverseQCInputTag) {
+            cnfrmObj[
+              `reverseQCInputTagErr-${i}`
+            ] = `reverseqc_input tag is missing in fulfillment of type 'Return' in Reverse QC flow.`;
+          } else if (
+            !Array.isArray(reverseQCInputTag.list) ||
+            reverseQCInputTag.list.length === 0
+          ) {
+            cnfrmObj[
+              `reverseQCInputListErr-${i}`
+            ] = `list array inside reverseqc_input tag is missing or empty in fulfillment of type 'Return' in Reverse QC flow.`;
+          }
+        }
+      }
+    }
 
     let fulfillmentTags = fulfillment?.tags;
     let avgPickupTime = fulfillment?.start?.time?.duration;

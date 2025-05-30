@@ -42,9 +42,21 @@ const checkSearch = async (data, msgIdSet) => {
   }
 
   if (
+    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "01B"))
+  ) {
+    dao.setValue("Reverse_QC", true);
+  }
+
+  if (
     search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "011"))
   ) {
     dao.setValue("Update_delivery_address", true);
+  }
+
+  if (
+    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "01F"))
+  ) {
+    dao.setValue("codified_static_terms", true);
   }
 
   if (dao.getValue("Dynamic_otp_verification_rto")) {

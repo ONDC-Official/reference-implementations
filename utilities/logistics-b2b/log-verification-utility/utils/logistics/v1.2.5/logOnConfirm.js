@@ -23,6 +23,8 @@ const checkOnConfirm = (data, msgIdSet) => {
   let awbNo = dao.getValue("awbNo");
   const surgeItem = dao.getValue("is_surge_item");
   const surgeItemData = dao.getValue("surge_item");
+  const codifiedStaticTerms = dao.getValue("codified_static_terms");
+  const codifiedBppTagsList = dao.getValue("codifiedbppTermsList");
   let surgeItemFound = null;
 
   if (on_confirm?.updated_at > contextTimestamp) {
@@ -50,22 +52,46 @@ const checkOnConfirm = (data, msgIdSet) => {
     categoryId = item.category_id;
     descriptor_code = item.descriptor?.code;
 
-    if (
-      surgeItem &&
-      item?.id === surgeItemData?.id
-    ) {
+    if (surgeItem && item?.id === surgeItemData?.id) {
       surgeItemFound = item;
     }
   });
 
   if (surgeItem && !surgeItemFound) {
     onCnfrmObj.surgeItemErr = `Surge item is missing in the order`;
-  } 
+  }
   // else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
   //   onCnfrmObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
   // }
 
   dao.setValue("item_descriptor_code", descriptor_code);
+
+  if (codifiedStaticTerms) {
+    if (!on_confirm?.tags) {
+      onCnfrmObj.codifiedStaticTermsErr = `message/order/tags is mandatory for codified_static_terms flow.`;
+    } else {
+      const bpp_terms = on_confirm?.tags.find(
+        (tag) => tag.code === "bpp_terms"
+      );
+
+      if (!bpp_terms) {
+        onCnfrmObj.codifiedStaticTermsErr = `bpp_terms tag is missing in /on_confirm for codified_static_terms flow.`;
+      }
+      const missingTags = codifiedBppTagsList.filter(
+        (reqTag) =>
+          !bpp_terms.list.some(
+            (tag) => tag.code === reqTag.code && tag.value === reqTag.value
+          )
+      );
+
+      if (missingTags.length > 0) {
+        const missingDescriptions = missingTags
+          .map((tag) => `{ code: "${tag.code}", value: "${tag.value}" }`)
+          .join(", ");
+        onCnfrmObj.codifiedStaticTermsErr = `Missing required codified static terms in /on_confirm: ${missingDescriptions}`;
+      }
+    }
+  }
 
   try {
     if (cod_order) {

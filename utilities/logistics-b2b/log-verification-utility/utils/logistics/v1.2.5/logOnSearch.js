@@ -14,6 +14,7 @@ const checkOnSearch = async (data, msgIdSet) => {
   let search = dao.getValue("searchObj");
   let validFulfillmentIDs = new Set();
   const cod_order = dao.getValue("cod_order");
+  const codified_static_terms = dao.getValue("codified_static_terms") || false;
   onSearch = onSearch.message.catalog;
   let avgPickupTime;
   /**
@@ -65,6 +66,44 @@ const checkOnSearch = async (data, msgIdSet) => {
     console.log(
       `Checking TAT for category or item in ${constants.LOG_ONSEARCH} api`
     );
+
+    if (codified_static_terms) {
+      if (!onSearch["bpp/descriptor"]?.tags) {
+        onSrchObj.codifiedStaticTermsErr = `bpp/descriptor/tags is mandatory in ${constants.LOG_ONSEARCH} api for codified static terms flow`;
+      } else {
+        const descriptorTags = onSearch["bpp/descriptor"].tags.find(
+          (tag) => tag.code === "bpp_terms"
+        );
+
+        if (!descriptorTags || !Array.isArray(descriptorTags.list)) {
+          onSrchObj.bppTermsErr = `bpp_terms tag or its list array is missing in bpp/descriptor/tags`;
+        } else {
+          const requiredKeys = [
+            "max_liability",
+            "max_liability_cap",
+            "mandatory_arbitration",
+            "court_jurisdiction",
+            "delay_interest",
+          ];
+
+          const missingKeys = requiredKeys.filter(
+            (key) =>
+              !descriptorTags.list.some(
+                (item) => item.code === key && item.value
+              )
+          );
+
+          if (missingKeys.length > 0) {
+            onSrchObj.bppTermsMissingKeys = `The following keys are missing or have no value in bpp_terms: ${missingKeys.join(
+              ", "
+            )}`;
+          } else {
+            dao.setValue("codifiedbppTermsList", descriptorTags.list);
+          }
+        }
+      }
+    }
+
     if (onSearch.hasOwnProperty("bpp/providers")) {
       onSearch["bpp/providers"].forEach((provider) => {
         if (cod_order) {
