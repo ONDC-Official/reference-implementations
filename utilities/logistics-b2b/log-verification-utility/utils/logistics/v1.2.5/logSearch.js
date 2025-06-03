@@ -35,29 +35,24 @@ const checkSearch = async (data, msgIdSet) => {
     console.error("Error while checking fulfillment tags:", error.stack);
   }
 
-  if (
-    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "016"))
-  ) {
-    dao.setValue("Dynamic_otp_verification_rto", true);
-  }
+  const tagCodeToFlagMap = {
+    "016": "Dynamic_otp_verification_rto",
+    "01B": "Reverse_QC",
+    "011": "Update_delivery_address",
+    "01F": "codified_static_terms",
+    "019": "eWayBill",
+    "018": "partial_rto",
+  };
 
-  if (
-    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "01B"))
-  ) {
-    dao.setValue("Reverse_QC", true);
-  }
-
-  if (
-    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "011"))
-  ) {
-    dao.setValue("Update_delivery_address", true);
-  }
-
-  if (
-    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "01F"))
-  ) {
-    dao.setValue("codified_static_terms", true);
-  }
+  Object.entries(tagCodeToFlagMap).forEach(([code, flag]) => {
+    if (
+      search?.tags?.some((tag) =>
+        tag?.list?.some((item) => item?.code === code)
+      )
+    ) {
+      dao.setValue(flag, true);
+    }
+  });
 
   if (dao.getValue("Dynamic_otp_verification_rto")) {
     const startType = search?.fulfillment?.start?.authorization?.type;

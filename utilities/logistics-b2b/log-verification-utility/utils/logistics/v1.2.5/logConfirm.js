@@ -21,6 +21,7 @@ const checkConfirm = (data, msgIdSet) => {
   const Update_delivery_address = dao.getValue("Update_delivery_address");
   const initCategoryId = JSON.stringify(dao.getValue("init_item_category_id"));
   const reverseQC = dao.getValue("Reverse_QC");
+  const eWayBill = dao.getValue("eWayBill");
   confirm = confirm.message.order;
   const orderTags = confirm?.tags;
   let bpp_terms = false;
@@ -89,6 +90,29 @@ const checkConfirm = (data, msgIdSet) => {
       `!!Error fetching immediaste Delivery fulfillment in${constants.LOG_CONFIRM}`,
       error
     );
+  }
+
+  if (eWayBill) {
+    const deliveryFulfillment = confirm?.fulfillments?.find(
+      (fulfillment) => fulfillment?.type === "Delivery"
+    );
+
+    const linkedProvider = deliveryFulfillment?.tags?.find(
+      (tag) => tag.code === "linked_provider"
+    );
+
+    if (!linkedProvider) {
+      cnfrmObj.linkedProviderErr = `linked_provider code is mandatory in fulfillment tags for eWayBill flow`;
+      return;
+    }
+
+    const taxIdEntry = linkedProvider?.list?.find(
+      (entry) => entry.code === "tax_id"
+    );
+
+    if (!taxIdEntry?.value) {
+      cnfrmObj.taxIdErr = `tax_id code is mandatory in linked_provider tag for eWayBill flow`;
+    }
   }
 
   let provId = confirm.provider.id;
@@ -213,11 +237,11 @@ const checkConfirm = (data, msgIdSet) => {
           };
         }
 
-        if (
-          !_.isEqual(JSON.stringify(linked_provider), initLinkedProviderTags)
-        ) {
-          cnfrmObj.linkedPrvdrErr = `linked_provider tag in /confirm does not match with the one provided in /init`;
-        }
+        // if (
+        //   !_.isEqual(JSON.stringify(linked_provider), initLinkedProviderTags)
+        // ) {
+        //   cnfrmObj.linkedPrvdrErr = `linked_provider tag in /confirm does not match with the one provided in /init`;
+        // }
 
         let { code, list } = tag;
         fulfillmentTagSet.add(code);

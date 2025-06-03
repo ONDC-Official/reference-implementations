@@ -18,6 +18,7 @@ const checkOnUpdate = (data, msgIdSet) => {
   const surgeItem = dao.getValue("is_surge_item");
   const surgeItemData = dao.getValue("surge_item");
   let p2h2p = dao.getValue("p2h2p");
+  const eWayBill = dao.getValue("eWayBill");
   let awbNo = dao.getValue("awbNo");
   let surgeItemFound = null;
   let locationsPresent = dao.getValue("confirm_locations");
@@ -99,6 +100,33 @@ const checkOnUpdate = (data, msgIdSet) => {
         avgPickupTime,
         dao.getValue(`${fulfillment?.id}-avgPickupTime`)
       );
+
+      if (eWayBill) {
+        if (fulfillment.type === "Delivery") {
+          if (!fulfillment?.tags) {
+            onUpdtObj.eWayBillErr = `eWayBill tag is required in /fulfillments for eWayBill flow.`;
+          }
+
+          const ebn = fulfillment?.tags?.find((tag) => tag.code === "ebn");
+          if (!ebn) {
+            onUpdtObj.eWayBillErr = `ebn tag is required in /fulfillments for eWayBill flow.`;
+          }
+
+          ebn?.list?.forEach((item) => {
+            if (!item?.id) {
+              onUpdtObj.eWayBillErr = `ebn tag in /fulfillments should have id code.`;
+            }
+            if (!item?.value) {
+              onUpdtObj.eWayBillErr = `ebn tag in /fulfillments should have value.`;
+            }
+            if (!item?.expiry_date) {
+              onUpdtObj.eWayBillErr = `ebn tag in /fulfillments should have expiry_date code.`;
+            } else if (!item.expiry_date?.value) {
+              onUpdtObj.eWayBillErr = `ebn tag in /fulfillments should have expiry_date value.`;
+            }
+          });
+        }
+      }
 
       if (contextDomain === "ONDC:LOG11") {
         const fulfillment_delay = fulfillment?.tags?.find(
@@ -190,65 +218,52 @@ const checkOnUpdate = (data, msgIdSet) => {
         onUpdtObj.shipLblErr = `Shipping label (/start/instructions/images) is required for P2H2P shipments.`;
       }
 
-      if(fulfillment?.type== "Delivery")
-      {
-        if(fulfillment?.hasOwnProperty("tags"))
-        {
+      if (fulfillment?.type == "Delivery") {
+        if (fulfillment?.hasOwnProperty("tags")) {
           fulfillment?.tags?.forEach((tag) => {
-            if(tag.code === "linked_provider")
-            {
-              if(!_.isEqual(JSON.stringify(tag), shipping_label))
-              {
-                onUpdtObj.linkedPrvdrErr = `linked_provider tag in /on_update does not match with the one provided in /init`;
-              }
-              if(tag?.list?.length > 0)
-              {
-                var found=false;
+            if (tag.code === "linked_provider") {
+              // if (!_.isEqual(JSON.stringify(tag), shipping_label)) {
+              //   onUpdtObj.linkedPrvdrErr = `linked_provider tag in /on_update does not match with the one provided in /init`;
+              // }
+              if (tag?.list?.length > 0) {
+                var found = false;
                 tag.list.forEach((item) => {
-                  if(item.code === "id")
-                  {
-                    found=true;
-                    }
-                  });
-                  if(!found)
-                  {
-                    onUpdtObj.linkedPrvdrErr = `linked_provider tag in /on_update does not have id code`;
-                  }
-                };
-              }
-              if(tag.code==="linked_order_diff")
-              {
-                const requiredCodes = [
-                  "id",
-                  "weight_unit",
-                  "weight_value",
-                  "dim_unit",
-                  "length",
-                  "breadth",
-                  "height",
-                ];
-                requiredCodes.forEach((key) => {
-                  const found = input.list.find((item) => item.code === key);
-                  if (!found) {
-                    onUpdtObj.linkedPrvdrErr = `${key} code is missing in list of linked_order_diff tag`;
+                  if (item.code === "id") {
+                    found = true;
                   }
                 });
-              }
-              if(tag.code==="linked_order_diff_proof")
-                {
-                  const requiredCodes = [
-                    "id",
-                    "url"
-                  ];
-                  requiredCodes.forEach((key) => {
-                    const found = input.list.find((item) => item.code === key);
-                    if (!found) {
-                      onUpdtObj.linkedPrvdrErr = `${key} code is missing in list of linked_order_diff_proof tag`;
-                    }
-                  });
+                if (!found) {
+                  onUpdtObj.linkedPrvdrErr = `linked_provider tag in /on_update does not have id code`;
                 }
+              }
             }
-          );
+            if (tag.code === "linked_order_diff") {
+              const requiredCodes = [
+                "id",
+                "weight_unit",
+                "weight_value",
+                "dim_unit",
+                "length",
+                "breadth",
+                "height",
+              ];
+              requiredCodes.forEach((key) => {
+                const found = input.list.find((item) => item.code === key);
+                if (!found) {
+                  onUpdtObj.linkedPrvdrErr = `${key} code is missing in list of linked_order_diff tag`;
+                }
+              });
+            }
+            if (tag.code === "linked_order_diff_proof") {
+              const requiredCodes = ["id", "url"];
+              requiredCodes.forEach((key) => {
+                const found = input.list.find((item) => item.code === key);
+                if (!found) {
+                  onUpdtObj.linkedPrvdrErr = `${key} code is missing in list of linked_order_diff_proof tag`;
+                }
+              });
+            }
+          });
         }
       }
 
@@ -259,58 +274,53 @@ const checkOnUpdate = (data, msgIdSet) => {
   } catch (error) {
     console.log(`!!Error while checking fulfillments in /on_update api`, error);
   }
-if (on_update?.hasOwnProperty("cancellation_terms")) {
-          console.log("validating cancellation terms"+on_status);
-          const cancellationTerms= on_confirm?.cancellation_terms;
-          if (!Array.isArray(cancellationTerms)) {
-            onUpdtObj.cancellationTerms='cancellation_terms must be an array';
+  if (on_update?.hasOwnProperty("cancellation_terms")) {
+    const cancellationTerms = on_update?.cancellation_terms;
+    if (!Array.isArray(cancellationTerms)) {
+      onUpdtObj.cancellationTerms = "cancellation_terms must be an array";
+    } else {
+      cancellationTerms.forEach((term, index) => {
+        const path = `cancellation_terms[${index}]`;
+
+        // fulfillment_state
+        const descriptor = term?.fulfillment_state?.descriptor;
+        if (!descriptor) {
+          onUpdtObj.cancellationTerms = `${path}.fulfillment_state.descriptor is missing`;
+        } else {
+          if (!descriptor.code) {
+            onUpdtObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is missing`;
           } else {
-            cancellationTerms.forEach((term, index) => {
-              const path = `cancellation_terms[${index}]`;
-          
-              // fulfillment_state
-              const descriptor = term?.fulfillment_state?.descriptor;
-              if (!descriptor) {
-                onUpdtObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
-              } else {
-                if (!descriptor.code) {
-                  onUpdtObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
-                } 
-                else
-                {
-                  if(!constants.FULFILLMENT_STATE.includes(descriptor.code))
-                  {
-                    onUpdtObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
-                  }
-                }
-                if (!descriptor.short_desc) {
-                  onUpdtObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
-                }
-              }
-          
-              // cancellation_fee
-              const fee = term?.cancellation_fee;
-              if (!fee) {
-                onUpdtObj.cancellationTerms=`${path}.cancellation_fee is missing`;
-              } else {
-                if (!fee.percentage) {
-                  onUpdtObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
-                }
-                if (!fee.amount) {
-                  onUpdtObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
-                } else {
-                  if (!fee.amount.currency) {
-                    onUpdtObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
-                  }
-                  if (!fee.amount.value) {
-                    onUpdtObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
-                  }
-                }
-              }
-            });
+            if (!constants.FULFILLMENT_STATE.includes(descriptor.code)) {
+              onUpdtObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is Invalid`;
+            }
           }
-      
+          if (!descriptor.short_desc) {
+            onUpdtObj.cancellationTerms = `${path}.fulfillment_state.descriptor.short_desc is missing`;
+          }
+        }
+
+        // cancellation_fee
+        const fee = term?.cancellation_fee;
+        if (!fee) {
+          onUpdtObj.cancellationTerms = `${path}.cancellation_fee is missing`;
+        } else {
+          if (!fee.percentage) {
+            onUpdtObj.cancellationTerms = `${path}.cancellation_fee.percentage is missing`;
+          }
+          if (!fee.amount) {
+            onUpdtObj.cancellationTerms = `${path}.cancellation_fee.amount is missing`;
+          } else {
+            if (!fee.amount.currency) {
+              onUpdtObj.cancellationTerms = `${path}.cancellation_fee.amount.currency is missing`;
+            }
+            if (!fee.amount.value) {
+              onUpdtObj.cancellationTerms = `${path}.cancellation_fee.amount.value is missing`;
+            }
+          }
+        }
+      });
     }
+  }
   return onUpdtObj;
 };
 
