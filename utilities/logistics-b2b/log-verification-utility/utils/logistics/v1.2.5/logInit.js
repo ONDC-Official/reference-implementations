@@ -18,6 +18,8 @@ const checkInit = (data, msgIdSet) => {
   let itemsArr = init?.items;
   let fulfillmentsArr = init?.fulfillments;
   let bppFulfillmentsArr = dao.getValue("bppFulfillmentsArr");
+  const callMasking = dao.getValue("call_masking");
+  const paymentWallet = dao.getValue("payment_wallet");
   let onSearchitemsArr;
   let providersArr = dao.getValue("providersArr");
 
@@ -66,6 +68,16 @@ const checkInit = (data, msgIdSet) => {
     );
   }
 
+  if (paymentWallet) {
+    const collectedBy = init?.payment?.collected_by;
+
+    if (!collectedBy) {
+      initObj.paymentCollectedByErr = `payment/collected_by is mandatory for payment_wallet flow`;
+    } else if (collectedBy !== "BPP") {
+      initObj.paymentCollectedByErr = `payment/collected_by should be 'BPP' for payment_wallet flow`;
+    }
+  }
+
   //billing check
   if (billing?.created_at > contextTimestamp) {
     initObj.BilngcreatedAtErr = `billing/created_at cannot be future dated w.r.t context/timestamp`;
@@ -105,6 +117,112 @@ const checkInit = (data, msgIdSet) => {
           ] = `Category id '${item.category_id}' for item with id '${item.id}' does not match with the catalog provided in /on_search`;
         }
         fulfillmentsArr.forEach((fulfillment, i) => {
+          if (callMasking) {
+            if (fulfillment?.type === "Delivery") {
+              // START CONTACT
+
+              if (!fulfillment?.start?.contact?.phone) {
+                const allowedMaskedTypes = [
+                  "ivr_pin",
+                  "ivr_without_pin",
+                  "api_endpoint",
+                ];
+                const maskedTag = fulfillment?.tags?.find(
+                  (tag) => tag.code === "masked_contact"
+                );
+
+                if (!maskedTag) {
+                  initObj.maskedContactErr = `'masked_contact' tag is required in /fulfillments in start object.`;
+                } else {
+                  const list = maskedTag.list || [];
+                  const requiredCodes = ["type", "setup", "token"];
+                  const foundCodes = new Set();
+
+                  for (const item of list) {
+                    if (!item.code || item.value == null) {
+                      initObj.listmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                    }
+
+                    foundCodes.add(item.code);
+
+                    if (
+                      item.code === "type" &&
+                      !allowedMaskedTypes.includes(item.value)
+                    ) {
+                      initObj.typemaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                        ", "
+                      )}. Found: '${item.value}'`;
+                    }
+
+                    if (
+                      (item.code === "setup" || item.code === "token") &&
+                      (!item.value || typeof item.value !== "string")
+                    ) {
+                      initObj.setupmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                    }
+                  }
+
+                  for (const code of requiredCodes) {
+                    if (!foundCodes.has(code)) {
+                      initObj.codemaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                    }
+                  }
+                }
+              }
+
+              // END CONTACT
+
+              if (!fulfillment?.end?.contact?.phone) {
+                const allowedMaskedTypes = [
+                  "ivr_pin",
+                  "ivr_without_pin",
+                  "api_endpoint",
+                ];
+                const maskedTag = fulfillment?.tags?.find(
+                  (tag) => tag.code === "masked_contact"
+                );
+
+                if (!maskedTag) {
+                  initObj.endmaskedContactErr = `'masked_contact' tag is required in /fulfillments in end.`;
+                } else {
+                  const list = maskedTag.list || [];
+                  const requiredCodes = ["type", "setup", "token"];
+                  const foundCodes = new Set();
+
+                  for (const item of list) {
+                    if (!item.code || item.value == null) {
+                      initObj.listendmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                    }
+
+                    foundCodes.add(item.code);
+
+                    if (
+                      item.code === "type" &&
+                      !allowedMaskedTypes.includes(item.value)
+                    ) {
+                      initObj.typeendmaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                        ", "
+                      )}. Found: '${item.value}'`;
+                    }
+
+                    if (
+                      (item.code === "setup" || item.code === "token") &&
+                      (!item.value || typeof item.value !== "string")
+                    ) {
+                      initObj.setupendmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                    }
+                  }
+
+                  for (const code of requiredCodes) {
+                    if (!foundCodes.has(code)) {
+                      initObj.codeendmaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
           fulfillment?.tags?.forEach((item) => {
             if (item?.code === "linked_provider") {
               dao.setValue("init_linked_provider", item);

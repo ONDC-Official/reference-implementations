@@ -42,6 +42,9 @@ const checkSearch = async (data, msgIdSet) => {
     "01F": "codified_static_terms",
     "019": "eWayBill",
     "018": "partial_rto",
+    "00F": "ePod",
+    "010": "call_masking",
+    "00D": "payment_wallet",
   };
 
   Object.entries(tagCodeToFlagMap).forEach(([code, flag]) => {

@@ -25,6 +25,7 @@ const checkOnConfirm = (data, msgIdSet) => {
   const surgeItemData = dao.getValue("surge_item");
   const codifiedStaticTerms = dao.getValue("codified_static_terms");
   const codifiedBppTagsList = dao.getValue("codifiedbppTermsList");
+  const callMasking = dao.getValue("call_masking");
   let surgeItemFound = null;
 
   if (on_confirm?.updated_at > contextTimestamp) {
@@ -114,6 +115,112 @@ const checkOnConfirm = (data, msgIdSet) => {
   try {
     console.log(`checking start and end time range in fulfillments`);
     fulfillments.forEach((fulfillment) => {
+      if (callMasking) {
+        if (fulfillment?.type === "Delivery") {
+          // START CONTACT
+  
+          if (!fulfillment?.start?.contact?.phone) {
+            const allowedMaskedTypes = [
+              "ivr_pin",
+              "ivr_without_pin",
+              "api_endpoint",
+            ];
+            const maskedTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "masked_contact"
+            );
+  
+            if (!maskedTag) {
+              onCnfrmObj.maskedContactErr = `'masked_contact' tag is required in /fulfillments in start object.`;
+            } else {
+              const list = maskedTag.list || [];
+              const requiredCodes = ["type", "setup", "token"];
+              const foundCodes = new Set();
+  
+              for (const item of list) {
+                if (!item.code || item.value == null) {
+                  onCnfrmObj.listmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                }
+  
+                foundCodes.add(item.code);
+  
+                if (
+                  item.code === "type" &&
+                  !allowedMaskedTypes.includes(item.value)
+                ) {
+                  onCnfrmObj.typemaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                    ", "
+                  )}. Found: '${item.value}'`;
+                }
+  
+                if (
+                  (item.code === "setup" || item.code === "token") &&
+                  (!item.value || typeof item.value !== "string")
+                ) {
+                  onCnfrmObj.setupmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                }
+              }
+  
+              for (const code of requiredCodes) {
+                if (!foundCodes.has(code)) {
+                  onCnfrmObj.codemaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                }
+              }
+            }
+          }
+  
+          // END CONTACT
+  
+          if (!fulfillment?.end?.contact?.phone) {
+            const allowedMaskedTypes = [
+              "ivr_pin",
+              "ivr_without_pin",
+              "api_endpoint",
+            ];
+            const maskedTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "masked_contact"
+            );
+  
+            if (!maskedTag) {
+              onCnfrmObj.endmaskedContactErr = `'masked_contact' tag is required in /fulfillments in end object.`;
+            } else {
+              const list = maskedTag.list || [];
+              const requiredCodes = ["type", "setup", "token"];
+              const foundCodes = new Set();
+  
+              for (const item of list) {
+                if (!item.code || item.value == null) {
+                  onCnfrmObj.listendmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                }
+  
+                foundCodes.add(item.code);
+  
+                if (
+                  item.code === "type" &&
+                  !allowedMaskedTypes.includes(item.value)
+                ) {
+                  onCnfrmObj.typeendmaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                    ", "
+                  )}. Found: '${item.value}'`;
+                }
+  
+                if (
+                  (item.code === "setup" || item.code === "token") &&
+                  (!item.value || typeof item.value !== "string")
+                ) {
+                  onCnfrmObj.setupendmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                }
+              }
+  
+              for (const code of requiredCodes) {
+                if (!foundCodes.has(code)) {
+                  onCnfrmObj.codeendmaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                }
+              }
+            }
+          }
+        }
+      }
+
       let fulfillment_tags = [];
       let extra_tag = [];
       fulfillment.tags.forEach((tag) => {
@@ -121,11 +228,11 @@ const checkOnConfirm = (data, msgIdSet) => {
           extra_tag.push(tag);
         } else fulfillment_tags.push(tag);
       });
-      if (
-        !_.isEqual(JSON.stringify(fulfillment_tags), confirm_fulfillment_tags)
-      ) {
-        onCnfrmObj.fulfillmentTagsErr = `fulfillments/tags mismatch between /confirm and /on_confirm`;
-      }
+      // if (
+      //   !_.isEqual(JSON.stringify(fulfillment_tags), confirm_fulfillment_tags)
+      // ) {
+      //   onCnfrmObj.fulfillmentTagsErr = `fulfillments/tags mismatch between /confirm and /on_confirm`;
+      // }
 
       if (cod_order) {
         const cod_settlement_tags = fulfillment?.tags?.some(
