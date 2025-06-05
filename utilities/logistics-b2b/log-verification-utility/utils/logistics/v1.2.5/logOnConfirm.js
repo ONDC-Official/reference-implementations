@@ -26,6 +26,8 @@ const checkOnConfirm = (data, msgIdSet) => {
   const codifiedStaticTerms = dao.getValue("codified_static_terms");
   const codifiedBppTagsList = dao.getValue("codifiedbppTermsList");
   const callMasking = dao.getValue("call_masking");
+  const paymentWallet = dao.getValue("payment_wallet");
+  const initWalletAmount = dao.getValue("payment_wallet_amount");
   let surgeItemFound = null;
 
   if (on_confirm?.updated_at > contextTimestamp) {
@@ -94,6 +96,71 @@ const checkOnConfirm = (data, msgIdSet) => {
     }
   }
 
+  if (paymentWallet) {
+    const collectedBy = on_confirm?.payment?.collected_by;
+    const paymentTags = on_confirm?.payment?.tags || [];
+    const params = on_confirm?.payment?.params;
+
+    if (!collectedBy) {
+      onCnfrmObj.paymentCollectedByErr = `payment/collected_by is mandatory for payment_wallet flow`;
+    } else if (collectedBy !== "BPP") {
+      onCnfrmObj.paymentCollectedByErr = `payment/collected_by should be 'BPP' for payment_wallet flow`;
+    } else if (
+      !on_confirm?.payment?.status ||
+      on_confirm?.payment?.status !== "PAID"
+    ) {
+      onCnfrmObj.paymentStatusErr = `payment/status must be 'PAID' for payment_wallet flow`;
+    } else if (!params)
+      onCnfrmObj.paymentParamsErr = `payment/params is mandatory for payment_wallet flow`;
+    else {
+      const requiredKeys = ["currency", "transaction_id", "amount"];
+
+      requiredKeys.forEach((key) => {
+        if (
+          params[key] === undefined ||
+          params[key] === null ||
+          String(params[key]).trim() === ""
+        ) {
+          onCnfrmObj[
+            `paymentParams${key}Err`
+          ] = `payment/params/${key} is mandatory for payment_wallet flow`;
+        }
+      });
+    }
+
+    if (!paymentTags || paymentTags.length < 1) {
+      onCnfrmObj.paymentTagsErr = `payment/tags is mandatory for payment_wallet flow`;
+    } else {
+      const payment_wallet = on_confirm?.payment?.tags.find(
+        (i) => i.code === "wallet_balance"
+      );
+      if (!payment_wallet) {
+        onCnfrmObj.paymentWalletErr = `payment/tags must contain 'wallet_balance' for payment_wallet flow`;
+      } else {
+        const currency = payment_wallet?.list.some(
+          (item) => item?.code === "currency"
+        );
+        const amount = payment_wallet?.list.find(
+          (item) => item?.code === "value"
+        );
+        if (!currency) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'currency' code`;
+        } else if (!amount) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'value' code`;
+        } else if (!amount?.value) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance value must be present or not empty`;
+        } else if (
+          Number(amount?.value) !==
+          Number(initWalletAmount - Number(params?.amount))
+        ) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance/list/code "value's" value should be ${Number(
+            initWalletAmount - Number(params?.amount)
+          )} but found ${amount?.value}`;
+        }
+      }
+    }
+  }
+
   try {
     if (cod_order) {
       if (COD_ITEM && !onCnfrmItemId.includes(COD_ITEM[0]?.id)) {
@@ -118,7 +185,7 @@ const checkOnConfirm = (data, msgIdSet) => {
       if (callMasking) {
         if (fulfillment?.type === "Delivery") {
           // START CONTACT
-  
+
           if (!fulfillment?.start?.contact?.phone) {
             const allowedMaskedTypes = [
               "ivr_pin",
@@ -128,21 +195,21 @@ const checkOnConfirm = (data, msgIdSet) => {
             const maskedTag = fulfillment?.tags?.find(
               (tag) => tag.code === "masked_contact"
             );
-  
+
             if (!maskedTag) {
               onCnfrmObj.maskedContactErr = `'masked_contact' tag is required in /fulfillments in start object.`;
             } else {
               const list = maskedTag.list || [];
               const requiredCodes = ["type", "setup", "token"];
               const foundCodes = new Set();
-  
+
               for (const item of list) {
                 if (!item.code || item.value == null) {
                   onCnfrmObj.listmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
                 }
-  
+
                 foundCodes.add(item.code);
-  
+
                 if (
                   item.code === "type" &&
                   !allowedMaskedTypes.includes(item.value)
@@ -151,7 +218,7 @@ const checkOnConfirm = (data, msgIdSet) => {
                     ", "
                   )}. Found: '${item.value}'`;
                 }
-  
+
                 if (
                   (item.code === "setup" || item.code === "token") &&
                   (!item.value || typeof item.value !== "string")
@@ -159,7 +226,7 @@ const checkOnConfirm = (data, msgIdSet) => {
                   onCnfrmObj.setupmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
                 }
               }
-  
+
               for (const code of requiredCodes) {
                 if (!foundCodes.has(code)) {
                   onCnfrmObj.codemaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
@@ -167,9 +234,9 @@ const checkOnConfirm = (data, msgIdSet) => {
               }
             }
           }
-  
+
           // END CONTACT
-  
+
           if (!fulfillment?.end?.contact?.phone) {
             const allowedMaskedTypes = [
               "ivr_pin",
@@ -179,21 +246,21 @@ const checkOnConfirm = (data, msgIdSet) => {
             const maskedTag = fulfillment?.tags?.find(
               (tag) => tag.code === "masked_contact"
             );
-  
+
             if (!maskedTag) {
               onCnfrmObj.endmaskedContactErr = `'masked_contact' tag is required in /fulfillments in end object.`;
             } else {
               const list = maskedTag.list || [];
               const requiredCodes = ["type", "setup", "token"];
               const foundCodes = new Set();
-  
+
               for (const item of list) {
                 if (!item.code || item.value == null) {
                   onCnfrmObj.listendmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
                 }
-  
+
                 foundCodes.add(item.code);
-  
+
                 if (
                   item.code === "type" &&
                   !allowedMaskedTypes.includes(item.value)
@@ -202,7 +269,7 @@ const checkOnConfirm = (data, msgIdSet) => {
                     ", "
                   )}. Found: '${item.value}'`;
                 }
-  
+
                 if (
                   (item.code === "setup" || item.code === "token") &&
                   (!item.value || typeof item.value !== "string")
@@ -210,7 +277,7 @@ const checkOnConfirm = (data, msgIdSet) => {
                   onCnfrmObj.setupendmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
                 }
               }
-  
+
               for (const code of requiredCodes) {
                 if (!foundCodes.has(code)) {
                   onCnfrmObj.codeendmaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;

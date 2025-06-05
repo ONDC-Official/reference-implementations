@@ -18,6 +18,7 @@ const checkOnInit = (data, msgIdSet) => {
   let provId = on_init.provider.id;
   const cod_order = dao.getValue("cod_order");
   const COD_ITEM = dao.getValue("COD_ITEM");
+  const paymentWallet = dao.getValue("payment_wallet");
   const orderTags = on_init?.tags;
   let bppTerms = false;
 
@@ -100,6 +101,44 @@ const checkOnInit = (data, msgIdSet) => {
     );
   }
 
+  if (paymentWallet) {
+    const collectedBy = on_init?.payment?.collected_by;
+    const paymentTags = on_init?.payment?.tags || [];
+
+    if (!collectedBy) {
+      onInitObj.paymentCollectedByErr = `payment/collected_by is mandatory for payment_wallet flow`;
+    } else if (collectedBy !== "BPP") {
+      onInitObj.paymentCollectedByErr = `payment/collected_by should be 'BPP' for payment_wallet flow`;
+    }
+
+    if (!paymentTags || paymentTags.length < 1) {
+      onInitObj.paymentTagsErr = `payment/tags is mandatory for payment_wallet flow`;
+    } else {
+      const payment_wallet = on_init?.payment?.tags.find(
+        (i) => i.code === "wallet_balance"
+      );
+      if (!payment_wallet) {
+        onInitObj.paymentWalletErr = `payment/tags must contain 'wallet_balance' for payment_wallet flow`;
+      } else {
+        const currency = payment_wallet?.list.some(
+          (item) => item?.code === "currency"
+        );
+        const amount = payment_wallet?.list.find(
+          (item) => item?.code === "value"
+        );
+        if (!currency) {
+          onInitObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'currency' code`;
+        } else if (!amount) {
+          onInitObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'value' code`;
+        } else if (!amount?.value) {
+          onInitObj.paymentWalletErr = `payment/tags/wallet_balance value must be present or not empty`;
+        } else {
+          dao.setValue("payment_wallet_amount", amount?.value);
+        }
+      }
+    }
+  }
+
   try {
     const onInitItem = [];
     on_init?.items?.forEach((item) => onInitItem.push(item?.id));
@@ -145,70 +184,71 @@ const checkOnInit = (data, msgIdSet) => {
       }
     });
     if (on_init?.hasOwnProperty("cancellation_terms")) {
-    console.log("validating cancellation terms"+initCategoryId);
-    const cancellationTerms= on_init?.cancellation_terms;
-    if (!Array.isArray(cancellationTerms)) {
-     onInitObj.cancellationTerms='cancellation_terms must be an array';
-    } else {
-      cancellationTerms.forEach((term, index) => {
-        const path = `cancellation_terms[${index}]`;
-    
-        // fulfillment_state
-        const descriptor = term?.fulfillment_state?.descriptor;
-        if (!descriptor) {
-          onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
-        } else {
-          if (!descriptor.code) {
-            onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
-          } 
-          else
-          {
-            if(!constants.fulfillment_state.includes(descriptor.code))
-            {
-              onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
-            }
-          }
-          if (!descriptor.short_desc) {
-            onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
-          }
-        }
-    
-        // cancellation_fee
-        const fee = term?.cancellation_fee;
-        if (!fee) {
-          onInitObj.cancellationTerms=`${path}.cancellation_fee is missing`;
-        } else {
-          if (!fee.percentage) {
-            onInitObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
-          }
-          if (!fee.amount) {
-            onInitObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
-          } else {
-            if (!fee.amount.currency) {
-              onInitObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
-            }
-            if (!fee.amount.value) {
-              onInitObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
-            }
-          }
-        }
-      });
-    }
+      console.log("validating cancellation terms" + initCategoryId);
+      const cancellationTerms = on_init?.cancellation_terms;
+      if (!Array.isArray(cancellationTerms)) {
+        onInitObj.cancellationTerms = "cancellation_terms must be an array";
+      } else {
+        cancellationTerms.forEach((term, index) => {
+          const path = `cancellation_terms[${index}]`;
 
+          // fulfillment_state
+          const descriptor = term?.fulfillment_state?.descriptor;
+          if (!descriptor) {
+            onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor is missing`;
+          } else {
+            if (!descriptor.code) {
+              onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is missing`;
+            } else {
+              if (!constants.fulfillment_state.includes(descriptor.code)) {
+                onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is Invalid`;
+              }
+            }
+            if (!descriptor.short_desc) {
+              onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor.short_desc is missing`;
+            }
+          }
+
+          // cancellation_fee
+          const fee = term?.cancellation_fee;
+          if (!fee) {
+            onInitObj.cancellationTerms = `${path}.cancellation_fee is missing`;
+          } else {
+            if (!fee.percentage) {
+              onInitObj.cancellationTerms = `${path}.cancellation_fee.percentage is missing`;
+            }
+            if (!fee.amount) {
+              onInitObj.cancellationTerms = `${path}.cancellation_fee.amount is missing`;
+            } else {
+              if (!fee.amount.currency) {
+                onInitObj.cancellationTerms = `${path}.cancellation_fee.amount.currency is missing`;
+              }
+              if (!fee.amount.value) {
+                onInitObj.cancellationTerms = `${path}.cancellation_fee.amount.value is missing`;
+              }
+            }
+          }
+        });
+      }
     }
-    if(initCategoryId!=undefined && initCategoryId!=null && initCategoryId!="null" && initCategoryId!="undefined"){
-    if (JSON.parse(initCategoryId) === "Immediate Delivery") {
-      const inlineRiderCheck = riderCheck?.find(
-        (i) => i.code === "inline_check_for_rider"
-      );
-      if (!riderCheck)
-        onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
-      else if (!inlineRiderCheck)
-        onInitObj.riderCheckErr = `inline_check_for_rider tag is mandatory in /on_init when category_id is Immediate Delivery`;
-      else if (inlineRiderCheck?.value !== "yes")
-        onInitObj.riderCheckErr = `inline_check_for_rider value should be "yes" in /on_init when category_id is Immediate Delivery`;
+    if (
+      initCategoryId != undefined &&
+      initCategoryId != null &&
+      initCategoryId != "null" &&
+      initCategoryId != "undefined"
+    ) {
+      if (JSON.parse(initCategoryId) === "Immediate Delivery") {
+        const inlineRiderCheck = riderCheck?.find(
+          (i) => i.code === "inline_check_for_rider"
+        );
+        if (!riderCheck)
+          onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
+        else if (!inlineRiderCheck)
+          onInitObj.riderCheckErr = `inline_check_for_rider tag is mandatory in /on_init when category_id is Immediate Delivery`;
+        else if (inlineRiderCheck?.value !== "yes")
+          onInitObj.riderCheckErr = `inline_check_for_rider value should be "yes" in /on_init when category_id is Immediate Delivery`;
+      }
     }
-  }
   } catch (error) {
     console.log(
       `!!Error while checking fulfillment array in /${constants.LOG_ONINIT}`,
