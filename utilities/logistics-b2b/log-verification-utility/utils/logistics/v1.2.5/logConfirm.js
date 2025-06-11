@@ -93,6 +93,22 @@ const checkConfirm = (data, msgIdSet) => {
     );
   }
 
+  if (confirm?.payment?.type === "POST-FULFILLMENT") {
+    const requiredFields = {
+      "@ondc/org/settlement_basis":
+        "payment/@ondc/org/settlement_basis is mandatory for POST-FULFILLMENT payment type",
+      "@ondc/org/settlement_window":
+        "payment/@ondc/org/settlement_window is mandatory for POST-FULFILLMENT payment type",
+    };
+
+    for (const [field, errorMessage] of Object.entries(requiredFields)) {
+      if (!confirm?.payment?.[field]) {
+        const errorKey = `payment${field.replace(/[^a-zA-Z]/g, "")}Err`;
+        cnfrmObj[errorKey] = errorMessage;
+      }
+    }
+  }
+
   if (eWayBill) {
     const deliveryFulfillment = confirm?.fulfillments?.find(
       (fulfillment) => fulfillment?.type === "Delivery"

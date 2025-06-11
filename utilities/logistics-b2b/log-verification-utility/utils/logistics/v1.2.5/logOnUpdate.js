@@ -61,6 +61,13 @@ const checkOnUpdate = (data, msgIdSet) => {
     console.error("Error while checking on update:", error.stack);
   }
 
+  if (
+    on_update?.payment?.type === "POST-FULFILLMENT" &&
+    on_update?.payment?.status === "PAID"
+  ) {
+    onUpdtObj.paymentErr = `payment/status should be "NOT-PAID" instead of ${on_update?.payment?.status} for POST-FULFILLMENT payment type`;
+  }
+
   try {
     if (surgeItem) {
       const breakup = on_update?.quote?.breakup || [];
@@ -103,10 +110,17 @@ const checkOnUpdate = (data, msgIdSet) => {
         dao.getValue(`${fulfillment?.id}-avgPickupTime`)
       );
 
+      if (
+        domain === "ONDC:LOG10" &&
+        fulfillment?.tags?.some((tag) => tag.code === "shipping_label")
+      ) {
+        onUpdtObj.shippingLabelErr = `shipping_label tag is not allowed in fulfillments for P2P order type (ONDC:LOG10)`;
+      }
+
       if (callMasking) {
         if (fulfillment?.type === "Delivery") {
           // START CONTACT
-  
+
           if (!fulfillment?.start?.contact?.phone) {
             const allowedMaskedTypes = [
               "ivr_pin",
@@ -116,21 +130,21 @@ const checkOnUpdate = (data, msgIdSet) => {
             const maskedTag = fulfillment?.tags?.find(
               (tag) => tag.code === "masked_contact"
             );
-  
+
             if (!maskedTag) {
               onUpdtObj.maskedContactErr = `'masked_contact' tag is required in /fulfillments in start object.`;
             } else {
               const list = maskedTag.list || [];
               const requiredCodes = ["type", "setup", "token"];
               const foundCodes = new Set();
-  
+
               for (const item of list) {
                 if (!item.code || item.value == null) {
                   onUpdtObj.listmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
                 }
-  
+
                 foundCodes.add(item.code);
-  
+
                 if (
                   item.code === "type" &&
                   !allowedMaskedTypes.includes(item.value)
@@ -139,7 +153,7 @@ const checkOnUpdate = (data, msgIdSet) => {
                     ", "
                   )}. Found: '${item.value}'`;
                 }
-  
+
                 if (
                   (item.code === "setup" || item.code === "token") &&
                   (!item.value || typeof item.value !== "string")
@@ -147,7 +161,7 @@ const checkOnUpdate = (data, msgIdSet) => {
                   onUpdtObj.setupmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
                 }
               }
-  
+
               for (const code of requiredCodes) {
                 if (!foundCodes.has(code)) {
                   onUpdtObj.codemaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
@@ -155,9 +169,9 @@ const checkOnUpdate = (data, msgIdSet) => {
               }
             }
           }
-  
+
           // END CONTACT
-  
+
           if (!fulfillment?.end?.contact?.phone) {
             const allowedMaskedTypes = [
               "ivr_pin",
@@ -167,21 +181,21 @@ const checkOnUpdate = (data, msgIdSet) => {
             const maskedTag = fulfillment?.tags?.find(
               (tag) => tag.code === "masked_contact"
             );
-  
+
             if (!maskedTag) {
               onUpdtObj.endmaskedContactErr = `'masked_contact' tag is required in /fulfillments in end object.`;
             } else {
               const list = maskedTag.list || [];
               const requiredCodes = ["type", "setup", "token"];
               const foundCodes = new Set();
-  
+
               for (const item of list) {
                 if (!item.code || item.value == null) {
                   onUpdtObj.listendmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
                 }
-  
+
                 foundCodes.add(item.code);
-  
+
                 if (
                   item.code === "type" &&
                   !allowedMaskedTypes.includes(item.value)
@@ -190,7 +204,7 @@ const checkOnUpdate = (data, msgIdSet) => {
                     ", "
                   )}. Found: '${item.value}'`;
                 }
-  
+
                 if (
                   (item.code === "setup" || item.code === "token") &&
                   (!item.value || typeof item.value !== "string")
@@ -198,7 +212,7 @@ const checkOnUpdate = (data, msgIdSet) => {
                   onUpdtObj.setupendmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
                 }
               }
-  
+
               for (const code of requiredCodes) {
                 if (!foundCodes.has(code)) {
                   onUpdtObj.codeendmaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;

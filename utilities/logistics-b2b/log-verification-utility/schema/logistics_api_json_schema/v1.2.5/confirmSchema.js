@@ -358,6 +358,21 @@ module.exports = {
                             type: "string",
                             enum: constants.PCC_CODE,
                           },
+                          additional_desc: {
+                            type: "object",
+                            properties: {
+                              content_type: {
+                                type: "string",
+                              },
+                              url: {
+                                type: "string",
+                                pattern:
+                                  "^https:\\/\\/(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(?:\\/[^\\s]*)?$",
+                                errorMessage:
+                                  "URL must be a valid https URL",
+                              },
+                            },
+                          },
                         },
                         required: ["code", "short_desc"],
                         allOf: [
@@ -493,6 +508,21 @@ module.exports = {
                           code: {
                             type: "string",
                             enum: constants.DCC_CODE,
+                          },
+                          additional_desc: {
+                            type: "object",
+                            properties: {
+                              content_type: {
+                                type: "string",
+                              },
+                              url: {
+                                type: "string",
+                                pattern:
+                                  "^https:\\/\\/(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(?:\\/[^\\s]*)?$",
+                                errorMessage:
+                                  "URL must be a valid https URL",
+                              },
+                            },
                           },
                         },
                         required: ["code"],

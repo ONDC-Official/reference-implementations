@@ -179,9 +179,35 @@ const checkOnConfirm = (data, msgIdSet) => {
     );
   }
 
+  if (on_confirm?.payment?.type === "POST-FULFILLMENT") {
+    if (on_confirm?.payment?.status === "PAID") {
+      onCnfrmObj.paymentStatusErr = `payment/status should be "NOT-PAID" instead of ${on_confirm?.payment?.status} for POST-FULFILLMENT payment type`;
+    }
+    const requiredFields = {
+      "@ondc/org/settlement_basis":
+        "payment/@ondc/org/settlement_basis is mandatory for POST-FULFILLMENT payment type",
+      "@ondc/org/settlement_window":
+        "payment/@ondc/org/settlement_window is mandatory for POST-FULFILLMENT payment type",
+    };
+
+    for (const [field, errorMessage] of Object.entries(requiredFields)) {
+      if (!on_confirm?.payment?.[field]) {
+        const errorKey = `payment${field.replace(/[^a-zA-Z]/g, "")}Err`;
+        onCnfrmObj[errorKey] = errorMessage;
+      }
+    }
+  }
+
   try {
     console.log(`checking start and end time range in fulfillments`);
     fulfillments.forEach((fulfillment) => {
+      if (
+        domain === "ONDC:LOG10" &&
+        fulfillment?.tags?.some((tag) => tag.code === "shipping_label")
+      ) {
+        onCnfrmObj.shippingLabelErr = `shipping_label tag is not allowed in fulfillments for P2P order type (ONDC:LOG10)`;
+      }
+
       if (callMasking) {
         if (fulfillment?.type === "Delivery") {
           // START CONTACT

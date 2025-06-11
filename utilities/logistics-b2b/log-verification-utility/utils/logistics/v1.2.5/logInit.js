@@ -78,6 +78,22 @@ const checkInit = (data, msgIdSet) => {
     }
   }
 
+  if (init?.payment?.type === "POST-FULFILLMENT") {
+    const requiredFields = {
+      "@ondc/org/settlement_basis":
+        "payment/@ondc/org/settlement_basis is mandatory for POST-FULFILLMENT payment type",
+      "@ondc/org/settlement_window":
+        "payment/@ondc/org/settlement_window is mandatory for POST-FULFILLMENT payment type",
+    };
+
+    for (const [field, errorMessage] of Object.entries(requiredFields)) {
+      if (!init?.payment?.[field]) {
+        const errorKey = `payment${field.replace(/[^a-zA-Z]/g, "")}Err`;
+        initObj[errorKey] = errorMessage;
+      }
+    }
+  }
+
   //billing check
   if (billing?.created_at > contextTimestamp) {
     initObj.BilngcreatedAtErr = `billing/created_at cannot be future dated w.r.t context/timestamp`;

@@ -139,6 +139,22 @@ const checkOnInit = (data, msgIdSet) => {
     }
   }
 
+  if (on_init?.payment?.type === "POST-FULFILLMENT") {
+    const requiredFields = {
+      "@ondc/org/settlement_basis":
+        "payment/@ondc/org/settlement_basis is mandatory for POST-FULFILLMENT payment type",
+      "@ondc/org/settlement_window":
+        "payment/@ondc/org/settlement_window is mandatory for POST-FULFILLMENT payment type",
+    };
+
+    for (const [field, errorMessage] of Object.entries(requiredFields)) {
+      if (!on_init?.payment?.[field]) {
+        const errorKey = `payment${field.replace(/[^a-zA-Z]/g, "")}Err`;
+        onInitObj[errorKey] = errorMessage;
+      }
+    }
+  }
+
   try {
     const onInitItem = [];
     on_init?.items?.forEach((item) => onInitItem.push(item?.id));

@@ -15,6 +15,14 @@ module.exports = {
         },
         city: {
           type: "string",
+          not: {
+            const: "*",
+          },
+          pattern: "^std:\\d{3,}$",
+          errorMessage: {
+            not: "City code cannot be '*', please provide a specific city code (e.g., std:080)",
+            pattern: "City code must match pattern std:XXX (e.g., std:080)",
+          },
         },
         action: {
           type: "string",
