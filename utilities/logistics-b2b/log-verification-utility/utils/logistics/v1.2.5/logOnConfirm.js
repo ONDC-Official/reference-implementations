@@ -201,6 +201,36 @@ const checkOnConfirm = (data, msgIdSet) => {
   try {
     console.log(`checking start and end time range in fulfillments`);
     fulfillments.forEach((fulfillment) => {
+      if (fulfillment?.type === "Delivery") {
+        const state = fulfillment?.tags?.find((tag) => tag.code === "state");
+        const ready_to_ship = state?.list?.find(
+          (item) => item.code === "ready_to_ship"
+        );
+
+        if (!state) {
+          onCnfrmObj.stateErr = `state code is mandatory in fulfillment/tags`;
+        }
+
+        if (!ready_to_ship) {
+          onCnfrmObj.readyToShipErr = `ready_to_ship code is mandatory in fulfillment/tags/state list`;
+        }
+
+        if (ready_to_ship && ready_to_ship?.value.toLowerCase() !== "yes") {
+          const timeRanges = {
+            "start/time/range": fulfillment?.start?.time?.range,
+            "end/time/range": fulfillment?.end?.time?.range,
+          };
+
+          for (const [key, value] of Object.entries(timeRanges)) {
+            if (value) {
+              onCnfrmObj[
+                key
+              ] = `${key} is not allowed in fulfillments when ready_to_ship is ${ready_to_ship.value}`;
+            }
+          }
+        }
+      }
+
       if (
         domain === "ONDC:LOG10" &&
         fulfillment?.tags?.some((tag) => tag.code === "shipping_label")

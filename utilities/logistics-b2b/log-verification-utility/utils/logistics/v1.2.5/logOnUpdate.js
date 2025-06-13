@@ -110,6 +110,28 @@ const checkOnUpdate = (data, msgIdSet) => {
         dao.getValue(`${fulfillment?.id}-avgPickupTime`)
       );
 
+      if (fulfillment?.type === "Delivery") {
+        const state = fulfillment?.tags?.find((tag) => tag.code === "state");
+        const ready_to_ship = state?.list?.find(
+          (item) => item.code === "ready_to_ship"
+        );
+
+        if (ready_to_ship && ready_to_ship?.value.toLowerCase() !== "yes") {
+          const timeRanges = {
+            "start/time/range": fulfillment?.start?.time?.range,
+            "end/time/range": fulfillment?.end?.time?.range,
+          };
+
+          for (const [key, value] of Object.entries(timeRanges)) {
+            if (value) {
+              onUpdtObj[
+                key
+              ] = `${key} is not allowed in fulfillments when ready_to_ship is ${ready_to_ship.value}`;
+            }
+          }
+        }
+      }
+
       if (
         domain === "ONDC:LOG10" &&
         fulfillment?.tags?.some((tag) => tag.code === "shipping_label")

@@ -156,6 +156,22 @@ const checkOnInit = (data, msgIdSet) => {
   }
 
   try {
+    if (on_init?.cancellation_terms) {
+      on_init?.cancellation_terms?.map((term) => {
+        if (
+          term?.cancellation_fee?.amount?.value > on_init?.quote?.price?.value
+        ) {
+          onInitObj[
+            `cancellation_terms${term?.fulfillment_state?.descriptor?.code}Err`
+          ] = `cancellation_fee amount ${term?.cancellation_fee?.amount?.value} cannot be greater than order quote price ${on_init?.quote?.price?.value}`;
+        }
+      });
+    }
+  } catch (error) {
+    console.log(`!!Error in cancellation_terms ${constants.LOG_ONINIT}`, error);
+  }
+
+  try {
     const onInitItem = [];
     on_init?.items?.forEach((item) => onInitItem.push(item?.id));
     if (cod_order) {
