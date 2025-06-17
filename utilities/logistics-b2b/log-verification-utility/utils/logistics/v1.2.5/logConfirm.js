@@ -167,6 +167,13 @@ const checkConfirm = (data, msgIdSet) => {
 
   try {
     if (cod_order) {
+      const item = confirm?.items?.find((item, i) => {
+        if (!item?.tags)
+          cnfrmObj[
+            `itemTagsErr${i}`
+          ] = `tags are mandatory in item for item id ${item.id} when order type is COD`;
+      });
+
       if (COD_ITEM && !confirmItemId.includes(COD_ITEM[0]?.id)) {
         cnfrmObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /confirm when order type is COD`;
       }
