@@ -25,6 +25,9 @@ const checkOnStatus = (data, msgIdSet) => {
   const surgeItemData = dao.getValue("surge_item");
   const ePod = dao.getValue("ePod");
   const callMasking = dao.getValue("call_masking");
+  const quick_commerce = dao.getValue("quick_commerce");
+  const search_fulfill_request = dao.getValue("search_fulfill_request");
+  const onSearchFulfillResponse = dao.getValue("on_search_fulfill_response");
   let trackingEnabled = false;
   let surgeItemFound = null;
 
@@ -57,6 +60,11 @@ const checkOnStatus = (data, msgIdSet) => {
     if (surgeItem && item?.id === surgeItemData?.id) {
       surgeItemFound = item;
     }
+
+    if (quick_commerce) {
+      if (item?.category_id !== "Instant Delivery")
+        onStatusObj.itemCatIdErr = `Item category id should be 'Instant Delivery' for quick commerce flow`;
+    }
   });
 
   if (surgeItem && !surgeItemFound) {
@@ -82,6 +90,89 @@ const checkOnStatus = (data, msgIdSet) => {
       `!!Error fetching order item  in${constants.LOG_ONSTATUS}`,
       err
     );
+  }
+
+  if (quick_commerce) {
+    const breakupItems = on_status?.quote?.breakup || [];
+    const fulfillmentBatch = on_status?.fulfillments?.find(
+      (i) => i.type === "Batch"
+    );
+    if (!fulfillmentBatch) {
+      onStatusObj[
+        `quick_commerce_fulfillmentType_Err`
+      ] = `Fulfillment type "Batch" should be there is fulfillments array for quick commerce logistics`;
+    } else {
+      if (fulfillmentBatch?.tags) {
+        const fulfillRequestTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_request"
+        );
+        let fulfillResponseTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_response"
+        );
+
+        if (!fulfillRequestTag) {
+          onStatusObj[
+            `quick_commerce_fulfillRequestTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_request' for quick commerce logistics`;
+        } else {
+          const sortedList1 = _.sortBy(search_fulfill_request, "code");
+          const sortedList2 = _.sortBy(fulfillRequestTag, "code");
+
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            search_fulfill_request.code === fulfillRequestTag.code;
+
+          if (!areEqual) {
+            onStatusObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_request' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+
+        if (!fulfillResponseTag) {
+          onStatusObj[
+            `quick_commerce_fulfillResponseTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_response' for quick commerce logistics`;
+        } else {
+          const index = fulfillResponseTag?.list?.findIndex(
+            (i) => i.code === "diff_value"
+          );
+          if (index === -1 || index === undefined) {
+            onStatusObj[
+              `quick_commerce_fulfillResponseTag_Err`
+            ] = `Fulfillment tags should include a code 'diff_value' in list for quick commerce logistics`;
+          } else fulfillResponseTag.list.splice(index, 1);
+
+          const sortedList1 = _.sortBy(onSearchFulfillResponse, "code");
+          const sortedList2 = _.sortBy(fulfillResponseTag, "code");
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            onSearchFulfillResponse.code === fulfillResponseTag.code;
+
+          if (!areEqual) {
+            onStatusObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_response' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+      } else
+        onStatusObj[
+          `quick_commerce_fulfillmenttags`
+        ] = `Fulfillment tags is missing.`;
+    }
+
+    if (
+      !breakupItems?.some((item) => item?.["@ondc/org/title_type"] === "diff")
+    ) {
+      onStatusObj.quotebreakupErr_Diff = `title_type "diff" is mandatory in /on_status breakup array when order type is quick commerce`;
+    }
+    if (
+      !breakupItems?.some(
+        (item) => item?.["@ondc/org/title_type"] === "tax_diff"
+      )
+    ) {
+      onStatusObj.quotebreakupErr_taxDiff = `title_type "tax_diff" is mandatory in /on_status breakup array when order type is quick commerce`;
+    }
   }
 
   try {

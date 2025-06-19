@@ -19,6 +19,9 @@ const checkOnInit = (data, msgIdSet) => {
   const cod_order = dao.getValue("cod_order");
   const COD_ITEM = dao.getValue("COD_ITEM");
   const paymentWallet = dao.getValue("payment_wallet");
+  const quick_commerce = dao.getValue("quick_commerce");
+  const search_fulfill_request = dao.getValue("search_fulfill_request");
+  const onSearchFulfillResponse = dao.getValue("on_search_fulfill_response");
   const orderTags = on_init?.tags;
   let bppTerms = false;
 
@@ -155,6 +158,66 @@ const checkOnInit = (data, msgIdSet) => {
     }
   }
 
+  if (quick_commerce) {
+    const fulfillmentBatch = on_init?.fulfillments?.find(
+      (i) => i.type === "Batch"
+    );
+    if (!fulfillmentBatch) {
+      onInitObj[
+        `quick_commerce_fulfillmentType_Err`
+      ] = `Fulfillment type "Batch" should be there is fulfillments array for quick commerce logistics`;
+    } else {
+      if (fulfillmentBatch?.tags) {
+        const fulfillRequestTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_request"
+        );
+        const fulfillResponseTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_response"
+        );
+
+        if (!fulfillRequestTag) {
+          onInitObj[
+            `quick_commerce_fulfillRequestTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_request' for quick commerce logistics`;
+        } else {
+          const sortedList1 = _.sortBy(search_fulfill_request, "code");
+          const sortedList2 = _.sortBy(fulfillRequestTag, "code");
+
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            search_fulfill_request.code === fulfillRequestTag.code;
+
+          if (!areEqual) {
+            onInitObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_request' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+
+        if (!fulfillResponseTag) {
+          onInitObj[
+            `quick_commerce_fulfillResponseTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_response' for quick commerce logistics`;
+        } else {
+          const sortedList1 = _.sortBy(onSearchFulfillResponse, "code");
+          const sortedList2 = _.sortBy(fulfillResponseTag, "code");
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            onSearchFulfillResponse.code === fulfillResponseTag.code;
+
+          if (!areEqual) {
+            onInitObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_response' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+      } else
+        onInitObj[
+          `quick_commerce_fulfillmenttags`
+        ] = `Fulfillment tags is missing.`;
+    }
+  }
+
   try {
     if (on_init?.cancellation_terms) {
       on_init?.cancellation_terms?.map((term) => {
@@ -173,7 +236,14 @@ const checkOnInit = (data, msgIdSet) => {
 
   try {
     const onInitItem = [];
-    on_init?.items?.forEach((item) => onInitItem.push(item?.id));
+    on_init?.items?.forEach((item) => {
+      onInitItem.push(item?.id);
+      if (quick_commerce) {
+        if (item?.category_id !== "Instant Delivery")
+          onInitObj.itemCatIdErr = `Item category id should be 'Instant Delivery' for quick commerce flow`;
+      }
+    });
+
     if (cod_order) {
       if (COD_ITEM && !onInitItem.includes(COD_ITEM[0]?.id)) {
         onInitObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /on_init when order type is COD`;
