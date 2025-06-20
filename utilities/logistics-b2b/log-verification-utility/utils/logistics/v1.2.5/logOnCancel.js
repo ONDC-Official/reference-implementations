@@ -23,6 +23,7 @@ const checkOnCancel = (data, msgIdSet) => {
   let missingTags = [];
   const surgeItem = dao.getValue("is_surge_item");
   const surgeItemData = dao.getValue("surge_item");
+  const eWayBill = dao.getValue("eWayBill");
   let rtoID, reasonId, preCnclState;
   let surgeItemFound = null;
   const created_at = on_cancel.created_at;
@@ -147,6 +148,28 @@ const checkOnCancel = (data, msgIdSet) => {
     }
   } catch (error) {
     console.log(error);
+  }
+
+  if (eWayBill) {
+    const rtoFulfillment = fulfillments?.find(
+      (fulfillment) => fulfillment?.type === "RTO"
+    );
+
+    const linkedProvider = rtoFulfillment?.tags?.find(
+      (tag) => tag.code === "linked_provider"
+    );
+
+    if (!linkedProvider) {
+      onCancelObj.linkedProviderErr = `linked_provider code is mandatory in fulfillment tags for eWayBill flow`;
+    } else {
+      const taxIdEntry = linkedProvider?.list?.find(
+        (entry) => entry.code === "tax_id"
+      );
+
+      if (!taxIdEntry?.value) {
+        onCancelObj.taxIdErr = `tax_id code is mandatory in linked_provider tag for eWayBill flow`;
+      }
+    }
   }
 
   try {

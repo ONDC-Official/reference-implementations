@@ -195,7 +195,7 @@ module.exports = {
                           items: {
                             type: "object",
                             properties: {
-                              code: { type: "string", enum: ["distance"] },
+                              code: { type: "string" },
                               list: {
                                 type: "array",
                                 items: {
@@ -203,10 +203,6 @@ module.exports = {
                                   properties: {
                                     code: {
                                       type: "string",
-                                      enum: [
-                                        "motorable_distance_type",
-                                        "motorable_distance",
-                                      ],
                                     },
                                     value: { type: "string" },
                                   },

@@ -14,6 +14,9 @@ const checkOnSearch = async (data, msgIdSet) => {
   let search = dao.getValue("searchObj");
   let validFulfillmentIDs = new Set();
   const cod_order = dao.getValue("cod_order");
+  const quick_commerce = dao.getValue("quick_commerce");
+  const search_fulfill_request = dao.getValue("search_fulfill_request");
+  const codified_static_terms = dao.getValue("codified_static_terms") || false;
   onSearch = onSearch.message.catalog;
   let avgPickupTime;
   /**
@@ -65,6 +68,134 @@ const checkOnSearch = async (data, msgIdSet) => {
     console.log(
       `Checking TAT for category or item in ${constants.LOG_ONSEARCH} api`
     );
+
+    if (quick_commerce) {
+      const provider = onSearch["bpp/providers"][0];
+      provider?.categories?.forEach((it, i) => {
+        if (it.id !== "Instant Delivery")
+          onSrchObj[
+            `quick_commerce_categoriesId_Err_${i}`
+          ] = `Categories id should be Instant Delivery for flow quick commerce logistics.`;
+        const duration = it?.time?.duration || "";
+        if (duration) {
+          const match = duration.match(/^PT(\d+)M$/);
+          const minutes = match ? parseInt(match[1], 10) : null;
+
+          if (minutes === null || minutes > 10) {
+            onSrchObj[
+              `quick_commerce_duration_Err_${i}`
+            ] = `Duration should be less than or equal to 10 minutes (PT10M or less). Found: ${duration} for quick commerce flow`;
+          }
+        }
+
+        const fulfillmentBatch = provider?.fulfillments?.find(
+          (i) => i.type === "Batch"
+        );
+        if (!fulfillmentBatch) {
+          onSrchObj[
+            `quick_commerce_fulfillmentType_Err_${i}`
+          ] = `Fulfillment type "Batch" should be there is fulfillments array for quick commerce logistics`;
+        } else {
+          if (fulfillmentBatch?.tags) {
+            const fulfillRequestTag = fulfillmentBatch.tags.find(
+              (tag) => tag.code === "fulfill_request"
+            );
+            const fulfillResponseTag = fulfillmentBatch.tags.find(
+              (tag) => tag.code === "fulfill_response"
+            );
+
+            if (!fulfillRequestTag) {
+              onSrchObj[
+                `quick_commerce_fulfillRequestTag_Err_${i}`
+              ] = `Fulfillment tags should include a code 'fulfill_request' for quick commerce logistics`;
+            } else {
+              const sortedList1 = _.sortBy(search_fulfill_request, "code");
+              const sortedList2 = _.sortBy(fulfillRequestTag, "code");
+
+              const areEqual =
+                _.isEqual(sortedList1, sortedList2) &&
+                search_fulfill_request.code === fulfillRequestTag.code;
+
+              if (!areEqual) {
+                onSrchObj[
+                  `quick_commerce_fulfillReuqest_${i}`
+                ] = `Fulfillment tags code 'fulfill_request' doesnot match with the one provided in search payload for quick commerce logistics`;
+              }
+            }
+
+            if (!fulfillResponseTag) {
+              onSrchObj[
+                `quick_commerce_fulfillResponseTag_Err_${i}`
+              ] = `Fulfillment tags should include a code 'fulfill_response' for quick commerce logistics`;
+            } else {
+              const requiredCodes = [
+                "rider_count",
+                "order_count",
+                "rate_basis",
+              ];
+
+              let allCodesPresent = true;
+
+              requiredCodes.forEach((code) => {
+                const exists = fulfillResponseTag.list.some(
+                  (item) => item.code === code
+                );
+                if (!exists) {
+                  onSrchObj[
+                    `fulfill_response_missing_${code}`
+                  ] = `Code '${code}' is missing in fulfill_response list for quick commerce flow.`;
+                  allCodesPresent = false;
+                }
+              });
+
+              if (allCodesPresent)
+                dao.setValue("on_search_fulfill_response", fulfillResponseTag);
+            }
+          } else
+            onSrchObj[
+              `quick_commerce_fulfillmenttags`
+            ] = `Fulfillment tags is missing.`;
+        }
+      });
+    }
+
+    if (codified_static_terms) {
+      if (!onSearch["bpp/descriptor"]?.tags) {
+        onSrchObj.codifiedStaticTermsErr = `bpp/descriptor/tags is mandatory in ${constants.LOG_ONSEARCH} api for codified static terms flow`;
+      } else {
+        const descriptorTags = onSearch["bpp/descriptor"].tags.find(
+          (tag) => tag.code === "bpp_terms"
+        );
+
+        if (!descriptorTags || !Array.isArray(descriptorTags.list)) {
+          onSrchObj.bppTermsErr = `bpp_terms tag or its list array is missing in bpp/descriptor/tags`;
+        } else {
+          const requiredKeys = [
+            "max_liability",
+            "max_liability_cap",
+            "mandatory_arbitration",
+            "court_jurisdiction",
+            "delay_interest",
+          ];
+
+          const missingKeys = requiredKeys.filter(
+            (key) =>
+              !descriptorTags.list.some(
+                (item) => item.code === key && item.value
+              )
+          );
+
+          if (missingKeys.length > 0) {
+            onSrchObj.bppTermsMissingKeys = `The following keys are missing or have no value in bpp_terms: ${missingKeys.join(
+              ", "
+            )}`;
+          } else {
+            dao.setValue("codifiedbppTermsList", descriptorTags.list);
+          }
+        }
+      }
+    }
+
     if (onSearch.hasOwnProperty("bpp/providers")) {
       onSearch["bpp/providers"].forEach((provider) => {
         if (cod_order) {
@@ -230,7 +361,8 @@ const checkOnSearch = async (data, msgIdSet) => {
         if (
           fulfillment.type === "Prepaid" ||
           fulfillment.type === "CoD" ||
-          fulfillment.type === "Delivery"
+          fulfillment.type === "Delivery" ||
+          fulfillment.type === "Batch"
         ) {
           hasForwardShipment = true;
           avgPickupTime = fulfillment?.start?.time?.duration;
@@ -273,6 +405,50 @@ const checkOnSearch = async (data, msgIdSet) => {
 
         dao.setValue(`${providerId}itemsArr`, itemsArr);
         itemsArr.forEach((item, j) => {
+          if (quick_commerce) {
+            if (item?.category_id !== "Instant Delivery")
+              onSrchObj[
+                `quick_commerce_itemCategoryId_Err_${j}`
+              ] = `item id with ${item?.id} category id should be "Instant Delivery" for quick commerce logistics flow.`;
+            if (item?.tags) {
+              const typeTag = item.tags.find((tag) => tag.code === "type");
+
+              if (!typeTag) {
+                onSrchObj[
+                  `quick_commerce_itemTagsCode_Err_${j}`
+                ] = `Item with id ${item?.id} should have a tag with code "type" for quick commerce logistics flow.`;
+              } else {
+                const typeEntry = typeTag.list?.find(
+                  (entry) => entry.code === "type" && entry.value === "rider"
+                );
+
+                if (typeEntry) {
+                  const unitEntry = typeTag.list?.find(
+                    (entry) => entry.code === "unit"
+                  );
+                  if (!unitEntry) {
+                    onSrchObj[
+                      `quick_commerce_itemTagsUnit_Err_${j}`
+                    ] = `Item with id ${item?.id} should have a code "unit" in the "type" tag list when "type" value is "rider".`;
+                  }
+                } else {
+                  const typeExists = typeTag.list?.some(
+                    (entry) => entry.code === "type"
+                  );
+                  if (!typeExists) {
+                    onSrchObj[
+                      `quick_commerce_itemTagsType_Err_${j}`
+                    ] = `Item with id ${item?.id} should have a code "type" in the "type" tag list.`;
+                  }
+                }
+              }
+            } else {
+              onSrchObj[
+                `quick_commerce_itemTags_Err_${j}`
+              ] = `Item with id ${item?.id} should have tags for quick commerce logistics flow.`;
+            }
+          }
+
           const typeTag = item?.tags?.find((tag) => tag.code === "type");
           const surgeInfo = typeTag?.list?.find(
             (i) => i.code === "type" && i.value === "surge"

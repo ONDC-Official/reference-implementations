@@ -113,7 +113,7 @@ module.exports = Object.freeze({
   LOG_ONSTATUS: "on_status",
   LOG_SUPPORT: "support",
   LOG_ONSUPPORT: "on_support",
-  FULFILLMENT_TYPE: ["Delivery", "Return", "RTO"],
+  FULFILLMENT_TYPE: ["Delivery", "Return", "RTO", "Batch"],
   CATEGORY_ID: [
     "Express Delivery",
     "Standard Delivery",
@@ -121,6 +121,7 @@ module.exports = Object.freeze({
     "Same Day Delivery",
     "Next Day Delivery",
     "Takeaway",
+    "Instant Delivery",
   ],
   PAYMENT_TYPE: ["ON-ORDER", "ON-FULFILLMENT", "POST-FULFILLMENT"],
   PAYMENT_COLLECTEDBY: ["BAP", "BPP", "SOR"],

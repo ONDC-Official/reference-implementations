@@ -35,17 +35,30 @@ const checkSearch = async (data, msgIdSet) => {
     console.error("Error while checking fulfillment tags:", error.stack);
   }
 
-  if (
-    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "016"))
-  ) {
-    dao.setValue("Dynamic_otp_verification_rto", true);
-  }
+  const tagCodeToFlagMap = {
+    "016": "Dynamic_otp_verification_rto",
+    "01B": "Reverse_QC",
+    "011": "Update_delivery_address",
+    "01F": "codified_static_terms",
+    "019": "eWayBill",
+    "018": "partial_rto",
+    "00F": "ePod",
+    "010": "call_masking",
+    "00D": "payment_wallet",
+    "005": "quick_commerce",
+    "006": "quick_commerce",
+    "007": "quick_commerce",
+  };
 
-  if (
-    search?.tags?.some((tag) => tag?.list?.some((item) => item?.code === "011"))
-  ) {
-    dao.setValue("Update_delivery_address", true);
-  }
+  Object.entries(tagCodeToFlagMap).forEach(([code, flag]) => {
+    if (
+      search?.tags?.some((tag) =>
+        tag?.list?.some((item) => item?.code === code)
+      )
+    ) {
+      dao.setValue(flag, true);
+    }
+  });
 
   if (dao.getValue("Dynamic_otp_verification_rto")) {
     const startType = search?.fulfillment?.start?.authorization?.type;
@@ -63,6 +76,63 @@ const checkSearch = async (data, msgIdSet) => {
           "Authorization type should be OTP for Dynamic OTP verification RTO flow in end object of fulfillment.";
       }
     }
+  }
+
+  try {
+    if (dao.getValue("quick_commerce")) {
+      if (search?.category?.id !== "Instant Delivery")
+        srchObj[
+          "quick_commerce_category_err"
+        ] = `message/intent/category/id should be "Instant delivery" for quick_commerce flow.`;
+      if (search?.fulfillment?.type !== "Batch")
+        srchObj[
+          "quick_commerce_fulfType_Err"
+        ] = `message/intent/fulfillment/type should be "Batch" for quick_commerce flow.`;
+      if (search?.fulfillment?.tags) {
+        const fulfillRequestTag = search.fulfillment.tags.find(
+          (tag) => tag.code === "fulfill_request"
+        );
+
+        if (fulfillRequestTag && fulfillRequestTag.list) {
+          const requiredCodes = [
+            "rider_count",
+            "order_count",
+            "rate_basis",
+            "motorable_distance",
+            "pickup_slot_start",
+            "pickup_slot_end",
+            "delivery_slot_start",
+            "delivery_slot_end",
+          ];
+
+          let allCodesPresent = true;
+
+          requiredCodes.forEach((code) => {
+            const exists = fulfillRequestTag.list.some(
+              (item) => item.code === code
+            );
+            if (!exists) {
+              srchObj[
+                `fulfill_request_missing_${code}`
+              ] = `Code '${code}' is missing in fulfill_request list for quick commerce flow.`;
+              allCodesPresent = false;
+            }
+          });
+
+          if (allCodesPresent) {
+            dao.setValue("search_fulfill_request", fulfillRequestTag);
+          }
+        } else {
+          srchObj["fulfill_request_missing"] =
+            "fulfill_request tag or its list is missing in fulfillment.tags for quick commerce flow.";
+        }
+      } else {
+        srchObj["fulfillment_tags_missing"] =
+          "fulfillment.tags is missing in the search object for quick commerce flow.";
+      }
+    }
+  } catch (error) {
+    console.error("Error while checking quick commerce:", error.stack);
   }
 
   try {

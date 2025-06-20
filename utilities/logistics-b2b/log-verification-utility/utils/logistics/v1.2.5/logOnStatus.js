@@ -23,6 +23,11 @@ const checkOnStatus = (data, msgIdSet) => {
   const confirm_fulfillment_tags = dao.getValue("confirm_fulfillment_tags");
   const surgeItem = dao.getValue("is_surge_item");
   const surgeItemData = dao.getValue("surge_item");
+  const ePod = dao.getValue("ePod");
+  const callMasking = dao.getValue("call_masking");
+  const quick_commerce = dao.getValue("quick_commerce");
+  const search_fulfill_request = dao.getValue("search_fulfill_request");
+  const onSearchFulfillResponse = dao.getValue("on_search_fulfill_response");
   let trackingEnabled = false;
   let surgeItemFound = null;
 
@@ -55,6 +60,11 @@ const checkOnStatus = (data, msgIdSet) => {
     if (surgeItem && item?.id === surgeItemData?.id) {
       surgeItemFound = item;
     }
+
+    if (quick_commerce) {
+      if (item?.category_id !== "Instant Delivery")
+        onStatusObj.itemCatIdErr = `Item category id should be 'Instant Delivery' for quick commerce flow`;
+    }
   });
 
   if (surgeItem && !surgeItemFound) {
@@ -80,6 +90,89 @@ const checkOnStatus = (data, msgIdSet) => {
       `!!Error fetching order item  in${constants.LOG_ONSTATUS}`,
       err
     );
+  }
+
+  if (quick_commerce) {
+    const breakupItems = on_status?.quote?.breakup || [];
+    const fulfillmentBatch = on_status?.fulfillments?.find(
+      (i) => i.type === "Batch"
+    );
+    if (!fulfillmentBatch) {
+      onStatusObj[
+        `quick_commerce_fulfillmentType_Err`
+      ] = `Fulfillment type "Batch" should be there is fulfillments array for quick commerce logistics`;
+    } else {
+      if (fulfillmentBatch?.tags) {
+        const fulfillRequestTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_request"
+        );
+        let fulfillResponseTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_response"
+        );
+
+        if (!fulfillRequestTag) {
+          onStatusObj[
+            `quick_commerce_fulfillRequestTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_request' for quick commerce logistics`;
+        } else {
+          const sortedList1 = _.sortBy(search_fulfill_request, "code");
+          const sortedList2 = _.sortBy(fulfillRequestTag, "code");
+
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            search_fulfill_request.code === fulfillRequestTag.code;
+
+          if (!areEqual) {
+            onStatusObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_request' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+
+        if (!fulfillResponseTag) {
+          onStatusObj[
+            `quick_commerce_fulfillResponseTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_response' for quick commerce logistics`;
+        } else {
+          const index = fulfillResponseTag?.list?.findIndex(
+            (i) => i.code === "diff_value"
+          );
+          if (index === -1 || index === undefined) {
+            onStatusObj[
+              `quick_commerce_fulfillResponseTag_Err`
+            ] = `Fulfillment tags should include a code 'diff_value' in list for quick commerce logistics`;
+          } else fulfillResponseTag.list.splice(index, 1);
+
+          const sortedList1 = _.sortBy(onSearchFulfillResponse, "code");
+          const sortedList2 = _.sortBy(fulfillResponseTag, "code");
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            onSearchFulfillResponse.code === fulfillResponseTag.code;
+
+          if (!areEqual) {
+            onStatusObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_response' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+      } else
+        onStatusObj[
+          `quick_commerce_fulfillmenttags`
+        ] = `Fulfillment tags is missing.`;
+    }
+
+    if (
+      !breakupItems?.some((item) => item?.["@ondc/org/title_type"] === "diff")
+    ) {
+      onStatusObj.quotebreakupErr_Diff = `title_type "diff" is mandatory in /on_status breakup array when order type is quick commerce`;
+    }
+    if (
+      !breakupItems?.some(
+        (item) => item?.["@ondc/org/title_type"] === "tax_diff"
+      )
+    ) {
+      onStatusObj.quotebreakupErr_taxDiff = `title_type "tax_diff" is mandatory in /on_status breakup array when order type is quick commerce`;
+    }
   }
 
   try {
@@ -223,10 +316,191 @@ const checkOnStatus = (data, msgIdSet) => {
   try {
     fulfillments?.forEach((fulfillment) => {
       ffState = fulfillment?.state?.descriptor?.code;
+
+      if (ffState === "Order-delivered") {
+        if (
+          !fulfillment?.tags.some(
+            (item) => item.code === "cod_collection_detail"
+          )
+        )
+          onStatusObj.codCollectionErr = `cod_collection_detail tag is mandatory in /on_status inside fulfillment/tags when fulfillment state is Order-delivered`;
+      }
+
       let fulfillmentTags = fulfillment?.tags;
       console.log(
         `Comparing pickup and delivery timestamps for on_status_${ffState}`
       );
+
+      if (callMasking) {
+        if (fulfillment?.type === "Delivery") {
+          // START CONTACT
+
+          if (!fulfillment?.start?.contact?.phone) {
+            const allowedMaskedTypes = [
+              "ivr_pin",
+              "ivr_without_pin",
+              "api_endpoint",
+            ];
+            const maskedTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "masked_contact"
+            );
+
+            if (!maskedTag) {
+              onStatusObj.maskedContactErr = `'masked_contact' tag is required in /fulfillments in start object.`;
+            } else {
+              const list = maskedTag.list || [];
+              const requiredCodes = ["type", "setup", "token"];
+              const foundCodes = new Set();
+
+              for (const item of list) {
+                if (!item.code || item.value == null) {
+                  onStatusObj.listmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                }
+
+                foundCodes.add(item.code);
+
+                if (
+                  item.code === "type" &&
+                  !allowedMaskedTypes.includes(item.value)
+                ) {
+                  onStatusObj.typemaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                    ", "
+                  )}. Found: '${item.value}'`;
+                }
+
+                if (
+                  (item.code === "setup" || item.code === "token") &&
+                  (!item.value || typeof item.value !== "string")
+                ) {
+                  onStatusObj.setupmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                }
+              }
+
+              for (const code of requiredCodes) {
+                if (!foundCodes.has(code)) {
+                  onStatusObj.codemaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                }
+              }
+            }
+          }
+
+          // END CONTACT
+
+          if (!fulfillment?.end?.contact?.phone) {
+            const allowedMaskedTypes = [
+              "ivr_pin",
+              "ivr_without_pin",
+              "api_endpoint",
+            ];
+            const maskedTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "masked_contact"
+            );
+
+            if (!maskedTag) {
+              onStatusObj.endmaskedContactErr = `'masked_contact' tag is required in /fulfillments in end object.`;
+            } else {
+              const list = maskedTag.list || [];
+              const requiredCodes = ["type", "setup", "token"];
+              const foundCodes = new Set();
+
+              for (const item of list) {
+                if (!item.code || item.value == null) {
+                  onStatusObj.listendmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                }
+
+                foundCodes.add(item.code);
+
+                if (
+                  item.code === "type" &&
+                  !allowedMaskedTypes.includes(item.value)
+                ) {
+                  onStatusObj.typeendmaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                    ", "
+                  )}. Found: '${item.value}'`;
+                }
+
+                if (
+                  (item.code === "setup" || item.code === "token") &&
+                  (!item.value || typeof item.value !== "string")
+                ) {
+                  onStatusObj.setupendmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                }
+              }
+
+              for (const code of requiredCodes) {
+                if (!foundCodes.has(code)) {
+                  onStatusObj.codeendmaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (ePod) {
+        if (fulfillment?.type === "Delivery") {
+          const allowedTypes = ["webp", "png", "jpeg", "pdf"];
+          const tags = fulfillment?.tags || [];
+
+          const proofTags = tags.filter(
+            (tag) => tag.code === "fulfillment_proof"
+          );
+
+          if (proofTags.length === 0) {
+            onStatusObj.epodErr = `ePOD flow requires 'fulfillment_proof' tag in /fulfillments.`;
+          } else {
+            const requiredStates = ["Order-picked-up", "Order-delivered"];
+            const foundStates = new Set();
+            if (proofTags.length < 2) {
+              onStatusObj.epodErr = `ePOD flow requires two separate 'fulfillment_proof' tags: one with state 'Order-picked-up' and another with state 'Order-delivered'.`;
+            } else {
+              for (const tag of proofTags) {
+                const list = tag.list || [];
+                let state, type, url;
+
+                for (const item of list) {
+                  if (!item.code || item.value == null) {
+                    onStatusObj.epodErr = `Each item inside 'fulfillment_proof' in ePOD flow must contain both 'code' and 'value'.`;
+                  }
+
+                  if (item.code === "state") state = item.value;
+                  if (item.code === "type") type = item.value;
+                  if (item.code === "url") url = item.value;
+                }
+
+                if (!state || !requiredStates.includes(state)) {
+                  onStatusObj.stateepodErr = `Each 'fulfillment_proof' tag in ePOD flow must have a valid 'state' — expected 'Order-picked-up' or 'Order-delivered'. Found: '${
+                    state || "undefined"
+                  }'.`;
+                }
+
+                if (!type || !allowedTypes.includes(type)) {
+                  onStatusObj.typeepodErr = `Invalid 'type' in 'fulfillment_proof' for state '${state}'. Allowed file types for ePOD flow are: ${allowedTypes.join(
+                    ", "
+                  )}.`;
+                }
+
+                if (
+                  !url ||
+                  typeof url !== "string" ||
+                  !url.startsWith("http")
+                ) {
+                  onStatusObj.urlepodErr = `Missing or invalid 'url' in 'fulfillment_proof' for state '${state}'. A public URL is required for ePOD flow.`;
+                }
+
+                foundStates.add(state);
+              }
+
+              for (const state of requiredStates) {
+                if (!foundStates.has(state)) {
+                  onStatusObj.epodErr = `Missing 'fulfillment_proof' tag with state '${state}' required for ePOD flow.`;
+                }
+              }
+            }
+          }
+        }
+      }
+
       if (fulfillment.type === "COD" || fulfillment.type === "Delivery") {
         if (fulfillmentTags) {
           fulfillmentTags?.forEach((tag) => {

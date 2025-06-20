@@ -23,6 +23,11 @@ const checkOnConfirm = (data, msgIdSet) => {
   let awbNo = dao.getValue("awbNo");
   const surgeItem = dao.getValue("is_surge_item");
   const surgeItemData = dao.getValue("surge_item");
+  const codifiedStaticTerms = dao.getValue("codified_static_terms");
+  const codifiedBppTagsList = dao.getValue("codifiedbppTermsList");
+  const callMasking = dao.getValue("call_masking");
+  const paymentWallet = dao.getValue("payment_wallet");
+  const initWalletAmount = dao.getValue("payment_wallet_amount");
   let surgeItemFound = null;
 
   if (on_confirm?.updated_at > contextTimestamp) {
@@ -50,22 +55,111 @@ const checkOnConfirm = (data, msgIdSet) => {
     categoryId = item.category_id;
     descriptor_code = item.descriptor?.code;
 
-    if (
-      surgeItem &&
-      item?.id === surgeItemData?.id
-    ) {
+    if (surgeItem && item?.id === surgeItemData?.id) {
       surgeItemFound = item;
     }
   });
 
   if (surgeItem && !surgeItemFound) {
     onCnfrmObj.surgeItemErr = `Surge item is missing in the order`;
-  } 
+  }
   // else if (!_.isEqual(surgeItemFound?.price, surgeItemData?.price)) {
   //   onCnfrmObj.surgeItemErr = `Surge item price does not match the one sent in on_search call`;
   // }
 
   dao.setValue("item_descriptor_code", descriptor_code);
+
+  if (codifiedStaticTerms) {
+    if (!on_confirm?.tags) {
+      onCnfrmObj.codifiedStaticTermsErr = `message/order/tags is mandatory for codified_static_terms flow.`;
+    } else {
+      const bpp_terms = on_confirm?.tags.find(
+        (tag) => tag.code === "bpp_terms"
+      );
+
+      if (!bpp_terms) {
+        onCnfrmObj.codifiedStaticTermsErr = `bpp_terms tag is missing in /on_confirm for codified_static_terms flow.`;
+      }
+      const missingTags = codifiedBppTagsList.filter(
+        (reqTag) =>
+          !bpp_terms.list.some(
+            (tag) => tag.code === reqTag.code && tag.value === reqTag.value
+          )
+      );
+
+      if (missingTags.length > 0) {
+        const missingDescriptions = missingTags
+          .map((tag) => `{ code: "${tag.code}", value: "${tag.value}" }`)
+          .join(", ");
+        onCnfrmObj.codifiedStaticTermsErr = `Missing required codified static terms in /on_confirm: ${missingDescriptions}`;
+      }
+    }
+  }
+
+  if (paymentWallet) {
+    const collectedBy = on_confirm?.payment?.collected_by;
+    const paymentTags = on_confirm?.payment?.tags || [];
+    const params = on_confirm?.payment?.params;
+
+    if (!collectedBy) {
+      onCnfrmObj.paymentCollectedByErr = `payment/collected_by is mandatory for payment_wallet flow`;
+    } else if (collectedBy !== "BPP") {
+      onCnfrmObj.paymentCollectedByErr = `payment/collected_by should be 'BPP' for payment_wallet flow`;
+    } else if (
+      !on_confirm?.payment?.status ||
+      on_confirm?.payment?.status !== "PAID"
+    ) {
+      onCnfrmObj.paymentStatusErr = `payment/status must be 'PAID' for payment_wallet flow`;
+    } else if (!params)
+      onCnfrmObj.paymentParamsErr = `payment/params is mandatory for payment_wallet flow`;
+    else {
+      const requiredKeys = ["currency", "transaction_id", "amount"];
+
+      requiredKeys.forEach((key) => {
+        if (
+          params[key] === undefined ||
+          params[key] === null ||
+          String(params[key]).trim() === ""
+        ) {
+          onCnfrmObj[
+            `paymentParams${key}Err`
+          ] = `payment/params/${key} is mandatory for payment_wallet flow`;
+        }
+      });
+    }
+
+    if (!paymentTags || paymentTags.length < 1) {
+      onCnfrmObj.paymentTagsErr = `payment/tags is mandatory for payment_wallet flow`;
+    } else {
+      const payment_wallet = on_confirm?.payment?.tags.find(
+        (i) => i.code === "wallet_balance"
+      );
+      if (!payment_wallet) {
+        onCnfrmObj.paymentWalletErr = `payment/tags must contain 'wallet_balance' for payment_wallet flow`;
+      } else {
+        const currency = payment_wallet?.list.some(
+          (item) => item?.code === "currency"
+        );
+        const amount = payment_wallet?.list.find(
+          (item) => item?.code === "value"
+        );
+        if (!currency) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'currency' code`;
+        } else if (!amount) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'value' code`;
+        } else if (!amount?.value) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance value must be present or not empty`;
+        } else if (
+          Number(amount?.value) !==
+          Number(initWalletAmount - Number(params?.amount))
+        ) {
+          onCnfrmObj.paymentWalletErr = `payment/tags/wallet_balance/list/code "value's" value should be ${Number(
+            initWalletAmount - Number(params?.amount)
+          )} but found ${amount?.value}`;
+        }
+      }
+    }
+  }
 
   try {
     if (cod_order) {
@@ -85,9 +179,171 @@ const checkOnConfirm = (data, msgIdSet) => {
     );
   }
 
+  if (on_confirm?.payment?.type === "POST-FULFILLMENT") {
+    if (on_confirm?.payment?.status === "PAID") {
+      onCnfrmObj.paymentStatusErr = `payment/status should be "NOT-PAID" instead of ${on_confirm?.payment?.status} for POST-FULFILLMENT payment type`;
+    }
+    const requiredFields = {
+      "@ondc/org/settlement_basis":
+        "payment/@ondc/org/settlement_basis is mandatory for POST-FULFILLMENT payment type",
+      "@ondc/org/settlement_window":
+        "payment/@ondc/org/settlement_window is mandatory for POST-FULFILLMENT payment type",
+    };
+
+    for (const [field, errorMessage] of Object.entries(requiredFields)) {
+      if (!on_confirm?.payment?.[field]) {
+        const errorKey = `payment${field.replace(/[^a-zA-Z]/g, "")}Err`;
+        onCnfrmObj[errorKey] = errorMessage;
+      }
+    }
+  }
+
   try {
     console.log(`checking start and end time range in fulfillments`);
     fulfillments.forEach((fulfillment) => {
+      if (fulfillment?.type === "Delivery") {
+        const state = fulfillment?.tags?.find((tag) => tag.code === "state");
+        const ready_to_ship = state?.list?.find(
+          (item) => item.code === "ready_to_ship"
+        );
+
+        if (!state) {
+          onCnfrmObj.stateErr = `state code is mandatory in fulfillment/tags`;
+        }
+
+        if (!ready_to_ship) {
+          onCnfrmObj.readyToShipErr = `ready_to_ship code is mandatory in fulfillment/tags/state list`;
+        }
+
+        if (ready_to_ship && ready_to_ship?.value.toLowerCase() !== "yes") {
+          const timeRanges = {
+            "start/time/range": fulfillment?.start?.time?.range,
+            "end/time/range": fulfillment?.end?.time?.range,
+          };
+
+          for (const [key, value] of Object.entries(timeRanges)) {
+            if (value) {
+              onCnfrmObj[
+                key
+              ] = `${key} is not allowed in fulfillments when ready_to_ship is ${ready_to_ship.value}`;
+            }
+          }
+        }
+      }
+
+      if (
+        domain === "ONDC:LOG10" &&
+        fulfillment?.tags?.some((tag) => tag.code === "shipping_label")
+      ) {
+        onCnfrmObj.shippingLabelErr = `shipping_label tag is not allowed in fulfillments for P2P order type (ONDC:LOG10)`;
+      }
+
+      if (callMasking) {
+        if (fulfillment?.type === "Delivery") {
+          // START CONTACT
+
+          if (!fulfillment?.start?.contact?.phone) {
+            const allowedMaskedTypes = [
+              "ivr_pin",
+              "ivr_without_pin",
+              "api_endpoint",
+            ];
+            const maskedTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "masked_contact"
+            );
+
+            if (!maskedTag) {
+              onCnfrmObj.maskedContactErr = `'masked_contact' tag is required in /fulfillments in start object.`;
+            } else {
+              const list = maskedTag.list || [];
+              const requiredCodes = ["type", "setup", "token"];
+              const foundCodes = new Set();
+
+              for (const item of list) {
+                if (!item.code || item.value == null) {
+                  onCnfrmObj.listmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                }
+
+                foundCodes.add(item.code);
+
+                if (
+                  item.code === "type" &&
+                  !allowedMaskedTypes.includes(item.value)
+                ) {
+                  onCnfrmObj.typemaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                    ", "
+                  )}. Found: '${item.value}'`;
+                }
+
+                if (
+                  (item.code === "setup" || item.code === "token") &&
+                  (!item.value || typeof item.value !== "string")
+                ) {
+                  onCnfrmObj.setupmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                }
+              }
+
+              for (const code of requiredCodes) {
+                if (!foundCodes.has(code)) {
+                  onCnfrmObj.codemaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                }
+              }
+            }
+          }
+
+          // END CONTACT
+
+          if (!fulfillment?.end?.contact?.phone) {
+            const allowedMaskedTypes = [
+              "ivr_pin",
+              "ivr_without_pin",
+              "api_endpoint",
+            ];
+            const maskedTag = fulfillment?.tags?.find(
+              (tag) => tag.code === "masked_contact"
+            );
+
+            if (!maskedTag) {
+              onCnfrmObj.endmaskedContactErr = `'masked_contact' tag is required in /fulfillments in end object.`;
+            } else {
+              const list = maskedTag.list || [];
+              const requiredCodes = ["type", "setup", "token"];
+              const foundCodes = new Set();
+
+              for (const item of list) {
+                if (!item.code || item.value == null) {
+                  onCnfrmObj.listendmaskedContactErr = `Each item in 'masked_contact' must contain both 'code' and 'value'.`;
+                }
+
+                foundCodes.add(item.code);
+
+                if (
+                  item.code === "type" &&
+                  !allowedMaskedTypes.includes(item.value)
+                ) {
+                  onCnfrmObj.typeendmaskedContactErr = `'type' in 'masked_contact' must be one of: ${allowedMaskedTypes.join(
+                    ", "
+                  )}. Found: '${item.value}'`;
+                }
+
+                if (
+                  (item.code === "setup" || item.code === "token") &&
+                  (!item.value || typeof item.value !== "string")
+                ) {
+                  onCnfrmObj.setupendmaskedContactErr = `'${item.code}' in 'masked_contact' must be a non-empty string.`;
+                }
+              }
+
+              for (const code of requiredCodes) {
+                if (!foundCodes.has(code)) {
+                  onCnfrmObj.codeendmaskedContactErr = `'masked_contact' tag must contain '${code}' in its list.`;
+                }
+              }
+            }
+          }
+        }
+      }
+
       let fulfillment_tags = [];
       let extra_tag = [];
       fulfillment.tags.forEach((tag) => {
@@ -95,11 +351,11 @@ const checkOnConfirm = (data, msgIdSet) => {
           extra_tag.push(tag);
         } else fulfillment_tags.push(tag);
       });
-      if (
-        !_.isEqual(JSON.stringify(fulfillment_tags), confirm_fulfillment_tags)
-      ) {
-        onCnfrmObj.fulfillmentTagsErr = `fulfillments/tags mismatch between /confirm and /on_confirm`;
-      }
+      // if (
+      //   !_.isEqual(JSON.stringify(fulfillment_tags), confirm_fulfillment_tags)
+      // ) {
+      //   onCnfrmObj.fulfillmentTagsErr = `fulfillments/tags mismatch between /confirm and /on_confirm`;
+      // }
 
       if (cod_order) {
         const cod_settlement_tags = fulfillment?.tags?.some(

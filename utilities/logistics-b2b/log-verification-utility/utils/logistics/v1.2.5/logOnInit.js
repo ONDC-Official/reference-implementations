@@ -18,6 +18,10 @@ const checkOnInit = (data, msgIdSet) => {
   let provId = on_init.provider.id;
   const cod_order = dao.getValue("cod_order");
   const COD_ITEM = dao.getValue("COD_ITEM");
+  const paymentWallet = dao.getValue("payment_wallet");
+  const quick_commerce = dao.getValue("quick_commerce");
+  const search_fulfill_request = dao.getValue("search_fulfill_request");
+  const onSearchFulfillResponse = dao.getValue("on_search_fulfill_response");
   const orderTags = on_init?.tags;
   let bppTerms = false;
 
@@ -100,9 +104,146 @@ const checkOnInit = (data, msgIdSet) => {
     );
   }
 
+  if (paymentWallet) {
+    const collectedBy = on_init?.payment?.collected_by;
+    const paymentTags = on_init?.payment?.tags || [];
+
+    if (!collectedBy) {
+      onInitObj.paymentCollectedByErr = `payment/collected_by is mandatory for payment_wallet flow`;
+    } else if (collectedBy !== "BPP") {
+      onInitObj.paymentCollectedByErr = `payment/collected_by should be 'BPP' for payment_wallet flow`;
+    }
+
+    if (!paymentTags || paymentTags.length < 1) {
+      onInitObj.paymentTagsErr = `payment/tags is mandatory for payment_wallet flow`;
+    } else {
+      const payment_wallet = on_init?.payment?.tags.find(
+        (i) => i.code === "wallet_balance"
+      );
+      if (!payment_wallet) {
+        onInitObj.paymentWalletErr = `payment/tags must contain 'wallet_balance' for payment_wallet flow`;
+      } else {
+        const currency = payment_wallet?.list.some(
+          (item) => item?.code === "currency"
+        );
+        const amount = payment_wallet?.list.find(
+          (item) => item?.code === "value"
+        );
+        if (!currency) {
+          onInitObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'currency' code`;
+        } else if (!amount) {
+          onInitObj.paymentWalletErr = `payment/tags/wallet_balance must contain 'value' code`;
+        } else if (!amount?.value) {
+          onInitObj.paymentWalletErr = `payment/tags/wallet_balance value must be present or not empty`;
+        } else {
+          dao.setValue("payment_wallet_amount", amount?.value);
+        }
+      }
+    }
+  }
+
+  if (on_init?.payment?.type === "POST-FULFILLMENT") {
+    const requiredFields = {
+      "@ondc/org/settlement_basis":
+        "payment/@ondc/org/settlement_basis is mandatory for POST-FULFILLMENT payment type",
+      "@ondc/org/settlement_window":
+        "payment/@ondc/org/settlement_window is mandatory for POST-FULFILLMENT payment type",
+    };
+
+    for (const [field, errorMessage] of Object.entries(requiredFields)) {
+      if (!on_init?.payment?.[field]) {
+        const errorKey = `payment${field.replace(/[^a-zA-Z]/g, "")}Err`;
+        onInitObj[errorKey] = errorMessage;
+      }
+    }
+  }
+
+  if (quick_commerce) {
+    const fulfillmentBatch = on_init?.fulfillments?.find(
+      (i) => i.type === "Batch"
+    );
+    if (!fulfillmentBatch) {
+      onInitObj[
+        `quick_commerce_fulfillmentType_Err`
+      ] = `Fulfillment type "Batch" should be there is fulfillments array for quick commerce logistics`;
+    } else {
+      if (fulfillmentBatch?.tags) {
+        const fulfillRequestTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_request"
+        );
+        const fulfillResponseTag = fulfillmentBatch.tags.find(
+          (tag) => tag.code === "fulfill_response"
+        );
+
+        if (!fulfillRequestTag) {
+          onInitObj[
+            `quick_commerce_fulfillRequestTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_request' for quick commerce logistics`;
+        } else {
+          const sortedList1 = _.sortBy(search_fulfill_request, "code");
+          const sortedList2 = _.sortBy(fulfillRequestTag, "code");
+
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            search_fulfill_request.code === fulfillRequestTag.code;
+
+          if (!areEqual) {
+            onInitObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_request' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+
+        if (!fulfillResponseTag) {
+          onInitObj[
+            `quick_commerce_fulfillResponseTag_Err`
+          ] = `Fulfillment tags should include a code 'fulfill_response' for quick commerce logistics`;
+        } else {
+          const sortedList1 = _.sortBy(onSearchFulfillResponse, "code");
+          const sortedList2 = _.sortBy(fulfillResponseTag, "code");
+          const areEqual =
+            _.isEqual(sortedList1, sortedList2) &&
+            onSearchFulfillResponse.code === fulfillResponseTag.code;
+
+          if (!areEqual) {
+            onInitObj[
+              `quick_commerce_fulfillReuqest`
+            ] = `Fulfillment tags code 'fulfill_response' doesnot match with the one provided in search payload for quick commerce logistics`;
+          }
+        }
+      } else
+        onInitObj[
+          `quick_commerce_fulfillmenttags`
+        ] = `Fulfillment tags is missing.`;
+    }
+  }
+
+  try {
+    if (on_init?.cancellation_terms) {
+      on_init?.cancellation_terms?.map((term) => {
+        if (
+          term?.cancellation_fee?.amount?.value > on_init?.quote?.price?.value
+        ) {
+          onInitObj[
+            `cancellation_terms${term?.fulfillment_state?.descriptor?.code}Err`
+          ] = `cancellation_fee amount ${term?.cancellation_fee?.amount?.value} cannot be greater than order quote price ${on_init?.quote?.price?.value}`;
+        }
+      });
+    }
+  } catch (error) {
+    console.log(`!!Error in cancellation_terms ${constants.LOG_ONINIT}`, error);
+  }
+
   try {
     const onInitItem = [];
-    on_init?.items?.forEach((item) => onInitItem.push(item?.id));
+    on_init?.items?.forEach((item) => {
+      onInitItem.push(item?.id);
+      if (quick_commerce) {
+        if (item?.category_id !== "Instant Delivery")
+          onInitObj.itemCatIdErr = `Item category id should be 'Instant Delivery' for quick commerce flow`;
+      }
+    });
+
     if (cod_order) {
       if (COD_ITEM && !onInitItem.includes(COD_ITEM[0]?.id)) {
         onInitObj.codOrderItemErr = `Item with id '${COD_ITEM[0]?.id}' does not exist in /on_init when order type is COD`;
@@ -145,70 +286,71 @@ const checkOnInit = (data, msgIdSet) => {
       }
     });
     if (on_init?.hasOwnProperty("cancellation_terms")) {
-    console.log("validating cancellation terms"+initCategoryId);
-    const cancellationTerms= on_init?.cancellation_terms;
-    if (!Array.isArray(cancellationTerms)) {
-     onInitObj.cancellationTerms='cancellation_terms must be an array';
-    } else {
-      cancellationTerms.forEach((term, index) => {
-        const path = `cancellation_terms[${index}]`;
-    
-        // fulfillment_state
-        const descriptor = term?.fulfillment_state?.descriptor;
-        if (!descriptor) {
-          onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor is missing`;
-        } else {
-          if (!descriptor.code) {
-            onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is missing`;
-          } 
-          else
-          {
-            if(!constants.fulfillment_state.includes(descriptor.code))
-            {
-              onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.code is Invalid`;
-            }
-          }
-          if (!descriptor.short_desc) {
-            onInitObj.cancellationTerms=`${path}.fulfillment_state.descriptor.short_desc is missing`;
-          }
-        }
-    
-        // cancellation_fee
-        const fee = term?.cancellation_fee;
-        if (!fee) {
-          onInitObj.cancellationTerms=`${path}.cancellation_fee is missing`;
-        } else {
-          if (!fee.percentage) {
-            onInitObj.cancellationTerms=`${path}.cancellation_fee.percentage is missing`;
-          }
-          if (!fee.amount) {
-            onInitObj.cancellationTerms=`${path}.cancellation_fee.amount is missing`;
-          } else {
-            if (!fee.amount.currency) {
-              onInitObj.cancellationTerms=`${path}.cancellation_fee.amount.currency is missing`;
-            }
-            if (!fee.amount.value) {
-              onInitObj.cancellationTerms=`${path}.cancellation_fee.amount.value is missing`;
-            }
-          }
-        }
-      });
-    }
+      console.log("validating cancellation terms" + initCategoryId);
+      const cancellationTerms = on_init?.cancellation_terms;
+      if (!Array.isArray(cancellationTerms)) {
+        onInitObj.cancellationTerms = "cancellation_terms must be an array";
+      } else {
+        cancellationTerms.forEach((term, index) => {
+          const path = `cancellation_terms[${index}]`;
 
+          // fulfillment_state
+          const descriptor = term?.fulfillment_state?.descriptor;
+          if (!descriptor) {
+            onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor is missing`;
+          } else {
+            if (!descriptor.code) {
+              onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is missing`;
+            } else {
+              if (!constants.fulfillment_state.includes(descriptor.code)) {
+                onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor.code is Invalid`;
+              }
+            }
+            if (!descriptor.short_desc) {
+              onInitObj.cancellationTerms = `${path}.fulfillment_state.descriptor.short_desc is missing`;
+            }
+          }
+
+          // cancellation_fee
+          const fee = term?.cancellation_fee;
+          if (!fee) {
+            onInitObj.cancellationTerms = `${path}.cancellation_fee is missing`;
+          } else {
+            if (!fee.percentage) {
+              onInitObj.cancellationTerms = `${path}.cancellation_fee.percentage is missing`;
+            }
+            if (!fee.amount) {
+              onInitObj.cancellationTerms = `${path}.cancellation_fee.amount is missing`;
+            } else {
+              if (!fee.amount.currency) {
+                onInitObj.cancellationTerms = `${path}.cancellation_fee.amount.currency is missing`;
+              }
+              if (!fee.amount.value) {
+                onInitObj.cancellationTerms = `${path}.cancellation_fee.amount.value is missing`;
+              }
+            }
+          }
+        });
+      }
     }
-    if(initCategoryId!=undefined && initCategoryId!=null && initCategoryId!="null" && initCategoryId!="undefined"){
-    if (JSON.parse(initCategoryId) === "Immediate Delivery") {
-      const inlineRiderCheck = riderCheck?.find(
-        (i) => i.code === "inline_check_for_rider"
-      );
-      if (!riderCheck)
-        onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
-      else if (!inlineRiderCheck)
-        onInitObj.riderCheckErr = `inline_check_for_rider tag is mandatory in /on_init when category_id is Immediate Delivery`;
-      else if (inlineRiderCheck?.value !== "yes")
-        onInitObj.riderCheckErr = `inline_check_for_rider value should be "yes" in /on_init when category_id is Immediate Delivery`;
+    if (
+      initCategoryId != undefined &&
+      initCategoryId != null &&
+      initCategoryId != "null" &&
+      initCategoryId != "undefined"
+    ) {
+      if (JSON.parse(initCategoryId) === "Immediate Delivery") {
+        const inlineRiderCheck = riderCheck?.find(
+          (i) => i.code === "inline_check_for_rider"
+        );
+        if (!riderCheck)
+          onInitObj.riderCheckErr = `rider_check tag is mandatory in /on_init when category_id is Immediate Delivery`;
+        else if (!inlineRiderCheck)
+          onInitObj.riderCheckErr = `inline_check_for_rider tag is mandatory in /on_init when category_id is Immediate Delivery`;
+        else if (inlineRiderCheck?.value !== "yes")
+          onInitObj.riderCheckErr = `inline_check_for_rider value should be "yes" in /on_init when category_id is Immediate Delivery`;
+      }
     }
-  }
   } catch (error) {
     console.log(
       `!!Error while checking fulfillment array in /${constants.LOG_ONINIT}`,
