@@ -361,7 +361,8 @@ const checkOnSearch = async (data, msgIdSet) => {
         if (
           fulfillment.type === "Prepaid" ||
           fulfillment.type === "CoD" ||
-          fulfillment.type === "Delivery"
+          fulfillment.type === "Delivery" ||
+          fulfillment.type === "Batch"
         ) {
           hasForwardShipment = true;
           avgPickupTime = fulfillment?.start?.time?.duration;
