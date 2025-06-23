@@ -1,0 +1,52 @@
+# Maven
+target/
+!target/*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test reports  
+# *.xml  # Commented out to allow pom.xml
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Documentation
+README.md
+Readme.md
+*.md
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Git
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.temp
+
+# Maven wrapper logs
+# .mvn/wrapper/maven-wrapper.properties  # Commented out to allow maven wrapper 
