@@ -342,6 +342,25 @@ docker-compose ps
 curl http://localhost:8080/health
 ```
 
+## 📊 Monitoring & Logs
+
+### Application Logs
+
+```bash
+# Docker logs
+docker-compose logs -f
+
+# Local logs
+tail -f logs/application.log
+```
+
+### Health Monitoring
+
+- **Health Endpoint:** `GET /health`
+- **Container Health Checks:** Automatic Docker health monitoring
+- **Log Levels:** Configurable via Spring Boot profiles
+
+## 🔧 Troubleshooting
 
 ### Common Issues
 
@@ -380,6 +399,13 @@ docker-compose logs
 - Check gateway URL accessibility
 - Verify subscription payload format
 
+### Debug Mode
+
+Enable debug logging:
+```bash
+export SPRING_PROFILES_ACTIVE=debug
+./mvnw spring-boot:run
+```
 
 ## 🎯 Common Use Cases
 
@@ -424,6 +450,18 @@ curl -X POST http://localhost:8080/verify-header \
 
 ## 🔗 Additional Resources
 
-- **ONDC Documentation:** [Onboarding documentation](https://github.com/ONDC-Official/developer-docs/blob/main/registry/Onboarding%20of%20Participants.md)
+- **ONDC Documentation:** [https://ondc.org/developers](https://ondc.org/developers)
 - **Spring Boot Reference:** [https://docs.spring.io/spring-boot/docs/current/reference/html/](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - **Docker Documentation:** [https://docs.docker.com/](https://docs.docker.com/)
+
+## 🆘 Support
+
+For issues and questions:
+1. **Check the logs:** `docker-compose logs -f` or application console
+2. **Verify configuration:** Review environment variables and configuration files
+3. **Test endpoints:** Use the provided cURL examples
+4. **Check connectivity:** Ensure all required services are accessible
+
+## 📝 License
+
+This project is licensed under the terms specified in the repository.
