@@ -23,6 +23,7 @@ const checkConfirm = (data, msgIdSet) => {
   const reverseQC = dao.getValue("Reverse_QC");
   const eWayBill = dao.getValue("eWayBill");
   const callMasking = dao.getValue("call_masking");
+  const statisOtpVerificationRto = dao.getValue("static_otp_verification_rto");
   confirm = confirm.message.order;
   const orderTags = confirm?.tags;
   let bpp_terms = false;
@@ -301,6 +302,37 @@ const checkConfirm = (data, msgIdSet) => {
         }
       }
     }
+
+    if (statisOtpVerificationRto && fulfillment?.tags) {
+      const rtoTag = fulfillment.tags.find(
+        (tag) => tag.code === "rto_verification"
+      );
+      if (!rtoTag) {
+        cnfrmObj[
+          `rtoVerificationTagErr-${i}`
+        ] = `'rto_verification' tag is required in fulfillment/tags for static OTP verification RTO flow.`;
+      } else {
+        const codeObj = rtoTag.list?.find((item) => item.code === "code");
+        if (!codeObj || codeObj.value !== "5") {
+          cnfrmObj[
+            `rtoVerificationCodeErr-${i}`
+          ] = `'rto_verification' tag must have an item with code: "code" and value: "5".`;
+        }
+        const shortDescObj = rtoTag.list?.find(
+          (item) => item.code === "short_desc"
+        );
+        if (
+          !shortDescObj ||
+          shortDescObj.value == null ||
+          shortDescObj.value === ""
+        ) {
+          cnfrmObj[
+            `rtoVerificationShortDescErr-${i}`
+          ] = `'rto_verification' tag must have an item with code: "short_desc" and a non-empty value.`;
+        }
+      }
+    }
+
 
     if (Update_delivery_address)
       dao.setValue("confirm_end_location", fulfillment?.end?.location?.address);
