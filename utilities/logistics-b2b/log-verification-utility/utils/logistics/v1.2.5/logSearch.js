@@ -49,7 +49,6 @@ const checkSearch = async (data, msgIdSet) => {
     "006": "quick_commerce",
     "007": "quick_commerce",
     "00A": "static_otp_verification_rto",
-    "018": "partial_rto",
   };
 
   Object.entries(tagCodeToFlagMap).forEach(([code, flag]) => {
