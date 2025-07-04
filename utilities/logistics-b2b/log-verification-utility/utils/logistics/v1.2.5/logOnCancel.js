@@ -10,7 +10,7 @@ const checkOnCancel = (data, msgIdSet) => {
   let contextTime = on_cancel.context.timestamp;
   let version = on_cancel.context.core_version;
   let messageId = on_cancel.context.message_id;
-  const providerId = on_cancel.message?.provider?.id
+  const providerId = on_cancel.message?.provider?.id;
   let selectedItem;
   on_cancel = on_cancel.message.order;
   let onSearchItemsArr = dao.getValue(`${on_cancel?.provider?.id}itemsArr`);
