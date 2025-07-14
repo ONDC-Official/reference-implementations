@@ -48,6 +48,7 @@ const checkSearch = async (data, msgIdSet) => {
     "005": "quick_commerce",
     "006": "quick_commerce",
     "007": "quick_commerce",
+    "00A": "static_otp_verification_rto",
   };
 
   Object.entries(tagCodeToFlagMap).forEach(([code, flag]) => {
@@ -133,6 +134,20 @@ const checkSearch = async (data, msgIdSet) => {
     }
   } catch (error) {
     console.error("Error while checking quick commerce:", error.stack);
+  }
+
+  try {
+    if (
+      dao.getValue("static_otp_verification_rto") &&
+      search?.fulfillment?.type === "Delivery"
+    ) {
+      if (search?.fulfillment?.end?.instructions?.code !== "5") {
+        srchObj["static_otp_verification_rto_error"] =
+          "Static OTP verification RTO flow requires fulfillment end instructions code to be '5'";
+      }
+    }
+  } catch (error) {
+    console.error("Error while checking fulfillment tags:", error.stack);
   }
 
   try {
