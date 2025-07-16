@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  ondc-java-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ondc-java-utility
+    ports:
+      - "8080:8080"
+    environment:
+      # Signing Keys (Ed25519) - Generate using /get-keys endpoint
+      - ONDC_SIGN_PRIVATE_KEY=${ONDC_SIGN_PRIVATE_KEY:-}
+      - ONDC_SIGN_PUBLIC_KEY=${ONDC_SIGN_PUBLIC_KEY:-}
+      
+      # Encryption Keys (X25519) - Generate using /get-keys endpoint  
+      - ONDC_ENC_PRIVATE_KEY=${ONDC_ENC_PRIVATE_KEY:-}
+      - ONDC_ENC_PUBLIC_KEY=${ONDC_ENC_PUBLIC_KEY:-}
+      
+      # ONDC Configuration
+      - ONDC_REQUEST_ID=${ONDC_REQUEST_ID:-c4b796d8-335d-41f7-978e-34b8b345438f}
+      - ONDC_PUBLIC_KEY=${ONDC_PUBLIC_KEY:-MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=}
+      
+      # Gateway URL
+      - ONDC_GATEWAY_URL=${ONDC_GATEWAY_URL:-https://staging.registry.ondc.org/subscribe}
+      
+      # Key Management - Set to false to use above keys, true to generate new ones
+      - ONDC_AUTO_GENERATE_KEYS=${ONDC_AUTO_GENERATE_KEYS:-false}
+      
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
+      - SERVER_PORT=8080
+      
+    volumes:
+      # Optional: Mount logs directory
+      - ./logs:/app/logs
+      
+    networks:
+      - ondc-network
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+networks:
+  ondc-network:
+    driver: bridge
+    name: ondc-java-network
+
+volumes:
+  ondc-logs:
+    name: ondc-java-logs 

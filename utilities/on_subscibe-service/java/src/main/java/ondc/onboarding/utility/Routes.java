@@ -9,8 +9,8 @@ import java.net.http.HttpResponse;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -35,16 +35,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 public class Routes extends  Utils{
-    private String signMessage;
 
     @Autowired
     private Map<String,byte[]> keys;
 
     @Autowired
     private String ondcPublicKey;
-
-    @Autowired
-    private String vlookupUrl;
 
     @Autowired
     private String requestId;
@@ -54,8 +50,26 @@ public class Routes extends  Utils{
     private final Logger logger =  LoggerFactory.getLogger(Routes.class);;
 
     @GetMapping("/get-keys")
-    public ResponseEntity<Map<String,byte[]>> getKeys (){
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(keys);
+    public ResponseEntity<Map<String,String>> getKeys (){
+        Map<String,String> keyResponse = new HashMap<>();
+        keyResponse.put("enc_private_key", toBase64(keys.get("enc_private_key")));
+        keyResponse.put("sign_private_key", toBase64(keys.get("sign_private_key")));
+        keyResponse.put("sign_public_key", toBase64(keys.get("sign_public_key")));
+        keyResponse.put("enc_public_key", toBase64(keys.get("enc_public_key")));
+        
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(keyResponse);
+    }
+
+    // Health check endpoint - matching Node.js
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body("Health OK!!");
+    }
+
+    // Default route - matching Node.js
+    @GetMapping("/")
+    public ResponseEntity<String> defaultRoute() {
+        return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body("Hello World!");
     }
 
     @PostMapping("/create-header")
@@ -74,33 +88,48 @@ public class Routes extends  Utils{
     }
 
     @PostMapping("/verify-header")
-    public boolean isValidHeader(@RequestBody JsonNode req) throws Exception {
-        long currentTimestamp = System.currentTimeMillis() / 1000L;
-        String authHeader = req.get("header").asText();
-        String signature = authHeader.split(",")[5].split("=")[1].replaceAll("\"","");
-        long expires = Long.parseLong(authHeader.split(",")[3].split("=")[1].replaceAll("\"",""));
-        long created = Long.parseLong(authHeader.split(",")[2].split("=")[1].replaceAll("\"",""));
-        if ((created > currentTimestamp) || currentTimestamp > expires){
-            logger.info("Timestamp should be Created < CurrentTimestamp < Expires");
-            return false;
+    public ResponseEntity<String> isValidHeader(@RequestBody JsonNode req) throws JSONException {
+        try {
+            long currentTimestamp = System.currentTimeMillis() / 1000L;
+            String authHeader = req.get("header").asText();
+            String signature = authHeader.split(",")[5].split("=")[1].replaceAll("\"","");
+            long expires = Long.parseLong(authHeader.split(",")[3].split("=")[1].replaceAll("\"",""));
+            long created = Long.parseLong(authHeader.split(",")[2].split("=")[1].replaceAll("\"",""));
+            
+            if ((created > currentTimestamp) || currentTimestamp > expires){
+                logger.info("Timestamp should be Created < CurrentTimestamp < Expires");
+                JSONObject response = new JSONObject();
+                response.put("is_valid", false);
+                response.put("reason", "Invalid timestamp");
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response.toString());
+            }
+            
+            String hashedReq = hashMassage(req.get("value").toString(),created,expires);
+            logger.info(hashedReq);
+            
+            boolean isValid = verify(
+                    fromBase64(signature),
+                    hashedReq.getBytes(),
+                    fromBase64(req.get("public_key").asText())
+            );
+            
+            JSONObject response = new JSONObject();
+            response.put("is_valid", isValid);
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response.toString());
+            
+        } catch (Exception e) {
+            logger.error("Error in verify-header: ", e);
+            JSONObject errorResponse = new JSONObject();
+            errorResponse.put("is_valid", false);
+            errorResponse.put("error", "Failed to verify header: " + e.getMessage());
+            return ResponseEntity.status(400).contentType(MediaType.APPLICATION_JSON).body(errorResponse.toString());
         }
-        String hashedReq = hashMassage(req.get("value").toString(),created,expires);
-        logger.info(hashedReq);
-        return verify(
-                fromBase64(signature),
-                hashedReq.getBytes(),
-                fromBase64(req.get("public_key").asText())
-        );
     }
 
-    @PostMapping("/subscribe")
+        @PostMapping("/subscribe")
     public ResponseEntity<String> subscribe(@RequestBody JsonNode subscribeBody) throws NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, JSONException, IOException, InterruptedException {
 
-        this.requestId = subscribeBody.get("message").get("request_id").asText();
-        this.signMessage = sign(
-                this.keys.get("sign_private_key"),
-                this.requestId.getBytes());
-
+        logger.info("Making subscription request to gateway URL: {}", gatewayUrl);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(gatewayUrl))
                 .POST(HttpRequest.BodyPublishers.ofString(subscribeBody.toString()))
@@ -120,9 +149,15 @@ public class Routes extends  Utils{
     @GetMapping("/ondc-site-verification.html")
     public ResponseEntity<String> htmlVerify() throws JSONException {
 
-        if (this.requestId.isEmpty()){
-            return ResponseEntity.internalServerError().body("Please Set Request ID");
+        if (this.requestId == null || this.requestId.isEmpty()){
+            return ResponseEntity.internalServerError().body("Please Set Request ID in configuration");
         }
+
+        // Generate signature for the request ID directly in this endpoint
+        String signedRequestId = sign(
+                this.keys.get("sign_private_key"),
+                this.requestId.getBytes()
+        );
 
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(
         """ 
@@ -139,102 +174,36 @@ public class Routes extends  Utils{
             ONDC Site Verification Page
           </body>
         </html>
-        """.formatted(this.signMessage));
+        """.formatted(signedRequestId));
     }
 
     @PostMapping("/on_subscribe")
-    public ResponseEntity<String> onSubscribe(@RequestBody JsonNode request) throws JSONException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, NoSuchProviderException, InvalidKeyException, IOException {
-        logger.info(request.toString());
-        byte[] decryptedData = encryptDecrypt(
-                Cipher.DECRYPT_MODE,
-                Base64.getDecoder().decode(request.get("challenge").asText()),
-                keys.get("enc_private_key"),
-                Base64.getDecoder().decode(this.ondcPublicKey)
-        );
-        JSONObject response = new JSONObject();
-        response.put("answer", new String(decryptedData));
-        logger.info(response.toString());
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response.toString());
-    }
-
-    @PostMapping("/sign")
-    public ResponseEntity<String> sign(@RequestBody JsonNode request) {
-
-        JsonNode searchParamsNode = request.get("search_parameters");
-        if (searchParamsNode == null) {
-            return ResponseEntity.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body("{\"error\": \"search_parameters not found in request\"}");
-        }
-
-        String country = searchParamsNode.get("country").asText();
-        String domain = searchParamsNode.get("domain").asText();
-        String type = searchParamsNode.get("type").asText();
-        String city = searchParamsNode.get("city").asText();
-        String subscriberId = searchParamsNode.get("subscriber_id").asText();
-
-        String formattedString = String.format("%s|%s|%s|%s|%s", country, domain, type, city, subscriberId);
-
-        String privateKeyBase64 = request.get("privatekey").asText();
-        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyBase64);
-
-        String signature = sign(privateKeyBytes, formattedString.getBytes());
-
-        String jsonResponse = String.format("{\"signature\": \"%s\"}", signature);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(jsonResponse);
-    }
-
-    @PostMapping("/vlookup")
-    public ResponseEntity<String> vLookup(@RequestBody JsonNode request) throws IOException, InterruptedException {
-        String requestString = request.toString();
-        System.out.println("Received request: " + requestString);
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(vlookupUrl))
-                .POST(HttpRequest.BodyPublishers.ofString(requestString))
-                .build();
-
-        HttpClient httpClient = HttpClient.newHttpClient();
-        HttpResponse<String> httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(httpResponse.body());
-    }
-
-    @PostMapping("/verify-signature")
-    public ResponseEntity<String> verifySignedRequest(@RequestBody JsonNode request) throws JSONException {
+    public ResponseEntity<String> onSubscribe(@RequestBody JsonNode request) throws JSONException {
         try {
-            String signedRequestId = request.get("signed_request_id").asText();
-            String publicKeyBase64 = request.get("public_key").asText();
-            String requestId2 = request.get("request_id").asText();
+            logger.info(request.toString());
             
-            // Convert public key from Base64 to bytes
-            byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyBase64);
+            JsonNode challengeNode = request.get("challenge");
+            if (challengeNode == null) {
+                JSONObject errorResponse = new JSONObject();
+                errorResponse.put("error", "Missing challenge parameter");
+                return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(errorResponse.toString());
+            }
             
-            // Verify the signature
-            boolean isValid = verify(
-                Base64.getDecoder().decode(signedRequestId),
-                requestId2.getBytes(),
-                publicKeyBytes
+            byte[] decryptedData = encryptDecrypt(
+                    Cipher.DECRYPT_MODE,
+                    Base64.getDecoder().decode(challengeNode.asText()),
+                    keys.get("enc_private_key"),
+                    Base64.getDecoder().decode(this.ondcPublicKey)
             );
-            
             JSONObject response = new JSONObject();
-            response.put("is_valid", isValid);
-            response.put("request_id", requestId2);
-            
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(response.toString());
-                    
+            response.put("answer", new String(decryptedData));
+            logger.info(response.toString());
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response.toString());
         } catch (Exception e) {
+            logger.error("Error in on_subscribe: ", e);
             JSONObject errorResponse = new JSONObject();
-            errorResponse.put("error", "Verification failed: " + e.getMessage());
-            return ResponseEntity.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(errorResponse.toString());
+            errorResponse.put("error", "Failed to decrypt challenge");
+            return ResponseEntity.status(500).contentType(MediaType.APPLICATION_JSON).body(errorResponse.toString());
         }
     }
 }
