@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>dotnet_C__</RootNamespace>
+    <AssemblyName>OnSubscribeService</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

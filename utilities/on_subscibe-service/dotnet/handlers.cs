@@ -131,6 +131,28 @@ public static class Handlers
         }
     }
 
+    public static IResult VerifyHeaderHandler(VerifyHeaderRequest request)
+    {
+        try
+        {
+            if (request == null || string.IsNullOrEmpty(request.Header) || request.Value == null || string.IsNullOrEmpty(request.PublicKey))
+            {
+                return Results.BadRequest(new { error = "Missing required fields: header, value, public_key" });
+            }
+
+            var (isValid, error) = CryptoOperations.VerifyAuthorizationHeader(request.Header, request.Value, request.PublicKey);
+            if (error != null)
+            {
+                return Results.BadRequest(new { is_valid = false, error = error.Message });
+            }
+            return Results.Ok(new { is_valid = isValid });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem($"Error verifying header: {ex.Message}");
+        }
+    }
+
 }
 
 public class OnSubscribeResponse
@@ -160,6 +182,14 @@ public class SearchParameters
     public string Type { get; set; }
     public string City { get; set; }
     public string SubscriberId { get; set; }
+}
+
+
+public class VerifyHeaderRequest
+{
+    public string Header { get; set; }
+    public object Value { get; set; }
+    public string PublicKey { get; set; }
 }
 
 

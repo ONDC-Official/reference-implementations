@@ -341,6 +341,74 @@ public class CryptoOperations
         return Encoding.UTF8.GetBytes(json);
     }
 
+    public static (bool isValid, Exception error) VerifyAuthorizationHeader(string authHeader, object payload, string publicKey)
+    {
+        try
+        {
+            var (created, expires, signature, parseError) = ParseAuthorizationHeader(authHeader);
+            if (parseError != null)
+            {
+                return (false, parseError);
+            }
+
+            long currentTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (created > currentTimestamp || currentTimestamp > expires)
+            {
+                return (false, new Exception("Timestamp validation failed: Created < CurrentTimestamp < Expires"));
+            }
+
+            byte[] payloadBytes = ConvertObjectToBytes(payload);
+            byte[] hash = ComputeBlake2bHash(payloadBytes);
+            string digest = Convert.ToBase64String(hash);
+
+            string signingMessage = string.Format("(created): {0}\n(expires): {1}\ndigest: BLAKE-512={2}", created, expires, digest);
+
+            byte[] publicKeyBytes = Convert.FromBase64String(publicKey);
+            byte[] signatureBytes = Convert.FromBase64String(signature);
+
+            var verifier = new Ed25519Signer();
+            var publicKeyParams = new Ed25519PublicKeyParameters(publicKeyBytes, 0);
+            verifier.Init(false, publicKeyParams);
+            var signingMessageBytes = Encoding.UTF8.GetBytes(signingMessage);
+            verifier.BlockUpdate(signingMessageBytes, 0, signingMessageBytes.Length);
+            bool ok = verifier.VerifySignature(signatureBytes);
+            return (ok, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex);
+        }
+    }
+
+    private static (long created, long expires, string signature, Exception error) ParseAuthorizationHeader(string authHeader)
+    {
+        try
+        {
+            string header = authHeader.StartsWith("Signature ") ? authHeader.Substring("Signature ".Length) : authHeader;
+
+            int createdStart = header.IndexOf("created=\"") + "created=\"".Length;
+            int createdEnd = header.IndexOf("\"", createdStart);
+            if (createdStart < "created=\"".Length || createdEnd == -1) throw new Exception("created not found");
+            long created = long.Parse(header.Substring(createdStart, createdEnd - createdStart));
+
+            int expiresStart = header.IndexOf("expires=\"") + "expires=\"".Length;
+            int expiresEnd = header.IndexOf("\"", expiresStart);
+            if (expiresStart < "expires=\"".Length || expiresEnd == -1) throw new Exception("expires not found");
+            long expires = long.Parse(header.Substring(expiresStart, expiresEnd - expiresStart));
+
+            int sigStart = header.IndexOf("signature=\"") + "signature=\"".Length;
+            int sigEnd = header.IndexOf("\"", sigStart);
+            if (sigStart < "signature=\"".Length || sigEnd == -1) throw new Exception("signature not found");
+            string signature = header.Substring(sigStart, sigEnd - sigStart);
+
+            return (created, expires, signature, null);
+        }
+        catch (Exception ex)
+        {
+            return (0, 0, null, ex);
+        }
+    }
+
     public class Ed25519 : IDisposable
     {
         public void GenerateKeyPair(out byte[] publicKey, out byte[] privateKey)

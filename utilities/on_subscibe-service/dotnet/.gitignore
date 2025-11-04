@@ -54,3 +54,4 @@ project.fragment.lock.json
 .vscode/
 .idea/
 .vs/
+.DS_Store
