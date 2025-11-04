@@ -28,6 +28,8 @@ const checkOnStatus = (data, msgIdSet) => {
   const quick_commerce = dao.getValue("quick_commerce");
   const search_fulfill_request = dao.getValue("search_fulfill_request");
   const onSearchFulfillResponse = dao.getValue("on_search_fulfill_response");
+  const statisOtpVerificationRto = dao.getValue("static_otp_verification_rto");
+
   let trackingEnabled = false;
   let surgeItemFound = null;
 
@@ -185,6 +187,27 @@ const checkOnStatus = (data, msgIdSet) => {
         if (fulfillment.type === "Delivery" && ffState !== "RTO") {
           onStatusObj.flflmntstErr = `In case of RTO, fulfillment with type 'Delivery' needs to in 'RTO' state`;
         }
+
+        if (statisOtpVerificationRto && orderState === "Completed") {
+          if (fulfillment?.type === "RTO") {
+            const instructions = fulfillment?.end?.instructions;
+            if (!instructions) {
+              onStatusObj.instructionsErr = `fulfillment.end.instructions is missing for static OTP verification RTO flow.`;
+            } else if (
+              instructions.code !== "5" &&
+              instructions.code !== "05"
+            ) {
+              onStatusObj.instructionsErr = `fulfillment.end.instructions.code must be "5" for static OTP verification RTO flow.`;
+            } else if (
+              !instructions.hasOwnProperty("short_desc") ||
+              instructions.short_desc === null ||
+              instructions.short_desc === ""
+            ) {
+              onStatusObj.instructionsErr = `fulfillment.end.instructions.short_desc must be present and non-empty for static OTP verification RTO flow.`;
+            }
+          }
+        }
+
         if (
           fulfillment.type === "RTO" &&
           (ffState == "RTO-Initiated" || ffState == "RTO-Disposed") &&
@@ -195,7 +218,7 @@ const checkOnStatus = (data, msgIdSet) => {
         if (
           fulfillment.type === "RTO" &&
           ffState == "RTO-Delivered" &&
-          on_status?.order !== "Completed"
+          on_status?.state !== "Completed"
         ) {
           onStatusObj.stateErr = `In case of RTO-Delivered fulfillment state, order state should be 'Completed'`;
         }

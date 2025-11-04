@@ -24,6 +24,10 @@ const checkOnCancel = (data, msgIdSet) => {
   const surgeItem = dao.getValue("is_surge_item");
   const surgeItemData = dao.getValue("surge_item");
   const eWayBill = dao.getValue("eWayBill");
+  const partialRTO1 = dao.getValue(`confirm_return_to_origin_1`);
+  const partialRTO2 = dao.getValue(`confirm_return_to_origin_2`);
+  const partialRto = dao.getValue("partial_rto");
+
   let rtoID, reasonId, preCnclState;
   let surgeItemFound = null;
   const created_at = on_cancel.created_at;
@@ -76,6 +80,61 @@ const checkOnCancel = (data, msgIdSet) => {
 
           if (!RtoItemId) {
             onCancelObj.itemIdErr = "RTO Item is missing in the order";
+          }
+
+          if (partialRto) {
+            if (!fulfillment?.tags) {
+              onCancelObj.tagsErr =
+                "Fulfillment tags are missing in the order of RTO fulfillment for partial RTO flow";
+            } else {
+              const linkedOrderItems = fulfillment.tags.filter(
+                (tag) => tag.code === "linked_order_item"
+              );
+
+              if (linkedOrderItems.length !== 2) {
+                onCancelObj.linkedOrderItemCountErr = `There should be exactly 2 linked_order_item tags in fulfillment.tags for partial RTO flow`;
+              } else {
+                const requiredKeys = [
+                  "category",
+                  "name",
+                  "currency",
+                  "value",
+                  "quantity",
+                  "weight_unit",
+                  "weight_value",
+                  "return_to_origin",
+                  "returned",
+                ];
+
+                let returnedYes = false;
+                let returnedNo = false;
+
+                linkedOrderItems.forEach((tag, idx) => {
+                  const keysPresent = tag.list.map((item) => item.code);
+                  const missing = requiredKeys.filter(
+                    (key) => !keysPresent.includes(key)
+                  );
+                  if (missing.length > 0) {
+                    onCancelObj[
+                      `linkedOrderItemMissingKeys${idx}`
+                    ] = `Missing keys in linked_order_item tag at index ${idx}: ${missing.join(
+                      ", "
+                    )}`;
+                  }
+                  const returnedObj = tag.list.find(
+                    (item) => item.code === "returned"
+                  );
+                  if (returnedObj) {
+                    if (returnedObj.value === "yes") returnedYes = true;
+                    if (returnedObj.value === "no") returnedNo = true;
+                  }
+                });
+
+                if (!returnedYes || !returnedNo) {
+                  onCancelObj.linkedOrderItemReturnedErr = `Among the two linked_order_item tags, one must have returned="yes" and one must have returned="no" for partial RTO flow`;
+                }
+              }
+            }
           }
         }
 
