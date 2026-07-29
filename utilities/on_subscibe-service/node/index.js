@@ -8,7 +8,7 @@ const port = 3000; // Port on which the server will listen
 const ENCRYPTION_PRIVATE_KEY =
   'MC4CAQEwBQYDK2VuBCIEILgcht9h660ZeO36tG+QuHGNcLN9JuAzxHWZl09f57Bh';
 const ONDC_PUBLIC_KEY =
-  'MCowBQYDK2VuAyEAlKHWJWiEiHFGlAJ6TE4VMGaeQUYg5DHEpuQdiq6flnQ=';
+  'MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM=';
 const REQUEST_ID = '6a6abf53-674f-4d6d-a52b-62e3fda55e04';
 const SIGNING_PRIVATE_KEY =
   '7M2L3q9y5gS/dq21Ly3Y3VtYEwgmGM1tM4n0wce/WgcJcOzvdfKo+AUEulIyQCawS39dc6uicu8NAaEpciPajg==';

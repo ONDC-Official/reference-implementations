@@ -25,12 +25,12 @@ penkey = pkey.private_bytes(
 
 print("Local Private Key: ", base64.b64encode(penkey).decode('utf-8'))
 print("Local Public Key: ", base64.b64encode(uenkey).decode('utf-8'))
-print("ONDC Public Key: ", "MCowBQYDK2VuAyEAa9Wbpvd9SsrpOZFcynyt/TO3x0Yrqyys4NUGIvyxX2Q=")
+print("ONDC Public Key: ", "MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM=")
 
 myukey = base64.b64encode(uenkey).decode('utf-8')
 
 ondcpub = (base64.b64decode(
-    "MCowBQYDK2VuAyEAa9Wbpvd9SsrpOZFcynyt/TO3x0Yrqyys4NUGIvyxX2Q="))
+    "MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM="))
 oenkey = serialization.load_der_public_key(ondcpub)
 
 shared_key = pkey.exchange(oenkey)

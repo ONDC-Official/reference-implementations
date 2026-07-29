@@ -7,10 +7,10 @@ import { hideBin } from 'yargs/helpers';
 const caller_subscriberId = process.env.SUBSCRIBER_ID || "<YOUR_SUBSCRIBER_ID>"; // Replace with your actual subscriber ID
 const uniqueKeyId = process.env.UNIQUE_KEY_ID || "<YOUR_UNIQUE_KEY_ID>"; // Replace with your actual unique key ID
 const privateKey = process.env.PRIVATE_KEY || "<YOUR_PRIVATE_KEY>"; // Replace with your actual private key
-const registryUrl = process.env.REGISTRY_URL || "https://staging.registry.ondc.org/v2.0/lookup";
+const registryUrl = process.env.REGISTRY_URL || "https://preprod.registry.ondc.org/v2.0/lookup"; // default was staging (decommissioned) -> now pre-prod
 
 // Registry URL for the ONDC registry
-// staging: https://staging.registry.ondc.org/v2.0/lookup
+// staging (decommissioned): https://staging.registry.ondc.org/v2.0/lookup
 // production: https://prod.registry.ondc.org/v2.0/lookup
 // preproduction: https://preprod.registry.ondc.org/v2.0/lookup
 

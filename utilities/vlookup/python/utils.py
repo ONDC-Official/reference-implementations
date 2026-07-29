@@ -23,7 +23,7 @@ def get_env_details(env):
         env_link = "https://preprod.registry.ondc.org/ondc/vlookup"
     elif env == "prod":
         env_link = "https://prod.registry.ondc.org/vlookup"
-    elif env == "staging":
+    elif env == "staging":  # staging decommissioned — environment retired
         env_link = "https://staging.registry.ondc.org/vlookup"
     else:
         raise ValueError("Unsupported environment")

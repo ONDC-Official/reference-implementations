@@ -37,7 +37,7 @@ Perform a VLookup operation by sending a POST request to `http://localhost:8000/
   "country": "IND", // country
   "type": "buyerApp", //buyerApp, sellerApp, gateway
   "city": "std:022", // city code
-  "env": "staging" //staging,preprod,prod
+  "env": "preprod" //preprod,prod (staging decommissioned)
 }
 ```
 

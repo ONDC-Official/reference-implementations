@@ -5,7 +5,7 @@ use Sop\CryptoTypes\Asymmetric\OneAsymmetricKey;
 use Sop\CryptoTypes\Asymmetric\PublicKeyInfo;
 
 const ENCRYPTION_PRIVATE_KEY = "ENCRYPTION_PRIVATE_KEY";
-const ONDC_PUBLIC_KEY = "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=";
+const ONDC_PUBLIC_KEY = "MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM=";
 const REQUEST_ID = "REQUEST_ID";
 const SIGNING_PRIVATE_KEY = "SIGNING_PRIVATE_KEY";
 

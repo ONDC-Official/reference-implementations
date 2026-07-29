@@ -38,21 +38,22 @@ public class AppConfig {
 
     @Bean
     public String ondcPublicKey(){
-        return "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=";
+        return "MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM=";
     }
 
     @Bean
     public String gatewayUrl(){
-        return "https://staging.registry.ondc.org/subscribe";
+        // staging decommissioned -> defaulting to pre-prod
+        return "https://preprod.registry.ondc.org/ondc/subscribe";
     }
 
     @Bean
     public String vlookupUrl(){
-        //Staging
-        return "https://staging.registry.ondc.org/vlookup";
+        //Staging (decommissioned)
+        //return "https://staging.registry.ondc.org/vlookup";
 
-        //Preprod
-        //return "https://preprod.registry.ondc.org/ondc/vlookup";
+        //Preprod (vlookup is obsolete -> use /v2.0/lookup)
+        return "https://preprod.registry.ondc.org/v2.0/lookup";
 
         //Prod
         //return "https://prod.registry.ondc.org/vlookup";

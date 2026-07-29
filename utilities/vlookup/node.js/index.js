@@ -16,7 +16,7 @@ const getEnvDetails = (env) => {
     envLink = "https://preprod.registry.ondc.org/ondc/vlookup";
   } else if (env === "prod") {
     envLink = "https://prod.registry.ondc.org/vlookup";
-  } else if (env === "staging") {
+  } else if (env === "staging") { // staging decommissioned — environment retired
     envLink = "https://staging.registry.ondc.org/vlookup";
   } else {
     throw new Error("Unsupported environment");

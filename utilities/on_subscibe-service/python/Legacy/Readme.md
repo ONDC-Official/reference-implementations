@@ -26,7 +26,7 @@ curl --location 'https://<Domain_Host_Url>/subscribe' \
     "<subscriber_id> | <ukId>": {
         "signingPublicKey": "...",
         "signingPrivateKey": "...",
-        "ondcPublicKey": "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=", # Change it for pre-prod and prod
+        "ondcPublicKey": "MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM=", # Change it for pre-prod and prod
         "encPublicKey": "...",
         "encPrivateKey": "...",
         "type": "BAP",
@@ -35,7 +35,7 @@ curl --location 'https://<Domain_Host_Url>/subscribe' \
     "<Domain_Host_Url>/dobpp/beckn/7f7896dd-787e-4a0b-8675-e9e6fe93bb8f | 50": {
         "signingPublicKey": "HUVYp98+DBp/LIbs7LoeSec3NwQcojLZhsa/tQdqbP4=",
         "signingPrivateKey": "...",
-        "ondcPublicKey": "MCowBQYDK2VuAyEAduMuZgmtpjdCuxv+Nc49K0cB6tL/Dj3HZetvVN7ZekM=",
+        "ondcPublicKey": "MCowBQYDK2VuAyEARa/WcMCzNQp4DWjvTI4DK7vHL6EdaHqN4GjFIu9wxxM=",
         "encPublicKey": "...",
         "encPrivateKey": "...",
         "type": "BPP",

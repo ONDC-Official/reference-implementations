@@ -51,7 +51,7 @@ ENC_PRIVATE_KEY = "your-encryption-private-key"
 
 ## ONDC Subscribe API Endpoints
 
-### Staging Environment
+### Staging Environment (Decommissioned)
 `https://staging.registry.ondc.org/subscribe`
 
 ### Pre-Production Environment
