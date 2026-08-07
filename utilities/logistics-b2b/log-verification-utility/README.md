@@ -168,3 +168,92 @@ _Notes:_
 ### N.B.
 
 > - Community contributions are welcomed to enhance this server for future releases.
+
+
+
+# 📦 Logistic Verification Utility
+
+This utility helps verify logistics flows by using pre-saved JSON payloads for different ONDC action and on_action APIs.
+
+---
+
+## 🚀 Steps to Use
+
+1. Go to the directory:
+/logistic-b2b/log-verification-utility
+
+
+2. Create a `public` folder inside `log-verification-utility`:
+mkdir public
+
+
+3. Create another folder named `logs` inside the `public` folder:
+mkdir public/logs
+
+4. Place all your JSON payloads (for both action and on_action calls) inside the `logs` folder.
+
+
+5. Run the utility with command "node index logistic"
+
+
+---
+
+## 🔁 Supported Flows
+
+### ✅ Version 1.2.0
+
+- Order to Confirm Fulfillment  
+- Deferred RTS  
+- RTO Flow  
+- Forward Flow  
+- Cancel Flow  
+- RTO Delivered  
+- RTO Disposed Flow  
+
+### ✅ Version 1.2.5
+
+- Quick Commerce  
+- Milk Run  
+- SPMD  
+- Payment Wallet  
+- ePOD  
+- Call Masking  
+- Dynamic OTP Verification (Pickup and Delivery)  
+- Dynamic OTP Verification (RTO)  
+- Update Delivery Address  
+- E-way Bill  
+- Reverse QC  
+- Codified Static Terms  
+- Update Pickup and Delivery Authorization  
+- COD Order  
+- Updated Flow for Immediate Delivery  
+- Surge Fee  
+- Pickup and Delivery Attempt Trail (P2H2P)  
+- Differential Weight Charges  
+- Static OTP Verification (Pickup and Delivery)  
+- Static OTP Verification (RTO)  
+- Cancellation Terms  
+
+---
+
+## 📂 Folder Structure Example
+
+log-verification-utility/
+├── index.js
+├── public/
+│ └── logs/
+│ ├── search.json
+│ ├── on_search.json
+│ ├── init.json
+│ ├── on_init.json
+│ └── ... (other payloads)
+
+
+---
+
+## 📌 Notes
+
+- Payloads should follow ONDC logistics specifications.
+- Make sure filenames are appropriate for matching the expected API call.
+- The utility validates the flow as per business rules and versioned schema.
+
