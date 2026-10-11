@@ -10,6 +10,10 @@ import {
   IVerifyMessage,
   IsHeaderValid,
   CreateVLookupSignature,
+  ICreateGzipSigningString,
+  ICreateGzipAuthorizationHeader,
+  IVerifyGzipHeader,
+  IsGzipHeaderValid,
 } from '../types';
 
 export const createSigningString = async ({ message, created, expires }: ICreateSigningString) => {
@@ -118,6 +122,98 @@ export const isHeaderValid = async ({ header, body, publicKey }: IsHeaderValid) 
     const keyId = keyIdSplit[1];
 
     const isValid = await verifyHeader({ headerParts: headerParts as IHeaderParts, body, publicKey });
+    return isValid;
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Raw-bytes signing string for gzip (or any binary) payloads.
+ *
+ * Mirrors createSigningString but hashes the compressed body bytes directly
+ * via crypto_generichash — it does NOT call sodium.from_string(), which would
+ * UTF-8-encode and corrupt non-text input. Use this when the signature must be
+ * computed over the exact compressed bytes on the wire (e.g. a gzip'd catalog
+ * body signed with Content-Encoding: gzip).
+ */
+export const createGzipSigningString = async ({
+  compressedBody,
+  created,
+  expires,
+}: ICreateGzipSigningString) => {
+  if (!created) created = Math.floor(new Date().getTime() / 1000).toString();
+  if (!expires) expires = (parseInt(created, 10) + 1 * 60 * 60).toString();
+
+  await _sodium.ready;
+
+  const sodium = _sodium;
+  const digest = sodium.crypto_generichash(64, compressedBody);
+  const digestBase64 = sodium.to_base64(digest, _sodium.base64_variants.ORIGINAL);
+
+  const signingString = `(created): ${created}
+(expires): ${expires}
+digest: BLAKE-512=${digestBase64}`;
+
+  return { signingString, created, expires };
+};
+
+/**
+ * Creates an ONDC Authorization header for an already-gzip-compressed body.
+ * The caller compresses the body; this signs the raw compressed bytes.
+ */
+export const createGzipAuthorizationHeader = async ({
+  compressedBody,
+  privateKey,
+  subscriberId,
+  subscriberUniqueKeyId,
+  expires,
+  created,
+}: ICreateGzipAuthorizationHeader) => {
+  const {
+    signingString,
+    expires: expiresT,
+    created: createdT,
+  } = await createGzipSigningString({
+    compressedBody,
+    created,
+    expires,
+  });
+
+  const signature = await signMessage({ signingString, privateKey });
+
+  const header = `Signature keyId="${subscriberId}|${subscriberUniqueKeyId}|ed25519",algorithm="ed25519",created="${createdT}",expires="${expiresT}",headers="(created) (expires) digest",signature="${signature}"`;
+  return header;
+};
+
+const verifyGzipHeader = async ({ headerParts, compressedBody, publicKey }: IVerifyGzipHeader) => {
+  const { signingString } = await createGzipSigningString({
+    compressedBody,
+    created: headerParts?.created,
+    expires: headerParts?.expires,
+  });
+  const verified = await verifyMessage({
+    signedString: headerParts?.signature,
+    signingString,
+    publicKey,
+  });
+  return verified;
+};
+
+/**
+ * Verifies an ONDC Authorization header against an already-gzip-compressed
+ * body, hashing the raw compressed bytes. Use this instead of isHeaderValid
+ * when the signature was created over compressed bytes — isHeaderValid would
+ * UTF-8-corrupt the binary body and reject a valid signature.
+ */
+export const isGzipHeaderValid = async ({ header, compressedBody, publicKey }: IsGzipHeaderValid) => {
+  try {
+    const headerParts = splitAuthHeader(header);
+    const isValid = await verifyGzipHeader({
+      headerParts: headerParts as IHeaderParts,
+      compressedBody,
+      publicKey,
+    });
     return isValid;
   } catch (e) {
     return false;

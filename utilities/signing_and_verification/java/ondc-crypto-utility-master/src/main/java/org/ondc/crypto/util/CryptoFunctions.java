@@ -19,6 +19,8 @@ import java.security.NoSuchAlgorithmException;
 	import java.security.spec.PKCS8EncodedKeySpec;
 	import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.BadPaddingException;
 	import javax.crypto.Cipher;
@@ -277,7 +279,90 @@ public class CryptoFunctions {
 			digest.update(req.getBytes(StandardCharsets.UTF_8));
 			return digest.digest();
 		}
-		
+
+		/**
+		 * Generate blake2b-512 hash over raw bytes (no UTF-8 re-encoding).
+		 *
+		 * <p>Counterpart to {@link #generateBlakeHash(String)} for gzip or any
+		 * binary payload: {@code generateBlakeHash} converts its String arg to
+		 * UTF-8 bytes, which corrupts non-text input. This hashes the bytes as
+		 * given, so a signature computed over compressed wire bytes stays valid.</p>
+		 *
+		 * @param req the raw bytes (e.g. gzip-compressed body) to digest
+		 * @return the byte[] blake2b-512 hash
+		 * @throws Exception the exception
+		 */
+		public static byte[] generateBlakeHashRaw(byte[] req) throws Exception {
+			if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+				Security.addProvider(new BouncyCastleProvider());
+			}
+			MessageDigest digest = MessageDigest.getInstance(BLAKE2B_512, BouncyCastleProvider.PROVIDER_NAME);
+			digest.reset();
+			digest.update(req);
+			return digest.digest();
+		}
+
+		/**
+		 * Creates an ONDC Authorization header for an already-gzip-compressed
+		 * body. The caller compresses; this signs the raw compressed bytes via
+		 * {@link #generateBlakeHashRaw(byte[])} so the digest is over the exact
+		 * wire bytes. Java's utility previously exposed only primitives; this
+		 * assembles the full Signature header for parity with the other languages.
+		 *
+		 * @param compressedBody the gzip-compressed request body (raw bytes)
+		 * @param privateKey the 32-byte ed25519 private key
+		 * @param subscriberId the subscriber id for keyId
+		 * @param uniqueKeyId the unique key id for keyId
+		 * @param created created epoch seconds
+		 * @param expires expires epoch seconds
+		 * @return the ONDC Signature authorization header string
+		 * @throws Exception the exception
+		 */
+		public static String createGzipAuthorizationHeader(byte[] compressedBody, byte[] privateKey,
+				String subscriberId, String uniqueKeyId, long created, long expires) throws Exception {
+			byte[] hash = generateBlakeHashRaw(compressedBody);
+			String digestBase64 = Base64.getEncoder().encodeToString(hash);
+			String signingString = "(created): " + created + "\n(expires): " + expires
+					+ "\ndigest: BLAKE-512=" + digestBase64;
+			byte[] signature = sign(privateKey, signingString.getBytes(StandardCharsets.UTF_8));
+			String signatureBase64 = Base64.getEncoder().encodeToString(signature);
+			return "Signature keyId=\"" + subscriberId + "|" + uniqueKeyId + "|ed25519\",algorithm=\"ed25519\""
+					+ ",created=\"" + created + "\",expires=\"" + expires
+					+ "\",headers=\"(created) (expires) digest\",signature=\"" + signatureBase64 + "\"";
+		}
+
+		/**
+		 * Verifies an ONDC Authorization header against an already-gzip-compressed
+		 * body (raw bytes). Use this instead of the String-based hash path, which
+		 * would UTF-8-corrupt the binary body and reject a valid signature.
+		 *
+		 * @param header the ONDC Signature authorization header
+		 * @param compressedBody the gzip-compressed request body (raw bytes)
+		 * @param publicKey the 32-byte ed25519 public key of the sender
+		 * @return true if the signature is valid over the compressed bytes
+		 * @throws Exception the exception
+		 */
+		public static boolean isGzipHeaderValid(String header, byte[] compressedBody, byte[] publicKey) throws Exception {
+			String created = extractHeaderField(header, "created");
+			String expires = extractHeaderField(header, "expires");
+			String signatureBase64 = extractHeaderField(header, "signature");
+			if (created == null || expires == null || signatureBase64 == null) {
+				return false;
+			}
+			byte[] hash = generateBlakeHashRaw(compressedBody);
+			String digestBase64 = Base64.getEncoder().encodeToString(hash);
+			String signingString = "(created): " + created + "\n(expires): " + expires
+					+ "\ndigest: BLAKE-512=" + digestBase64;
+			byte[] signature = Base64.getDecoder().decode(signatureBase64);
+			return verify(signature, signingString.getBytes(StandardCharsets.UTF_8), publicKey);
+		}
+
+		/** Extracts a quoted field (e.g. created="123") from a Signature header. */
+		private static String extractHeaderField(String header, String field) {
+			Matcher m = Pattern.compile(field + "=\"([^\"]*)\"").matcher(header);
+			return m.find() ? m.group(1) : null;
+		}
+
 	}
 
 

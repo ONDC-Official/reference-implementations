@@ -304,6 +304,91 @@ func verifyRequest(authHeader string) bool {
 	return ed25519.Verify(publicKeyBytes, []byte(computedMessage), receivedSignature)
 }
 
+// getGzipRequestBody reads the already-gzip-compressed request body as raw
+// bytes (no text decoding), from GZIP_BODY_PATH (default "request_body.gz").
+func getGzipRequestBody() ([]byte, error) {
+	path := os.Getenv("GZIP_BODY_PATH")
+	if path == "" {
+		path = "request_body.gz"
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error opening gzip request body file", err)
+		return nil, err
+	}
+	defer file.Close()
+
+	return io.ReadAll(file)
+}
+
+// getGzipAuthHeader signs the raw compressed body bytes (caller compresses).
+// Mirrors getAuthHeader but over the gzip body; reuses signRequest, which
+// already hashes the raw []byte.
+func getGzipAuthHeader() (string, error) {
+	var authHeader string
+
+	payload, err := getGzipRequestBody()
+	if err != nil {
+		return authHeader, err
+	}
+
+	privateKey := os.Getenv("PRIVATE_KEY")
+	currentTime := int(time.Now().Unix())
+	ttl := 30
+
+	signature, err := signRequest(privateKey, payload, currentTime, ttl)
+	if err != nil {
+		fmt.Println("Could not compute signature", err)
+		return authHeader, err
+	}
+
+	subscriberID := os.Getenv("SUBSCRIBER_ID")
+	if subscriberID == "" {
+		subscriberID = "buyer-app.ondc.org"
+	}
+
+	uniqueKeyID := os.Getenv("UNIQUE_KEY_ID")
+	if uniqueKeyID == "" {
+		uniqueKeyID = "207"
+	}
+	authHeader = fmt.Sprintf(`Signature keyId="%s|%s|ed25519",algorithm="ed25519",created="%d",expires="%d",headers="(created) (expires) digest",signature="%s"`, subscriberID, uniqueKeyID, currentTime, currentTime+ttl, signature)
+
+	return authHeader, nil
+}
+
+// verifyGzipRequest verifies an auth header against the raw compressed body
+// bytes. Mirrors verifyRequest but over the gzip body.
+func verifyGzipRequest(authHeader string) bool {
+
+	payload, err := getGzipRequestBody()
+	if err != nil {
+		return false
+	}
+
+	publicKey := os.Getenv("PUBLIC_KEY")
+
+	_, created, expires, signature, err := parseAuthHeader(authHeader)
+	if err != nil {
+		return false
+	}
+
+	hash := blake2b.Sum512(payload)
+	digest := base64Encode(hash[:])
+
+	computedMessage := fmt.Sprintf("(created): %s\n(expires): %s\ndigest: BLAKE-512=%s", created, expires, digest)
+	publicKeyBytes, err := base64Decode(publicKey)
+	if err != nil {
+		fmt.Println("Error decoding public key", err)
+		return false
+	}
+	receivedSignature, err := base64Decode(signature)
+	if err != nil {
+		fmt.Println("Unable to base64 decode received signature", err)
+		return false
+	}
+	return ed25519.Verify(publicKeyBytes, []byte(computedMessage), receivedSignature)
+}
+
 func parseAuthHeader(authHeader string) (string, string, string, string, error) {
 	signatureRegex := regexp.MustCompile(`keyId=\"(.+?)\".+?created=\"(.+?)\".+?expires=\"(.+?)\".+?signature=\"(.+?)\"`)
 	groups := signatureRegex.FindAllStringSubmatch(authHeader, -1)
@@ -412,6 +497,14 @@ func main() {
 	case "verify_authorisation_header":
 		authHeader := args[1]
 		fmt.Println(verifyRequest(authHeader))
+	case "create_gzip_authorisation_header":
+		authHeader, err := getGzipAuthHeader()
+		if err == nil {
+			fmt.Println(authHeader)
+		}
+	case "verify_gzip_authorisation_header":
+		authHeader := args[1]
+		fmt.Println(verifyGzipRequest(authHeader))
 	case "encrypt":
 		privateKey := args[1]
 		publicKey := args[2]
