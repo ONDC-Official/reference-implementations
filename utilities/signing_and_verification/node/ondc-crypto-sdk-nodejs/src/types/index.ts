@@ -55,3 +55,36 @@ export interface CreateVLookupSignature {
   subscriber_id: string;
   privateKey: string;
 }
+
+/**
+ * Gzip (raw-bytes) variants. These accept the already-compressed body as a
+ * Uint8Array/Buffer and hash the raw bytes directly — unlike the string-based
+ * interfaces above, they never UTF-8 re-encode the body, so binary (gzip)
+ * payloads are signed/verified intact.
+ */
+export interface ICreateGzipSigningString {
+  compressedBody: Uint8Array;
+  created?: string;
+  expires?: string;
+}
+
+export interface ICreateGzipAuthorizationHeader {
+  compressedBody: Uint8Array;
+  privateKey: string;
+  subscriberId: string;
+  subscriberUniqueKeyId: string;
+  expires?: string;
+  created?: string;
+}
+
+export interface IVerifyGzipHeader {
+  headerParts: IHeaderParts;
+  compressedBody: Uint8Array;
+  publicKey: string;
+}
+
+export interface IsGzipHeaderValid {
+  header: string;
+  compressedBody: Uint8Array;
+  publicKey: string;
+}

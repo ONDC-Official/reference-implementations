@@ -84,3 +84,22 @@ python cryptic_utils.py decrypt "MC4CAQAwBQYDK2VuBCIEIOgl3rf3arbk1PvIe0C9TZp7ImR
 ```
 
 Output will be a Plain Text decoded string "ONDC is a Great Initiative!"
+
+## Signing & verifying gzip (binary) payloads
+
+When the request body is gzip-compressed and the signature is computed over the **compressed bytes**, use the gzip variants. They hash the raw bytes directly (via `hash_message_bytes`) instead of re-encoding a `str` to UTF-8, so binary payloads are digested intact. The caller compresses the body; these functions sign/verify the bytes as given.
+
+```python
+import gzip
+from cryptic_utils import create_gzip_authorisation_header, verify_gzip_authorisation_header
+
+compressed_body = gzip.compress(request_body.encode("utf-8"))  # caller compresses (bytes)
+
+# PRIVATE_KEY, SUBSCRIBER_ID, UNIQUE_KEY_ID are read from the environment
+header = create_gzip_authorisation_header(compressed_body)
+
+# verify against the exact compressed bytes received on the wire
+is_valid = verify_gzip_authorisation_header(header, compressed_body, public_key=sender_public_key)
+```
+
+> Verify against the raw compressed bytes exactly as received. Do not decompress before verifying.

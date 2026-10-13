@@ -60,6 +60,33 @@ const isValid = await createVLookupSignature({
 The method returns a signature that can be used in the /vlookup call on the registry.
 
 
+## Signing & verifying gzip (binary) payloads
+
+When the request body is gzip-compressed and the signature is computed over the **compressed bytes** (for example a catalog pushed with `Content-Encoding: gzip`), use the gzip variants. They hash the raw bytes directly and never UTF-8 re-encode the body, so they do not corrupt binary input the way the string-based `createAuthorizationHeader` / `isHeaderValid` do. The caller is responsible for compressing the body; these functions sign/verify the bytes as given.
+
+```javascript
+import { createGzipAuthorizationHeader, isGzipHeaderValid } from 'ondc-crypto-sdk-nodejs';
+import { gzipSync } from 'zlib';
+
+const compressedBody = gzipSync(Buffer.from(JSON.stringify(payload))); // Uint8Array / Buffer
+
+const header = await createGzipAuthorizationHeader({
+  compressedBody,
+  privateKey: 'privateKey',
+  subscriberId: 'subscriberId',
+  subscriberUniqueKeyId: 'uniqueKeyId',
+});
+
+const valid = await isGzipHeaderValid({
+  header,
+  compressedBody, // the exact bytes received on the wire
+  publicKey: 'publicKey',
+});
+```
+
+> Verify against the raw compressed bytes exactly as received. Do not decompress before verifying.
+
+
 ## Release Notes
 
 ### [v2.1.0] - 2024-14-05

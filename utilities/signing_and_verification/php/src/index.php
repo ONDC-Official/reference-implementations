@@ -112,6 +112,54 @@ function verify_authorisation_header(string $auth_header, string $request_body_s
     return false;
 }
 
+/**
+ * Creates an ONDC Authorization header for an already-gzip-compressed body.
+ * The caller compresses; this signs the raw compressed bytes. Unlike
+ * create_authorisation_header it takes the key/ids as explicit params rather
+ * than reading $_ENV. PHP strings are binary-safe, so hash_msg digests the
+ * compressed bytes intact.
+ */
+function create_gzip_authorisation_header(string $compressed_body, string $private_key, string $subscriber_id, string $unique_key_id, string $created = null, string $expires = null)
+{
+    $now = new DateTime();
+    $one_hour = new DateInterval("PT1H");
+
+    if ($created == null) {
+        $created = $now->getTimestamp();
+    }
+
+    if ($expires == null) {
+        $expires = $now->add($one_hour)->getTimestamp();
+    }
+
+    $signing_key = create_signing_string(hash_msg($compressed_body), $created, $expires);
+    $signature = sign_response($signing_key, $private_key);
+
+    $header = "Signature keyId=\"$subscriber_id|$unique_key_id|ed25519\",algorithm=\"ed25519\",created=\"$created\",expires=\"$expires\",headers=\"(created) (expires) digest\",signature=\"$signature\"";
+    return $header;
+}
+
+/**
+ * Verifies an ONDC Authorization header against an already-gzip-compressed
+ * body (raw bytes). Takes its args explicitly (does not read $_ENV).
+ */
+function verify_gzip_authorisation_header(string $auth_header, string $compressed_body, string $public_key): bool
+{
+    $auth_header = str_replace("Signature ", "", $auth_header);
+    $header_parts = get_filter_dict($auth_header);
+    $created = (int) $header_parts["created"];
+    $expires = (int) $header_parts["expires"];
+
+    $now = new DateTime();
+    if ($created <= $now->getTimestamp() && $expires >= $now->getTimestamp()) {
+        $signing_key = create_signing_string(hash_msg($compressed_body), $created, $expires);
+        return verify_response($header_parts['signature'], $signing_key, $public_key);
+    } else {
+        throw new Exception('The signature has expired.');
+    }
+    return false;
+}
+
 function gen_keys()
 {
     $signkeypair = sodium_crypto_sign_keypair();
@@ -178,6 +226,12 @@ function main(array $args)
             break;
         case "-v":
             echo verify_authorisation_header($_ENV['AUTH_HEADER'] || '', $_ENV['REQUEST_BODY'] || '', $_ENV["SIGNING_PUB_KEY"]);
+            break;
+        case "-sg":
+            echo create_gzip_authorisation_header(file_get_contents($_ENV['GZIP_BODY_PATH']), $_ENV['SIGNING_PRIV_KEY'], $_ENV['SUBSCRIBER_ID'], $_ENV['UNIQUE_KEY_ID']);
+            break;
+        case "-vg":
+            echo verify_gzip_authorisation_header($_ENV['AUTH_HEADER'], file_get_contents($_ENV['GZIP_BODY_PATH']), $_ENV["SIGNING_PUB_KEY"]) ? 'true' : 'false';
             break;
         default:
             echo "$args[1] is not a valid argument: please check" . "\n";

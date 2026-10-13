@@ -97,6 +97,45 @@ def verify_authorisation_header(auth_header, request_body_str=request_body_raw_t
         return False
 
 
+def hash_message_bytes(msg: bytes):
+    # Counterpart to hash_message for compressed/binary bodies: hashes the raw
+    # bytes directly instead of re-encoding a str to utf-8, so gzip payloads
+    # are digested intact (utf-8 re-encoding corrupts arbitrary binary).
+    HASHER = nacl.hash.blake2b
+    digest = HASHER(msg, digest_size=64, encoder=nacl.encoding.Base64Encoder)
+    return digest.decode("utf-8")
+
+
+def create_gzip_authorisation_header(compressed_body: bytes, created=None, expires=None):
+    # `compressed_body` is the already-gzip-compressed request body (raw bytes).
+    # The caller compresses; this signs the raw compressed bytes.
+    created = int(datetime.datetime.now().timestamp()) if created is None else created
+    expires = int((datetime.datetime.now() + datetime.timedelta(hours=1)).timestamp()) if expires is None else expires
+    signing_key = create_signing_string(hash_message_bytes(compressed_body), created=created, expires=expires)
+    signature = sign_response(signing_key, private_key=os.getenv("PRIVATE_KEY"))
+
+    subscriber_id = os.getenv("SUBSCRIBER_ID", "buyer-app.ondc.org")
+    unique_key_id = os.getenv("UNIQUE_KEY_ID", "207")
+    header = f'Signature keyId="{subscriber_id}|{unique_key_id}|ed25519",algorithm="ed25519",created=' \
+             f'"{created}",expires="{expires}",headers="(created) (expires) digest",signature="{signature}"'
+    return header
+
+
+def verify_gzip_authorisation_header(auth_header, compressed_body: bytes, public_key=os.getenv("PUBLIC_KEY")):
+    # `compressed_body` is the raw gzip-compressed request body (bytes), hashed
+    # directly. Use this instead of verify_authorisation_header when the
+    # signature was created over compressed bytes.
+    header_parts = get_filter_dictionary_or_operation(auth_header.replace("Signature ", ""))
+    created = int(header_parts['created'])
+    expires = int(header_parts['expires'])
+    current_timestamp = int(datetime.datetime.now().timestamp())
+    if created <= current_timestamp <= expires:
+        signing_key = create_signing_string(hash_message_bytes(compressed_body), created=created, expires=expires)
+        return verify_response(header_parts['signature'], signing_key, public_key=public_key)
+    else:
+        return False
+
+
 def generate_key_pairs():
     signing_key = SigningKey.generate()
     private_key = base64.b64encode(signing_key._signing_key).decode()

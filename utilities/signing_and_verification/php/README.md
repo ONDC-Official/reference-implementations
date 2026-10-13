@@ -81,3 +81,26 @@ composer run start -- -d 'dq6j2KZp61G6PMM9IhHW2fbOnquy7gkwJN/tVXkKAI4='
 #OUTPUT
 message to encrypt
 ```
+
+## Signing & verifying gzip (binary) payloads
+
+When the request body is gzip-compressed and the signature is computed over the **compressed bytes**, use the gzip variants. They hash the raw bytes directly and take their arguments explicitly (unlike `verify_authorisation_header`, which reads `$_ENV`). The caller compresses the body; these functions sign/verify the bytes as given.
+
+```php
+// library usage
+$compressed_body = gzencode($request_body);                    // caller compresses (binary string)
+$header = create_gzip_authorisation_header($compressed_body, $signing_priv_key, $subscriber_id, $unique_key_id);
+$is_valid = verify_gzip_authorisation_header($header, $compressed_body, $sender_signing_pub_key);
+```
+
+CLI (reads the gzip body file from `GZIP_BODY_PATH`):
+
+```sh
+# -sg: sign a gzip body. SIGNING_PRIV_KEY, SUBSCRIBER_ID, UNIQUE_KEY_ID, GZIP_BODY_PATH should be set
+composer run start -- -sg
+
+# -vg: verify a gzip body. AUTH_HEADER, GZIP_BODY_PATH, SIGNING_PUB_KEY should be set
+composer run start -- -vg
+```
+
+> Verify against the raw compressed bytes exactly as received. Do not decompress before verifying.
